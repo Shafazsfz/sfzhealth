@@ -217,6 +217,34 @@ def rebrand_swift() -> int:
     return 0
 
 
+# Display labels returned from a switch (not caught by the UI-context rule above). Exact text edits.
+SPECIFIC_EDITS = [
+    ("Packages/StrandAnalytics/Sources/StrandAnalytics/WeeklyDigest.swift",
+     [('case .charge: return "Charge"', 'case .charge: return "Recovery"'),
+      ('case .effort: return "Effort"', 'case .effort: return "Strain"'),
+      ('case .rest:   return "Rest"', 'case .rest:   return "Sleep"')]),
+    ("Strand/Screens/TodayView.swift",
+     [('case .charge: return "Charge"', 'case .charge: return "Recovery"'),
+      ('case .effort: return "Effort"', 'case .effort: return "Strain"'),
+      ('case .rest:   return "Rest"', 'case .rest:   return "Sleep"')]),
+]
+
+
+def specific_edits() -> int:
+    for file, pairs in SPECIFIC_EDITS:
+        path = Path(file)
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        new = text
+        for old, rep in pairs:
+            new = new.replace(old, rep)
+        if new != text:
+            path.write_text(new, encoding="utf-8")
+            print(f"{file}: labels renamed")
+    return 0
+
+
 def english_only() -> int:
     """sfz ships English only: drop every other language from the catalogs (smaller app, faster build).
     Written in Xcode's own catalog layout so a later Xcode build doesn't reformat the file again."""
@@ -244,5 +272,6 @@ def english_only() -> int:
 
 if __name__ == "__main__":
     rebrand_swift()
+    specific_edits()
     main()
     sys.exit(english_only())

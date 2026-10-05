@@ -1,7 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {},
+    "" : {
+
+    },
     "%@ · recovery %lld" : {
       "localizations" : {
         "en" : {
@@ -12,7 +14,9 @@
         }
       }
     },
-    "%lld" : {},
+    "%lld" : {
+
+    },
     "%lld days ago" : {
       "localizations" : {
         "en" : {
@@ -103,11 +107,6 @@
         }
       }
     },
-    "0xAA 41 00 1c crc32=f3a1  mono 13" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
     "1 hour" : {
       "localizations" : {
         "en" : {
@@ -138,621 +137,12 @@
         }
       }
     },
-    "51 bpm" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "7h 42m asleep · 92% efficiency" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "87% · streaming" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
     "ALL-OUT" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ALL-OUT"
-          }
-        }
-      }
-    },
-    "Add" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Adopted via NoopButtonStyle" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Awake" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Awake"
-          }
-        }
-      }
-    },
-    "BPM" : {},
-    "Bar only" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Baseline" : {},
-    "Body / Regular 15 — the thread of you, read in full." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Building" : {},
-    "COUNT-UP SCORE" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Calibrating" : {},
-    "Calm night" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Caption 12" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Card %lld" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Classic" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Classic"
-          }
-        }
-      }
-    },
-    "Clear search" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear search"
-          }
-        }
-      }
-    },
-    "Custom" : {},
-    "DEPLETED" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DEPLETED"
-          }
-        }
-      }
-    },
-    "Dark" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dark"
-          }
-        }
-      }
-    },
-    "Date" : {},
-    "Deep" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deep"
-          }
-        }
-      }
-    },
-    "Default" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Default"
-          }
-        }
-      }
-    },
-    "Done" : {},
-    "Effort" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Strain"
-          }
-        }
-      }
-    },
-    "Fill" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fill"
-          }
-        }
-      }
-    },
-    "Filled" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Filled"
-          }
-        }
-      }
-    },
-    "Fit" : {},
-    "Footnote 11" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Frosted" : {},
-    "Garmin Fill" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Garmin Fill"
-          }
-        }
-      }
-    },
-    "HIGH" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "HIGH"
-          }
-        }
-      }
-    },
-    "HRV (ms) — 30 days" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Headline / Semibold 17" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Heart rate, 24 hours" : {},
-    "Hover a band: stage name, clock start–end and duration." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Hover a cell: ring + date, score and recovery-state tooltip." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Hover a gauge for a strain + load-word tooltip." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Hover a ring for a recovery + state-word tooltip." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Hover any sparkline to read the exact sample under the cursor." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Hover the cards to see the lift." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Hover the line: crosshair + dot + date/value tooltip." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Hover to read each day's HRV in ms." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "In a card" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "LIGHT" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LIGHT"
-          }
-        }
-      }
-    },
-    "LOW" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LOW"
-          }
-        }
-      }
-    },
-    "Last night" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Light" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Light"
-          }
-        }
-      }
-    },
-    "Live" : {},
-    "MODERATE" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MODERATE"
-          }
-        }
-      }
-    },
-    "Midnight" : {},
-    "Mint" : {},
-    "Movement during sleep" : {},
-    "NOOP" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sfz Health"
-          }
-        }
-      }
-    },
-    "Next day" : {},
-    "No data" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No data"
-          }
-        }
-      }
-    },
-    "No heart-rate data" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No heart-rate data"
-          }
-        }
-      }
-    },
-    "Ocean" : {},
-    "Overline" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Overview HR" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside a preview block, so no release build can reach it and it is not user-facing copy. Unlike its neighbours this preview is not wrapped in `#if DEBUG`, which is why the first pass over this catalogue read it as shipped copy and translated it.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "PEAK" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PEAK"
-          }
-        }
-      }
-    },
-    "PRIMED" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PRIMED"
-          }
-        }
-      }
-    },
-    "Pick a date" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick a date"
-          }
-        }
-      }
-    },
-    "Previous day" : {},
-    "RECOVERY GRADIENT" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Recovery" : {},
-    "Recovery calendar, %lld days, average %lld, low %lld, high %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recovery calendar, %lld days, average %lld, low %lld, high %lld"
-          }
-        }
-      }
-    },
-    "Recovery calendar, no data" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recovery calendar, no data"
-          }
-        }
-      }
-    },
-    "Recovery — 30 days" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Recovery — past year" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Reduce Motion renders static at the final frame." : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Remove" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Replay reveal" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Resting HR" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Restless night" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Ribbon" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ribbon"
-          }
-        }
-      }
-    },
-    "Roll the number" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "SOFT CARD TRANSITION" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "STAGGERED APPEAR" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "STRAIN RAMP" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "STRENUOUS" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "STRENUOUS"
-          }
-        }
-      }
-    },
-    "Save" : {
-      "extractionState" : "stale"
-    },
-    "Segment" : {},
-    "Segment counts & heights" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Sfz Health" : {},
-    "Sleep end" : {},
-    "Sleep performance" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Sleep stages" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Sleep stages, %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sleep stages, %@"
-          }
-        }
-      }
-    },
-    "Sleep stages, no data" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sleep stages, no data"
-          }
-        }
-      }
-    },
-    "Sleep start" : {},
-    "Solid" : {},
-    "Stretch" : {},
-    "Subhead 13" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Syncing" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Syncing"
-          }
-        }
-      }
-    },
-    "System" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System"
-          }
-        }
-      }
-    },
-    "Tile" : {},
-    "Time" : {},
-    "Title 1 / Bold 28" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Title 2 / Semibold 22" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Today" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today"
-          }
-        }
-      }
-    },
-    "Toggle gentle spring" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Trend" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trend"
-          }
-        }
-      }
-    },
-    "Trend, %lld points, latest %@, low %@, high %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trend, %lld points, latest %@, low %@, high %@"
-          }
-        }
-      }
-    },
-    "Value" : {},
-    "Values" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "WHOOP Blue" : {},
-    "Wake" : {},
-    "Whoop 4.0" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
-      "extractionState" : "stale",
-      "shouldTranslate" : false
-    },
-    "Yesterday" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yesterday"
           }
         }
       }
@@ -788,10 +178,156 @@
         }
       }
     },
-    "hour %lld" : {
-      "comment" : "Xcode #Preview specimen: this literal exists only inside an `#if DEBUG` preview block, so no release build can reach it and it is not user-facing copy. Translating it produced nonsense in the locales held to zero tolerance (fr rendered \"Bold\" as \"Or\", four languages read the animation \"lift\" as an elevator), which is what this flag prevents.",
+    "Awake" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awake"
+          }
+        }
+      }
+    },
+    "Baseline" : {
+
+    },
+    "BPM" : {
+
+    },
+    "Building" : {
+
+    },
+    "Calibrating" : {
+
+    },
+    "Classic" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classic"
+          }
+        }
+      }
+    },
+    "Clear search" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear search"
+          }
+        }
+      }
+    },
+    "Custom" : {
+
+    },
+    "Dark" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        }
+      }
+    },
+    "Date" : {
+
+    },
+    "Deep" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deep"
+          }
+        }
+      }
+    },
+    "Default" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default"
+          }
+        }
+      }
+    },
+    "DEPLETED" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DEPLETED"
+          }
+        }
+      }
+    },
+    "Done" : {
+
+    },
+    "Effort" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strain"
+          }
+        }
+      }
+    },
+    "Fill" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fill"
+          }
+        }
+      }
+    },
+    "Filled" : {
       "extractionState" : "stale",
-      "shouldTranslate" : false
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filled"
+          }
+        }
+      }
+    },
+    "Fit" : {
+
+    },
+    "Frosted" : {
+
+    },
+    "Garmin Fill" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garmin Fill"
+          }
+        }
+      }
+    },
+    "Heart rate, 24 hours" : {
+
+    },
+    "HIGH" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIGH"
+          }
+        }
+      }
     },
     "just now" : {
       "localizations" : {
@@ -803,12 +339,290 @@
         }
       }
     },
+    "Light" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        }
+      }
+    },
+    "LIGHT" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIGHT"
+          }
+        }
+      }
+    },
+    "Live" : {
+
+    },
+    "LOW" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LOW"
+          }
+        }
+      }
+    },
+    "Midnight" : {
+
+    },
+    "Mint" : {
+
+    },
+    "MODERATE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MODERATE"
+          }
+        }
+      }
+    },
+    "Movement during sleep" : {
+
+    },
+    "Next day" : {
+
+    },
+    "No data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No data"
+          }
+        }
+      }
+    },
+    "No heart-rate data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No heart-rate data"
+          }
+        }
+      }
+    },
+    "NOOP" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sfz Health"
+          }
+        }
+      }
+    },
+    "Ocean" : {
+
+    },
+    "PEAK" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PEAK"
+          }
+        }
+      }
+    },
+    "Pick a date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a date"
+          }
+        }
+      }
+    },
+    "Previous day" : {
+
+    },
+    "PRIMED" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PRIMED"
+          }
+        }
+      }
+    },
     "range %@ to %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "range %@ to %@"
+          }
+        }
+      }
+    },
+    "Recovery" : {
+
+    },
+    "Recovery calendar, %lld days, average %lld, low %lld, high %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recovery calendar, %lld days, average %lld, low %lld, high %lld"
+          }
+        }
+      }
+    },
+    "Recovery calendar, no data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recovery calendar, no data"
+          }
+        }
+      }
+    },
+    "Ribbon" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ribbon"
+          }
+        }
+      }
+    },
+    "Segment" : {
+
+    },
+    "Sfz Health" : {
+
+    },
+    "Sleep end" : {
+
+    },
+    "Sleep stages, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep stages, %@"
+          }
+        }
+      }
+    },
+    "Sleep stages, no data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep stages, no data"
+          }
+        }
+      }
+    },
+    "Sleep start" : {
+
+    },
+    "Solid" : {
+
+    },
+    "STRENUOUS" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STRENUOUS"
+          }
+        }
+      }
+    },
+    "Stretch" : {
+
+    },
+    "Syncing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing"
+          }
+        }
+      }
+    },
+    "System" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
+          }
+        }
+      }
+    },
+    "Tile" : {
+
+    },
+    "Time" : {
+
+    },
+    "Today" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        }
+      }
+    },
+    "Trend" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend"
+          }
+        }
+      }
+    },
+    "Trend, %lld points, latest %@, low %@, high %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend, %lld points, latest %@, low %@, high %@"
+          }
+        }
+      }
+    },
+    "Value" : {
+
+    },
+    "Wake" : {
+
+    },
+    "WHOOP Blue" : {
+
+    },
+    "Yesterday" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yesterday"
           }
         }
       }

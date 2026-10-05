@@ -3238,9 +3238,9 @@ struct TodayView: View {
     /// Kotlin (the Android hero already reads its label from a localized resource, not the enum name).
     private static func domainLabel(_ domain: DomainTheme) -> LocalizedStringKey {
         switch domain {
-        case .charge: return "Charge"
-        case .effort: return "Effort"
-        case .rest:   return "Rest"
+        case .charge: return "Recovery"
+        case .effort: return "Strain"
+        case .rest:   return "Sleep"
         case .stress: return "Stress"
         }
     }

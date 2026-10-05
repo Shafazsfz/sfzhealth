@@ -37,7 +37,7 @@ struct CutTodayView: View {
     }
 
     var body: some View {
-        ScreenScaffold(title: "Today", subtitle: LocalizedStringKey(Date().formatted(.dateTime.weekday(.wide).day().month(.wide))),
+        ScreenScaffold(title: "Weight Loss", subtitle: LocalizedStringKey(Date().formatted(.dateTime.weekday(.wide).day().month(.wide))),
                        onRefresh: { ble.syncNow(); await load() }, lazy: false, topBackground: nil,
                        trailing: { gearMenu }) {
             VStack(spacing: NoopMetrics.sectionGap) {
@@ -283,7 +283,7 @@ struct CutTodayView: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(tint)
                 .frame(width: 28, height: 28)
-                .background(Circle().fill(tint.opacity(0.15)))
+                .background(Circle().fill(StrandPalette.hairline.opacity(0.5)))
             VStack(alignment: .leading, spacing: 0) {
                 Text(value).font(StrandFont.number(17, weight: .bold)).foregroundStyle(StrandPalette.textPrimary)
                 Text(label).font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
@@ -300,7 +300,7 @@ struct CutTodayView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, NoopMetrics.space2)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(tint.opacity(0.12)))
+        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(StrandPalette.hairline.opacity(0.5)))   // sfz minimal: neutral tile
     }
 
     private func op(_ s: String) -> some View {
@@ -505,7 +505,7 @@ struct CutTodayView: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(tint)
                 .frame(width: 28, height: 28)
-                .background(Circle().fill(tint.opacity(0.15)))
+                .background(Circle().fill(StrandPalette.hairline.opacity(0.5)))
             Text(text).font(StrandFont.body).foregroundStyle(StrandPalette.textPrimary)
         }
     }

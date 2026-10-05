@@ -137,7 +137,7 @@ struct RootTabView: View {
             // position across a flip instead of inheriting Coach's.
             // sfz: Weight Loss takes the fourth slot (tag 3); Coach lives under More instead, so the
             // bar stays at five tabs and iOS never folds one into its own overflow menu.
-            tab(CutTodayView(), "Weight", "scalemass", path: $tabPaths[3], scrollSignal: scrollTop[3]).tag(3)
+            tab(CutTodayView(), "Goal", "scalemass", path: $tabPaths[3], scrollSignal: scrollTop[3]).tag(3)
             moreTab(path: $tabPaths[4], scrollSignal: scrollTop[4]).tag(4)
         }
         .tint(StrandPalette.accent)

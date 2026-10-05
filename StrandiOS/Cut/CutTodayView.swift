@@ -37,7 +37,7 @@ struct CutTodayView: View {
     }
 
     var body: some View {
-        ScreenScaffold(title: "Weight Loss", subtitle: LocalizedStringKey(Date().formatted(.dateTime.weekday(.wide).day().month(.wide))),
+        ScreenScaffold(title: "Goal", subtitle: LocalizedStringKey(Date().formatted(.dateTime.weekday(.wide).day().month(.wide))),
                        onRefresh: { ble.syncNow(); await load() }, lazy: false, topBackground: nil,
                        trailing: { gearMenu }) {
             VStack(spacing: NoopMetrics.sectionGap) {
@@ -249,7 +249,7 @@ struct CutTodayView: View {
         let logged = days.contains { $0.deficit != nil }
         return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
             HStack {
-                Text("7 days").font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+                Text("This week").font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                 Spacer()
                 if logged {
                     Text(String(format: "%@%.2f kg", totalKcal >= 0 ? "−" : "+", abs(totalKcal) / CutPlanStore.kcalPerKgFat))
@@ -322,16 +322,18 @@ struct CutTodayView: View {
         return g < 1000 ? "\(Int(g.rounded())) g" : String(format: "%.2f kg", g / 1000)
     }
 
-    /// The last seven calendar days, oldest first. A day with nothing logged has no deficit rather than
-    /// being counted as a full fast.
+    /// This week, Monday to Sunday (sfz). A day with nothing logged has no deficit rather than being
+    /// counted as a full fast; days still ahead stay empty.
     private func weekDays(maintenance: Double) -> [DayBar] {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
-        return (0..<7).reversed().compactMap { back -> DayBar? in
+        let sinceMonday = (cal.component(.weekday, from: today) + 5) % 7   // Mon = 0 … Sun = 6
+        return (0..<7).compactMap { i -> DayBar? in
+            let back = sinceMonday - i   // >0 past, 0 today, <0 future
             guard let date = cal.date(byAdding: .day, value: -back, to: today) else { return nil }
             let k = Repository.localDayKey(date)
             var deficit: Double?
-            if !plan.entries(day: k).isEmpty {
+            if back >= 0, !plan.entries(day: k).isEmpty {
                 let burn = k == dayKey ? burnedSoFar
                     : plan.dayBurn(maintenance: maintenance, activeKcal: plan.activeByDay[k] ?? 0)
                 deficit = burn - plan.eaten(day: k)

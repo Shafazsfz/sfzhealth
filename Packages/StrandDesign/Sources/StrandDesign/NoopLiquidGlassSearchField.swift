@@ -92,14 +92,16 @@ public extension View {
     ) -> some View {
         #if os(iOS)
         // sfz minimal: flat circle/capsule with a hairline, no glass material.
+        // The style makes the whole shape tappable: some labels are transparent (the profile photo
+        // button draws its picture in an overlay), and a plain style would only hit visible pixels.
         if capsule {
-            self.buttonStyle(.plain)
+            self.buttonStyle(SfzFlatButtonStyle(capsule: true))
                 .background(NoopVisualStyle.surface, in: Capsule())
-                .overlay(Capsule().strokeBorder(NoopVisualStyle.border, lineWidth: 0.8))
+                .overlay(Capsule().strokeBorder(NoopVisualStyle.border, lineWidth: 0.8).allowsHitTesting(false))
         } else {
-            self.buttonStyle(.plain)
+            self.buttonStyle(SfzFlatButtonStyle(capsule: false))
                 .background(NoopVisualStyle.surface, in: Circle())
-                .overlay(Circle().strokeBorder(NoopVisualStyle.border, lineWidth: 0.8))
+                .overlay(Circle().strokeBorder(NoopVisualStyle.border, lineWidth: 0.8).allowsHitTesting(false))
         }
         #else
         fallback()
@@ -122,5 +124,21 @@ public extension View {
         self.background(
             NoopPanelSurface(cornerRadius: NoopVisualStyle.pillRadius, elevated: false)
         )
+    }
+}
+
+
+/// sfz: flat header-button style: the full circle/capsule is the tap target, with a light press dim.
+struct SfzFlatButtonStyle: ButtonStyle {
+    var capsule: Bool
+    func makeBody(configuration: Configuration) -> some View {
+        Group {
+            if capsule {
+                configuration.label.contentShape(Capsule())
+            } else {
+                configuration.label.contentShape(Circle())
+            }
+        }
+        .opacity(configuration.isPressed ? 0.6 : 1)
     }
 }

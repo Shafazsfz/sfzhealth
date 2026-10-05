@@ -572,11 +572,9 @@ struct LiquidTodayView: View {
                         Text(dayTitle)
                             .font(StrandFont.rounded(28))
                             .foregroundStyle(StrandPalette.textPrimary)
-                            .shadow(color: .black.opacity(0.4), radius: 10, y: 1)
                         Text(dateLine)
                             .font(StrandFont.caption)
                             .foregroundStyle(StrandPalette.textSecondary)
-                            .shadow(color: .black.opacity(0.35), radius: 8, y: 1)
                     }
                     .contentShape(Rectangle())
                     .frame(maxWidth: .infinity, alignment: .leading)

@@ -109,7 +109,6 @@ public struct ConnectionDot: View {
             Circle()
                 .fill(tone.color)
                 .frame(width: size, height: size)
-                .shadow(color: tone.color.opacity(0.8), radius: pulsing ? 4 : 2)
         }
         .frame(width: size, height: size)
         // Honour the quiet-motion gate (system Reduce Motion, Low Power Mode, or the in-app

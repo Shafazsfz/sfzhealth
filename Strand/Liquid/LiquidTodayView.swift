@@ -189,7 +189,7 @@ struct LiquidTodayView: View {
     /// Day-cycle scene backdrop (#698). Default ON. When off, the liquid Today drops the sky for the plain
     /// dark canvas — parity with Android and the classic TodayView, which already honour this pref. Mirrors
     /// Kotlin `NoopPrefs.showDayCycleBackground`.
-    @AppStorage(SceneBackgroundPrefs.enabledKey) private var showDayCycleBackground = true
+    @AppStorage(SceneBackgroundPrefs.enabledKey) private var showDayCycleBackground = false  // sfz: minimal, plain canvas by default
     /// Custom background image (#custom-background): when active it overrides the sky in the backdrop below.
     @ObservedObject private var backgroundStore = BackgroundImageStore.shared
 
@@ -2180,7 +2180,6 @@ private struct LiquidWordmark: View {
                     .foregroundStyle(StrandPalette.textTertiary)
             }
         }
-        .shadow(color: .black.opacity(0.25), radius: 6, y: 1)
         .rotationEffect(.degrees(rot))
         .scaleEffect(x: scaleX, y: scaleY)
         .offset(x: dx)

@@ -376,12 +376,7 @@ private struct NoopElevation: ViewModifier {
     var hovering: Bool
     func body(content: Content) -> some View {
         let lightShadow = Color(hex: "#1A2230")
-        return content.shadow(
-            color: scheme == .light ? lightShadow.opacity(hovering ? 0.16 : 0.09)
-                                    : Color.black.opacity(hovering ? 0.45 : 0.0),
-            radius: scheme == .light ? (hovering ? 14 : 10) : (hovering ? 18 : 0),
-            x: 0, y: scheme == .light ? (hovering ? 5 : 3) : (hovering ? 8 : 0)
-        )
+        return content
     }
 }
 

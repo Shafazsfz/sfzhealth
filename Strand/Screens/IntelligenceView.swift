@@ -161,7 +161,6 @@ struct IntelligenceView: View {
                                 font: StrandFont.rounded(52),
                                 color: StrandPalette.textPrimary
                             )
-                            .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
                             Text("± \(Int(f.band.rounded())) · \(StrandPalette.recoveryState(f.charge))")
                                 .font(StrandFont.captionNumber)
                                 .foregroundStyle(StrandPalette.textSecondary)

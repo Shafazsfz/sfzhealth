@@ -263,7 +263,6 @@ struct ConfidenceTierChip: View {
             Circle()
                 .fill(hue)
                 .frame(width: 7, height: 7)
-                .shadow(color: hue.opacity(0.8), radius: 2)
                 .accessibilityHidden(true)
             Text(tag)
                 .font(StrandFont.overline)

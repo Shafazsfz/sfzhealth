@@ -550,7 +550,6 @@ private struct SidebarStatus: View {
             Circle()
                 .fill(statusColor)
                 .frame(width: 9, height: 9)
-                .shadow(color: statusColor.opacity(0.6), radius: live.connected ? 4 : 0)
             VStack(alignment: .leading, spacing: 1) {
                 Text(statusText)
                     .font(StrandFont.rounded(12, weight: .medium))

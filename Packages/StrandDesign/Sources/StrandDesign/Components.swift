@@ -500,7 +500,6 @@ public struct SegmentedPillControl<T: Hashable>: View {
                                             lineWidth: 0.75
                                         )
                                     )
-                                    .shadow(color: .black.opacity(0.20), radius: 4, x: 0, y: 2)
                             }
                         }
                         .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -613,7 +612,6 @@ public struct NoopPrimaryButtonStyle: ButtonStyle {
             )
             // A crisp, subtle NEUTRAL elevation — the gold cast-glow read as too much against the
             // clean design, so it's a soft dark lift now, no bloom.
-            .shadow(color: .black.opacity(pressed ? 0.08 : 0.16), radius: 6, x: 0, y: 3)
             .opacity(pressed ? 0.9 : 1)
             .scaleEffect(pressed ? 0.98 : 1)
             .animation(StrandMotion.interactive, value: pressed)
@@ -761,7 +759,6 @@ private struct PulseDot: View {
             }
             Circle().fill(color)
                 .frame(width: size, height: size)
-                .shadow(color: color.opacity(0.8), radius: pulsing ? 4 : 2)
         }
         .frame(width: size, height: size)
         .onAppear { if pulsing && !poseStill { animate = true } }

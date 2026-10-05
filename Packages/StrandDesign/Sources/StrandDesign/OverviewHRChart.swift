@@ -633,7 +633,6 @@ private struct WorkoutBadge: View {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .fill(tint)
             )
-            .shadow(color: tint.opacity(0.5), radius: 4, y: 1)
             .allowsHitTesting(false)
     }
 }

@@ -505,7 +505,6 @@ private struct BreathingContent: View {
                         .tracking(0.8)
                         .foregroundStyle(StrandPalette.textTertiary)
                 }
-                .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
                 .allowsHitTesting(false)   // taps fall through to the vessel → splash
             }
             .frame(width: geo.size.width, height: geo.size.height)

@@ -1178,15 +1178,12 @@ private struct RadarSweep: View {
                 Circle()
                     .fill(bonded ? StrandPalette.recovery100 : StrandPalette.accent)
                     .frame(width: 14, height: 14)
-                    .shadow(color: (bonded ? StrandPalette.recovery100 : StrandPalette.accent).opacity(0.8),
-                            radius: ping ? 10 : 4)
 
                 // A discovered "blip" once bonded.
                 if bonded {
                     Circle()
                         .fill(StrandPalette.statusPositive)
                         .frame(width: 12, height: 12)
-                        .shadow(color: StrandPalette.statusPositive.opacity(0.9), radius: 8)
                         .position(x: size * 0.70, y: size * 0.36)
                         .transition(.scale.combined(with: .opacity))
                 }
@@ -1249,7 +1246,6 @@ private struct ThreadProgress: View {
                     .fill(LinearGradient(gradient: StrandPalette.recoveryGradient,
                                          startPoint: .leading, endPoint: .trailing))
                     .frame(width: max(6, geo.size.width * progress))
-                    .shadow(color: StrandPalette.recovery078.opacity(0.6), radius: 6)
                     .animation(StrandMotion.gentle, value: progress)
             }
         }
@@ -1396,7 +1392,6 @@ private struct PrimaryButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(configuration.isPressed ? StrandPalette.accentHover : StrandPalette.accent)
             )
-            .shadow(color: StrandPalette.accent.opacity(0.4), radius: 12, y: 4)
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(StrandMotion.interactive, value: configuration.isPressed)
     }

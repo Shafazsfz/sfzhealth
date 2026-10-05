@@ -109,13 +109,6 @@ public struct StrandCardHover: ViewModifier {
             )
             // Incremental hover lift on top of the surface's resting elevation: a warm soft shadow on
             // light (the white card lifts off the paper), the signature black on dark.
-            .shadow(
-                color: hovering ? (scheme == .light ? Color(hex: "#1A2230").opacity(0.16)
-                                                     : Color.black.opacity(0.45)) : .clear,
-                radius: hovering ? (scheme == .light ? 14 : 16) : 0,
-                x: 0,
-                y: hovering ? (scheme == .light ? 6 : 10) : 0
-            )
             .offset(y: hovering ? -1 : 0)
             .animation(StrandMotion.interactive, value: hovering)
             // .onHover is unavailable on watchOS (no pointer); the watch never hovers a card.

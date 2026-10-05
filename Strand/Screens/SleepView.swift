@@ -534,7 +534,6 @@ struct SleepView: View {
             Text("Sleep")
                 .font(StrandFont.rounded(24, weight: .semibold))
                 .foregroundStyle(Color.white.opacity(0.96))
-                .shadow(color: .black.opacity(0.35), radius: 5, y: 1)
                 .padding(.top, 6)
                 .accessibilityAddTraits(.isHeader)
 
@@ -553,7 +552,6 @@ struct SleepView: View {
                     Text(sleepScoreWord(score))
                         .font(StrandFont.subhead.weight(.semibold))
                         .foregroundStyle(Color.white.opacity(0.90))
-                        .shadow(color: .black.opacity(0.30), radius: 2, y: 1)
                 }
                 .padding(.top, 8)
                 .accessibilityElement(children: .ignore)
@@ -2356,7 +2354,7 @@ private struct SleepPerformanceNightScene: View {
     /// #1319: honour the Settings "Day-cycle background" toggle on the Sleep tab too. The bundled
     /// moonlit-lake scene used to draw unconditionally here, so an iOS user who turned the toggle off
     /// still saw it on Sleep — while Home/Today (and the Android Sleep screen) already went plain.
-    @AppStorage(SceneBackgroundPrefs.enabledKey) private var showDayCycleBackground = true
+    @AppStorage(SceneBackgroundPrefs.enabledKey) private var showDayCycleBackground = false  // sfz: minimal, plain canvas by default
 
     var body: some View {
         if showDayCycleBackground { nightScene } else { StrandPalette.surfaceBase }

@@ -101,12 +101,6 @@ public struct NoopPanelSurface: View {
                     lineWidth: 0.8
                 )
             )
-            .shadow(
-                color: scheme == .dark ? .black.opacity(elevated ? 0.34 : 0.18) : .black.opacity(0.10),
-                radius: elevated ? 18 : 9,
-                x: 0,
-                y: elevated ? 10 : 5
-            )
             .opacity(surfaceOpacity)
         #endif
     }

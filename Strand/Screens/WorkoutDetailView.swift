@@ -551,7 +551,6 @@ struct WorkoutDetailView: View {
                                         format: { String(format: "%.1f", $0) },
                                         font: StrandFont.rounded(28),
                                         color: StrandPalette.textPrimary)
-                                .shadow(color: .black.opacity(0.5), radius: 5, y: 1)
                             Text(effortScale == .whoop ? "of 21" : "of 100")
                                 .font(StrandFont.caption)
                                 .foregroundStyle(StrandPalette.textSecondary)

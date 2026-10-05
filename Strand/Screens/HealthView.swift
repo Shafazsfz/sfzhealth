@@ -914,7 +914,6 @@ private struct FitnessAgeSection: View {
                             .frame(width: 96, height: 96)
                         CountUpNumber(value: Double(shown), font: StrandFont.rounded(30), prefix: bound)
                             .foregroundStyle(.white)
-                            .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
                             .allowsHitTesting(false)
                     }
                     VStack(alignment: .leading, spacing: NoopMetrics.space1) {
@@ -1261,7 +1260,6 @@ private struct VitalitySection: View {
                         VStack(spacing: 0) {
                             CountUpNumber(value: v, font: StrandFont.rounded(38))
                                 .foregroundStyle(.white)
-                                .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
                             Text("of 100").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
                         }
                         .allowsHitTesting(false)

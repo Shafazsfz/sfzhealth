@@ -940,7 +940,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge"
+            "value": "Recovery"
           }
         },
         "es": {
@@ -1196,7 +1196,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Effort"
+            "value": "Strain"
           }
         },
         "es": {
@@ -1708,7 +1708,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open NOOP on your iPhone to sync"
+            "value": "Open Sfz Health on your iPhone to sync"
           }
         },
         "es": {
@@ -2220,7 +2220,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rest"
+            "value": "Sleep"
           }
         },
         "es": {

@@ -135,9 +135,9 @@ struct RootTabView: View {
             // Coach is absent: `tabPaths` and `scrollTop` are indexed by tag, and More stays tag 4 in both
             // shapes, so a wearer's More tab keeps its identity, its navigation path and its scroll
             // position across a flip instead of inheriting Coach's.
-            if coachEnabled {
-                tab(CoachView(), "Coach", "sparkles", path: $tabPaths[3], scrollSignal: scrollTop[3]).tag(3)
-            }
+            // sfz: Weight Loss takes the fourth slot (tag 3); Coach lives under More instead, so the
+            // bar stays at five tabs and iOS never folds one into its own overflow menu.
+            tab(CutTodayView(), "Weight", "scalemass", path: $tabPaths[3], scrollSignal: scrollTop[3]).tag(3)
             moreTab(path: $tabPaths[4], scrollSignal: scrollTop[4]).tag(4)
         }
         .tint(StrandPalette.accent)
@@ -145,7 +145,7 @@ struct RootTabView: View {
         // any more, which renders as an empty tab rather than as an error. Send that wearer to Today, and
         // only in that case, so a flip made from anywhere else does not move them.
         .onChangeCompat(of: coachEnabled) { enabled in
-            if !enabled && selectedTab == 3 { selectedTab = 0 }
+            // sfz: tag 3 is Weight Loss now, which stays put whatever the Coach switch says.
         }
         // #1841: the same "Hide bar when scrolling" preference Android drives its own bar with. Here the
         // system owns the behaviour — iOS 26's tab bar MINIMISES to a pill on scroll down rather than
@@ -223,7 +223,9 @@ struct RootTabView: View {
                     router.requestedDestination = nil
                     break
                 }
-                withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.24)) { selectedTab = 3 }
+                // sfz: Coach moved under More, so open it there.
+                withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.24)) { selectedTab = 4 }
+                tabPaths[4].append(MoreDestination.coach)
                 router.requestedDestination = nil
             case .trends:
                 // Trends is a primary tab on iPhone (not a pillar sheet) — switch to it.
@@ -466,13 +468,13 @@ struct RootTabView: View {
                 moreSection("Insights") {
                     MoreRow("What Moves You", "wand.and.sparkles", .insightsHub)
                     MoreRow("Intelligence", "brain.head.profile", .intelligence)
-                    // K3: Coach promoted to a top-level tab — no longer listed under More.
+                    // sfz: Coach is listed here again because the Weight tab took its slot in the bar.
+                    if coachEnabled { MoreRow("Coach", "sparkles", .coach) }
                     MoreRow("Insights", "lightbulb.fill", .insights)
                     MoreRow("Explore", "square.grid.2x2.fill", .explore)
                     MoreRow("Compare", "rectangle.split.2x1.fill", .compare)
                 }
                 moreSection("Body") {
-                    MoreRow("Weight Loss", "scalemass.fill", .weightLoss)
                     MoreRow("Live", "waveform.path.ecg", .live)
                     MoreRow("Workouts", "figure.run", .workouts)
                     MoreRow("Lift Log", "dumbbell.fill", .liftLog)

@@ -654,9 +654,8 @@ struct LiquidTodayView: View {
             // #today-layout: the hero + Start-session row moved OUT of the scene into the reorderable
             // section block below. The wordmark's bottom pad (10) + the section VStack's 12 spacing keeps
             // the default hero-under-wordmark gap at the original 22.
-            LiquidWordmark()
-                .padding(.top, 30)
-                .padding(.bottom, 10)
+            // sfz: wordmark removed to save space; keep a small gap above the hero.
+            Color.clear.frame(height: 16)
         }
     }
 

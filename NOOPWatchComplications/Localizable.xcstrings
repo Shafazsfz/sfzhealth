@@ -204,7 +204,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge"
+            "value": "Recovery"
           }
         },
         "es": {
@@ -268,7 +268,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge %lld out of 100"
+            "value": "Recovery %lld out of 100"
           }
         },
         "pt-PT": {
@@ -332,7 +332,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge %lld · %lld bpm%@"
+            "value": "Recovery %lld · %lld bpm%@"
           }
         },
         "pt-PT": {
@@ -396,7 +396,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge %lld%@"
+            "value": "Recovery %lld%@"
           }
         },
         "pt-PT": {
@@ -460,7 +460,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge calibrating"
+            "value": "Recovery calibrating"
           }
         },
         "pt-PT": {
@@ -524,7 +524,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge calibrating, needs more data"
+            "value": "Recovery calibrating, needs more data"
           }
         },
         "pt-PT": {
@@ -588,7 +588,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge out of date, last synced %@. Open NOOP on iPhone."
+            "value": "Recovery out of date, last synced %@. Open Sfz Health on iPhone."
           }
         },
         "pt-PT": {
@@ -652,7 +652,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge stale · %@"
+            "value": "Recovery stale · %@"
           }
         },
         "pt-PT": {
@@ -716,7 +716,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge unavailable"
+            "value": "Recovery unavailable"
           }
         },
         "pt-PT": {
@@ -780,7 +780,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge · %@"
+            "value": "Recovery · %@"
           }
         },
         "pt-PT": {
@@ -844,7 +844,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge · cal"
+            "value": "Recovery · cal"
           }
         },
         "pt-PT": {
@@ -908,7 +908,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Charge –"
+            "value": "Recovery –"
           }
         },
         "pt-PT": {
@@ -972,7 +972,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Effort"
+            "value": "Strain"
           }
         },
         "es": {
@@ -1036,7 +1036,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "NOOP Charge"
+            "value": "Sfz Health Recovery"
           }
         },
         "es": {
@@ -1100,7 +1100,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "NOOP · open on iPhone"
+            "value": "Sfz Health · open on iPhone"
           }
         },
         "pt-PT": {
@@ -1164,7 +1164,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "NOOP. %@, %@, %@."
+            "value": "Sfz Health. %@, %@, %@."
           }
         },
         "pt-PT": {
@@ -1228,7 +1228,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "NOOP. No data yet, open NOOP on your iPhone to sync."
+            "value": "Sfz Health. No data yet, open Sfz Health on your iPhone to sync."
           }
         },
         "pt-PT": {
@@ -1292,7 +1292,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "NOOP. Scores out of date, last synced %@. Open NOOP on iPhone to refresh."
+            "value": "Sfz Health. Scores out of date, last synced %@. Open Sfz Health on iPhone to refresh."
           }
         },
         "pt-PT": {
@@ -1356,7 +1356,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No data, open NOOP on iPhone"
+            "value": "No data, open Sfz Health on iPhone"
           }
         },
         "pt-PT": {
@@ -1420,7 +1420,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open NOOP"
+            "value": "Open Sfz Health"
           }
         },
         "pt-PT": {
@@ -1484,7 +1484,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rest"
+            "value": "Sleep"
           }
         },
         "es": {
@@ -1548,7 +1548,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your Charge (recovery) on the watch face, with Effort and Rest in the rectangular card."
+            "value": "Your Recovery on the watch face, with Strain and Sleep in the rectangular card."
           }
         },
         "es": {

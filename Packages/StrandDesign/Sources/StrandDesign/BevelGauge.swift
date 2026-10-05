@@ -94,7 +94,7 @@ public struct BevelGauge: View {
     /// The non-animating backdrop: frosted disc behind the arc + the faint full-span track "well".
     private var staticBackdrop: some View {
         ZStack {
-            innerDisc
+            // sfz minimal: no frosted inner disc.
             // Faint full-span track — the inset "well" the score arc sits in.
             arcShape(to: 1.0)
                 .stroke(StrandPalette.surfaceInset,
@@ -114,7 +114,7 @@ public struct BevelGauge: View {
                 )
 
             // Clean end-cap dot at the arc tip.
-            if animatedFraction > 0.001 { endCap }
+            // sfz minimal: no end-cap dot.
         }
     }
 

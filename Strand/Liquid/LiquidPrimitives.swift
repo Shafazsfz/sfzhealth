@@ -26,77 +26,16 @@ enum LiquidRender {
         let cap = StrokeStyle(lineWidth: lineWidth, lineCap: .round)
         var ctx = base
 
-        // Restrained outer lift — light gray shadow, not deep black.
-        let shadowRect = rect.offsetBy(dx: 0, dy: max(1, diameter * 0.010))
-        ctx.fill(Path(ellipseIn: shadowRect), with: .color(Color.black.opacity(0.14)))
-
-        // One continuous centre disc — soft 3D: light top face, gentle rim shade.
-        // No separate inset circle / hard ring line.
-        ctx.fill(Path(ellipseIn: rect), with: .linearGradient(
-            Gradient(colors: [
-                NoopVisualStyle.surfaceTop,
-                NoopVisualStyle.surfaceBottom
-            ]),
-            startPoint: CGPoint(x: rect.midX, y: rect.minY),
-            endPoint: CGPoint(x: rect.midX, y: rect.maxY)
-        ))
-        // Soft radial lift — brighter near the upper face, slightly deeper at the rim.
-        ctx.fill(Path(ellipseIn: rect), with: .radialGradient(
-            Gradient(stops: [
-                .init(color: Color.white.opacity(0.07), location: 0.00),
-                .init(color: Color.white.opacity(0.02), location: 0.42),
-                .init(color: Color.clear, location: 0.72),
-                .init(color: Color.black.opacity(0.10), location: 1.00)
-            ]),
-            center: CGPoint(x: rect.midX, y: rect.minY + diameter * 0.32),
-            startRadius: 0,
-            endRadius: diameter * 0.52
-        ))
-        // Very soft lower-edge shade for a lightly recessed read.
-        ctx.fill(Path(ellipseIn: rect), with: .linearGradient(
-            Gradient(stops: [
-                .init(color: Color.clear, location: 0.00),
-                .init(color: Color.clear, location: 0.55),
-                .init(color: Color.black.opacity(0.06), location: 1.00)
-            ]),
-            startPoint: CGPoint(x: rect.midX, y: rect.minY),
-            endPoint: CGPoint(x: rect.midX, y: rect.maxY)
-        ))
-
+        // sfz minimal: a flat track and a solid progress arc. No disc, shadow, gradient or rim.
+        _ = rect
         let track = fullArc(center: center, radius: radius)
-
-        // Recessed track — gray channel (original border tone), not black.
-        ctx.stroke(track, with: .linearGradient(
-            Gradient(colors: [
-                Color.white.opacity(0.08),
-                NoopVisualStyle.border.opacity(0.18),
-                NoopVisualStyle.border.opacity(0.50)
-            ]),
-            startPoint: CGPoint(x: rect.midX, y: rect.minY),
-            endPoint: CGPoint(x: rect.midX, y: rect.maxY)
-        ), style: StrokeStyle(lineWidth: lineWidth + 1.6, lineCap: .round))
-
-        ctx.stroke(track, with: .color(NoopVisualStyle.border.opacity(0.72)), style: cap)
+        ctx.stroke(track, with: .color(tint.opacity(0.16)), style: cap)
 
         let level = max(0, min(1, sim.level))
         if level > 0.004 {
             let progress = partialArc(center: center, radius: radius, level: level)
-
-            // Contained under-lift — wider stroke, low opacity, no blur.
-            ctx.stroke(progress, with: .color(tint.opacity(0.18)),
-                       style: StrokeStyle(lineWidth: lineWidth + 2.0, lineCap: .round))
-
-            // Progress arc — harsh semantic gradient (visible dark ↔ light bands).
-            ctx.stroke(progress, with: .linearGradient(
-                progressGradient(tint),
-                startPoint: CGPoint(x: rect.minX, y: rect.maxY),
-                endPoint: CGPoint(x: rect.maxX, y: rect.minY)
-            ), style: cap)
+            ctx.stroke(progress, with: .color(tint), style: cap)
         }
-
-        // Outer instrument rim (unchanged placement).
-        ctx.stroke(Path(ellipseIn: rect.insetBy(dx: 0.5, dy: 0.5)),
-                   with: .color(NoopVisualStyle.borderHighlight.opacity(0.55)), lineWidth: 1)
     }
 
     /// Full-span track arc — geometry unchanged from the original vessel.
@@ -116,13 +55,8 @@ enum LiquidRender {
 
     /// Harsh semantic gradient — tight stops so dark/light bands read clearly on the arc.
     private static func progressGradient(_ tint: Color) -> Gradient {
-        Gradient(stops: [
-            .init(color: tint.liquidDarker(0.48), location: 0.00),
-            .init(color: tint.liquidLighter(0.38), location: 0.34),
-            .init(color: tint.liquidDarker(0.22), location: 0.58),
-            .init(color: tint.liquidLighter(0.28), location: 0.82),
-            .init(color: tint.liquidDarker(0.35), location: 1.00)
-        ])
+        // sfz minimal: one flat colour instead of light/dark bands.
+        Gradient(colors: [tint, tint])
     }
 
     /// A horizontal capsule tube filled to `frac`; tilt pushes the liquid along it.
@@ -152,17 +86,17 @@ enum LiquidRender {
         p.closeSubpath()
         let fillGradient = usesCleanFill
             ? progressGradient(tint)
-            : Gradient(colors: [tint.opacity(0.84), tint.liquidDarker(0.28).opacity(0.86)])
+            : Gradient(colors: [tint, tint])   // sfz minimal: flat fill
         clip.fill(p, with: .linearGradient(
             fillGradient,
             startPoint: CGPoint(x: 0, y: usesCleanFill ? h / 2 : 0),
             endPoint: CGPoint(x: usesCleanFill ? w : 0, y: usesCleanFill ? h / 2 : h)
         ))
-        if showsHighlight {
+        if showsHighlight && false {   // sfz minimal: no glass highlight
             clip.fill(Path(CGRect(x: 2, y: 1.2, width: max(0, edge - r * 0.6), height: 1)),
                       with: .color(.white.opacity(0.12)))
         }
-        if !usesCleanFill {
+        if !usesCleanFill && false {   // sfz minimal: no sparkle flecks
             for i in 0..<min(8, sim.flecks.count) {
                 let f = sim.flecks[i]
                 let spark = pow(max(0, sin(f.ph + sim.a * 5 + now * f.sp)), 10)

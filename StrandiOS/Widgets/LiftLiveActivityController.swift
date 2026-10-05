@@ -53,7 +53,7 @@ final class LiftLiveActivityController {
         var logLine: String {
             switch self {
             case .askedIOS:    return "Lift Log: strap step sent to the Lock Screen with a light-up alert"
-            case .appOnScreen: return "Lift Log: strap step not lighting the Lock Screen — NOOP is open on screen"
+            case .appOnScreen: return "Lift Log: strap step not lighting the Lock Screen — Sfz Health is open on screen"
             case .noBanner:    return "Lift Log: strap step not lighting the Lock Screen — no Lift Log banner is running"
             }
         }
@@ -141,7 +141,7 @@ final class LiftLiveActivityController {
                 if !waitingForForeground {
                     waitingForForeground = true
                     log("Lift Log: no Lock Screen banner — iOS starts one only while NOOP is open, so it "
-                        + "comes back the next time NOOP is opened")
+                        + "comes back the next time Sfz Health is opened")
                 }
                 return alert ? .noBanner : nil
             }

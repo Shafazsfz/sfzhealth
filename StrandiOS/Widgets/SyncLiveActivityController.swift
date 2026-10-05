@@ -150,11 +150,11 @@ final class SyncLiveActivityController {
         // Each refusal names its gate. These are rare-event lines (one per attempted start), so they stay
         // always-on rather than behind a Test Centre domain.
         guard authInfo.areActivitiesEnabled else {
-            live?.append(log: "Sync activity: not started — Live Activities are off for NOOP in iOS Settings")
+            live?.append(log: "Sync activity: not started — Live Activities are off for Sfz Health in iOS Settings")
             return
         }
         guard UnitPrefs.syncLiveActivityEnabled() else {
-            live?.append(log: "Sync activity: not started — \"Strap sync\" is off in NOOP Settings → Live notifications")
+            live?.append(log: "Sync activity: not started — \"Strap sync\" is off in Sfz Health Settings → Live notifications")
             return
         }
         if let activity { push(activity, state); return }

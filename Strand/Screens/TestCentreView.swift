@@ -193,7 +193,7 @@ struct TestCentreView: View {
             Button("Clear", role: .destructive) { clearScheduledExports() }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("This deletes every scheduled strap-log and raw-capture file NOOP has saved. This can't be undone.")
+            Text("This deletes every scheduled strap-log and raw-capture file Sfz Health has saved. This can't be undone.")
         }
         .alert(infoTitle, isPresented: $showInfo) {
             Button("OK", role: .cancel) { }
@@ -271,7 +271,7 @@ struct TestCentreView: View {
                 Divider().overlay(StrandPalette.hairline)
                 Toggle("Legacy R22 feature-flag experiment", isOn: $deepDataEnabled)
                     .toggleStyle(.switch).tint(StrandPalette.accent)
-                Text("The strap accepts these writes, but NOOP has not observed them enabling a separate live stream. This is not the Raw Data Collector.")
+                Text("The strap accepts these writes, but Sfz Health has not observed them enabling a separate live stream. This is not the Raw Data Collector.")
                     .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                 if deepDataEnabled {
                     NoopButton("Send legacy R22 enable sequence", systemImage: "bolt.badge.automatic", kind: .secondary) {
@@ -803,7 +803,7 @@ struct TestCentreView: View {
             await model.repo.refresh()
         }
         infoTitle = String(localized: "Charge baseline recalibrating")
-        infoMessage = String(localized: "NOOP will re-learn your baseline from tonight's data onward. Your history is kept, and it takes a few nights to settle.")
+        infoMessage = String(localized: "Sfz Health will re-learn your baseline from tonight's data onward. Your history is kept, and it takes a few nights to settle.")
         showInfo = true
     }
 
@@ -874,7 +874,7 @@ struct TestCentreView: View {
             if let url {
                 infoTitle = String(localized: "Strap log exported")
                 #if os(iOS)
-                infoMessage = String(localized: "Saved \(url.lastPathComponent) to NOOP's folder in the Files app.")
+                infoMessage = String(localized: "Saved \(url.lastPathComponent) to Sfz Health's folder in the Files app.")
                 #else
                 infoMessage = String(localized: "Saved \(url.lastPathComponent) to your Documents folder.")
                 #endif

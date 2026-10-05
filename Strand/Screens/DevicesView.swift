@@ -22,7 +22,7 @@ struct DevicesView: View {
 
     var body: some View {
         ScreenScaffold(title: "Devices",
-                       subtitle: "Pair and manage the bands NOOP reads from.",
+                       subtitle: "Pair and manage the bands Sfz Health reads from.",
                        // The day-of-sky liquid backdrop, matching Today / Health / Sleep / Trends: a fixed,
                        // full-bleed time-of-day sky behind the scroll content (it does not scroll).
                        topBackground: liquidScaffoldSky()) {
@@ -33,7 +33,7 @@ struct DevicesView: View {
                 // calm pending note rather than an empty screen in that brief window.
                 DataPendingNote(
                     title: "Getting your devices ready",
-                    message: "NOOP is opening your on-device data. Your paired bands will appear here in a moment.",
+                    message: "Sfz Health is opening your on-device data. Your paired bands will appear here in a moment.",
                     symbol: "badge.plus.radiowaves.right")
             }
         }
@@ -322,7 +322,7 @@ private struct DevicesContent: View {
             Button("Cancel", role: .cancel) { removeTarget = nil }
             Button("Remove", role: .destructive) { confirmRemove(device) }
         } message: { device in
-            Text("Remove \(device.displayName)? NOOP will stop connecting to it. Its recorded data is kept and you can re-add it any time.")
+            Text("Remove \(device.displayName)? Sfz Health will stop connecting to it. Its recorded data is kept and you can re-add it any time.")
         }
         // Restart strap confirm (#166)
         .alert("Restart this strap?",
@@ -452,7 +452,7 @@ private struct DevicesContent: View {
             Image(systemName: "info.circle")
                 .foregroundStyle(StrandPalette.textTertiary)
                 .accessibilityHidden(true)
-            Text("WHOOP is NOOP's primary, fully-supported band. Other heart-rate straps are an early, in-development addition: they stream live heart rate and HRV, but not WHOOP's deeper sleep and recovery data.")
+            Text("WHOOP is Sfz Health's primary, fully-supported band. Other heart-rate straps are an early, in-development addition: they stream live heart rate and HRV, but not WHOOP's deeper sleep and recovery data.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1129,7 +1129,7 @@ private struct DeviceCard: View {
                 .foregroundStyle(StrandPalette.statusWarning)
                 .frame(width: 14)
                 .accessibilityHidden(true)
-            Text("Paired locally. NOOP owns this ring while it holds the key. If you reset it again or set it up in the Oura app, NOOP no longer owns it and you would re-add it to take it over.")
+            Text("Paired locally. Sfz Health owns this ring while it holds the key. If you reset it again or set it up in the Oura app, Sfz Health no longer owns it and you would re-add it to take it over.")
                 .font(StrandFont.caption)
                 .foregroundStyle(StrandPalette.statusWarning)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1182,7 +1182,7 @@ struct DeviceCapabilityProfile {
                 displayModel: String(localized: "\(d.brand) (experimental)"),
                 captures: String(localized: "Heart rate (live, best-effort)"),
                 powers: String(localized: "Powers the live console + Effort. No Charge, Rest or Sleep"),
-                footnote: String(localized: "Experimental: live heart rate where the band exposes it. Some bands need a pairing we can't do yet. NOOP will say so honestly and never show a made-up number. No sleep, recovery, skin temp, SpO₂ or steps."))
+                footnote: String(localized: "Experimental: live heart rate where the band exposes it. Some bands need a pairing we can't do yet. Sfz Health will say so honestly and never show a made-up number. No sleep, recovery, skin temp, SpO₂ or steps."))
         }
         // EXPERIMENTAL locally-adopted Oura ring (gen 3/4/5). The gen is carried on `model` ("Oura Ring
         // 3/4/5") and recovered with OuraRingGen.from(model:). NOOP reads the ring's OWN raw signals + open
@@ -1365,7 +1365,7 @@ private struct ForgetDeviceSheet: ViewModifier {
                     target = nil
                 }
             } message: { _ in
-                Text("NOOP removes this device from your list and deletes its recorded data here. You can re-pair the strap to pull its recent history back.")
+                Text("Sfz Health removes this device from your list and deletes its recorded data here. You can re-pair the strap to pull its recent history back.")
             }
     }
 }
@@ -1581,7 +1581,7 @@ private struct EcgWristSheet: View {
                 .font(StrandFont.subhead)
                 .foregroundStyle(StrandPalette.statusWarning)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("Which value means “left” and which means “right” comes from WHOOP's own app and the strap firmware, not from a strap NOOP has tested. You can send it again with the other choice at any time, and it changes nothing about your recorded data.")
+            Text("Which value means “left” and which means “right” comes from WHOOP's own app and the strap firmware, not from a strap Sfz Health has tested. You can send it again with the other choice at any time, and it changes nothing about your recorded data.")
                 .font(StrandFont.caption)
                 .foregroundStyle(StrandPalette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1752,7 +1752,7 @@ struct DeviceCardCatalog: View {
 
     var body: some View {
         ScreenScaffold(title: "Devices",
-                       subtitle: "What each band captures (and what NOOP uses it for).",
+                       subtitle: "What each band captures (and what Sfz Health uses it for).",
                        topBackground: liquidScaffoldSky()) {
             VStack(spacing: NoopMetrics.gap) {
                 DeviceCard(device: Self.dev("whoop-4d", "WHOOP", "4.0", Self.whoopCaps),

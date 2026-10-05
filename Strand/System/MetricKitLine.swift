@@ -43,14 +43,14 @@ enum MetricKitLine {
         let exits = d.exits.filter { $0.count > 0 }
         parts.append("exits: " + (exits.isEmpty ? "none" : exits.map { "\($0.reason) \($0.count)" }
             .joined(separator: ", ")))
-        return "MetricKit day \(stamp(d.begin, timeZone)) → \(stamp(d.end, timeZone)) (NOOP \(d.appVersion)): "
+        return "MetricKit day \(stamp(d.begin, timeZone)) → \(stamp(d.end, timeZone)) (Sfz Health \(d.appVersion)): "
             + parts.joined(separator: ", ")
     }
 
     /// A crash, hang, exception or slow-launch report: `kind` names it, `detail` is what iOS said about it.
     static func diagnostic(_ kind: String, appVersion: String, at: Date, detail: String,
                            timeZone: TimeZone = .current) -> String {
-        "MetricKit \(kind) (NOOP \(appVersion), reported \(stamp(at, timeZone))): \(detail)"
+        "MetricKit \(kind) (Sfz Health \(appVersion), reported \(stamp(at, timeZone))): \(detail)"
     }
 
     /// "1h 12m", "6m 12s", "40s", and tenths below ten seconds ("2.4s") where a hang lives.

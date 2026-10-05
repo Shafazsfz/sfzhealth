@@ -186,13 +186,13 @@ struct BondRefusalGiveUp {
     /// UUID (per-install, not the hardware address), which carries no PII. Pure so a fixture pins it. No
     /// em-dash (project rule). Byte-identical to the Android twin.
     static func epitaphLine(refusals: Int, opaqueId: String) -> String {
-        "Bond epitaph: the strap [\(opaqueId)] refused the encrypted bond \(refusals)x in a row with no successful bond - giving up auto-reconnect to stop hammering it. It is almost certainly held by the official WHOOP app or a stale phone pairing. Free it (close the WHOOP app, put the strap in pairing mode, forget it in Bluetooth settings) then reconnect in NOOP."
+        "Bond epitaph: the strap [\(opaqueId)] refused the encrypted bond \(refusals)x in a row with no successful bond - giving up auto-reconnect to stop hammering it. It is almost certainly held by the official WHOOP app or a stale phone pairing. Free it (close the WHOOP app, put the strap in pairing mode, forget it in Bluetooth settings) then reconnect in Sfz Health."
     }
 
     /// #747: the honest user-facing hint shown when auto-reconnect pauses. Tells them WHY it stopped and how
     /// to get going again. Pure; no em-dash. Byte-identical to the Android twin.
     static func pausedHint() -> String {
-        "NOOP stopped retrying because your strap keeps refusing to pair. It is likely still held by the official WHOOP app, or your phone is holding an old pairing. Close the WHOOP app, put the strap in pairing mode (tap until the LEDs flash blue), and if it is listed in your Bluetooth settings choose Forget This Device. Then tap Connect to try again."
+        "Sfz Health stopped retrying because your strap keeps refusing to pair. It is likely still held by the official WHOOP app, or your phone is holding an old pairing. Close the WHOOP app, put the strap in pairing mode (tap until the LEDs flash blue), and if it is listed in your Bluetooth settings choose Forget This Device. Then tap Connect to try again."
     }
 
     /// #1635: the log epitaph for the SUPPRESSION path.
@@ -220,7 +220,7 @@ struct BondRefusalGiveUp {
     ///
     /// Pure. Byte-identical to the Kotlin `BondRefusalGiveUp.helloSuppressedHint`.
     static func helloSuppressedHint() -> String {
-        "The secure handshake with your strap never completes, and the attempt itself is what drops the link. NOOP has switched it off for this strap so live heart rate keeps streaming. History sync stays unavailable until it pairs, and so do motion, skin temperature, SpO₂ and respiratory rate, so sleep is staged from heart rate alone. Some straps have paired again after being put in pairing mode. Tap until the LEDs flash blue, then tap Connect."
+        "The secure handshake with your strap never completes, and the attempt itself is what drops the link. Sfz Health has switched it off for this strap so live heart rate keeps streaming. History sync stays unavailable until it pairs, and so do motion, skin temperature, SpO₂ and respiratory rate, so sleep is staged from heart rate alone. Some straps have paired again after being put in pairing mode. Tap until the LEDs flash blue, then tap Connect."
     }
 
     /// The paused hint for a bond that failed WITHOUT the strap ever answering (#1635).
@@ -3246,7 +3246,7 @@ public final class BLEManager: NSObject, ObservableObject {
     nonisolated static func futureDatedStrapBanner(strapNewestTs: Int?, wallNowUnix: Int) -> String? {
         guard BackfillContinuation.isFutureDatedNewest(strapNewestTs, wallNowUnix: wallNowUnix) else { return nil }
         return "Synced, but your strap's clock is set in the future - its banked history is dated ahead of "
-            + "today, so NOOP can't trust those timestamps and didn't import them (importing them would "
+            + "today, so Sfz Health can't trust those timestamps and didn't import them (importing them would "
             + "misfile your data days or years ahead). Fully charge the strap to 100% and power-cycle it so "
             + "its clock re-syncs, then reconnect."
     }
@@ -5692,9 +5692,9 @@ extension BLEManager: @preconcurrency CBCentralManagerDelegate {
         // toggle that already reads "on" from a PRIOR build's grant may not carry over — the
         // message needs to tell the user to re-toggle it, not just check that it's on.
         #if os(macOS)
-        state.lastSyncError = "NOOP isn't allowed to use Bluetooth. Open System Settings → Privacy & Security → Bluetooth — if NOOP is already listed there, toggle it off and back on (a new NOOP build needs a fresh grant), then quit and reopen NOOP."
+        state.lastSyncError = "Sfz Health isn't allowed to use Bluetooth. Open System Settings → Privacy & Security → Bluetooth — if Sfz Health is already listed there, toggle it off and back on (a new Sfz Health build needs a fresh grant), then quit and reopen Sfz Health."
         #else
-        state.lastSyncError = "NOOP isn't allowed to use Bluetooth. Open iPhone Settings → NOOP → Bluetooth — if it's already on, toggle it off and back on, then quit and reopen NOOP."
+        state.lastSyncError = "Sfz Health isn't allowed to use Bluetooth. Open iPhone Settings → Sfz Health → Bluetooth — if it's already on, toggle it off and back on, then quit and reopen Sfz Health."
         #endif
         log("Bluetooth permission not granted (unauthorized) — cannot scan or connect")
         radioStateErrorShown = true

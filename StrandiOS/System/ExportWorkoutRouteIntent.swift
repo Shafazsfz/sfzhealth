@@ -28,7 +28,7 @@ enum RouteExportIntentError: Swift.Error, CustomLocalizedStringResourceConvertib
     case noExportableRoute
 
     var localizedStringResource: LocalizedStringResource {
-        "NOOP has no recorded route with GPS measurements to export yet."
+        "Sfz Health has no recorded route with GPS measurements to export yet."
     }
 }
 

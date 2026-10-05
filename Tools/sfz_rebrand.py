@@ -154,5 +154,53 @@ def main() -> int:
     return 0
 
 
+# --- Swift string literals ----------------------------------------------------------------------
+# Many screens pass plain String text (blurbs, subtitles, error hints) that never goes through the
+# catalog, so the app name is also swapped inside Swift string literals. Only literals that name NOOP
+# are touched (bare words like "Charge" double as data keys in code and go through the catalog).
+SWIFT_DIRS = ["Strand", "StrandiOS", "StrandiOSShared", "StrandiOSWidgets", "NOOPWatch",
+              "NOOPWatchComplications", "Packages/StrandDesign/Sources"]
+SWIFT_SKIP_FILES = {"Terms.swift", "ProjectInfo.swift", "NoopScratch.swift", "RootView.swift", "HrBroadcaster.swift"}
+# Lines that are logs or identifiers rather than text a person reads.
+SWIFT_SKIP_LINE = re.compile(r"^\s*(//|#Preview)|\blog\??\(|Logger|os_log|NSLog|print\(|appendLog|\.debug\(|"
+                             r"\.info\(|\.error\(|\.notice\(|\.warning\(|strap log|forKey|UserDefaults|"
+                             r"Notification\.Name|identifier|\.noop")
+SWIFT_LIT = re.compile(r'"(?:[^"\\\n]|\\.)*"')
+
+
+def rebrand_swift() -> int:
+    changed_files = 0
+    for root in SWIFT_DIRS:
+        for path in sorted(Path(root).rglob("*.swift")):
+            if path.name in SWIFT_SKIP_FILES or "Tests" in path.parts:
+                continue
+            text = path.read_text(encoding="utf-8")
+            if "NOOP" not in text:
+                continue
+            lines = text.split("\n")
+            for i, line in enumerate(lines):
+                if "NOOP" not in line or SWIFT_SKIP_LINE.search(line):
+                    continue
+
+                def fix(m):
+                    lit = m.group(0)
+                    if "/" in lit or "_" in lit.replace("NOOP", ""):
+                        return lit   # paths, URLs, keys
+                    if not re.search(r"\bNOOP\b", lit):
+                        return lit
+                    # The literal is also its catalog key, so the catalog's Recovery/Strain/Sleep value
+                    # no longer applies once it changes: rename those words here too.
+                    return rebrand(lit)
+
+                lines[i] = SWIFT_LIT.sub(fix, line)
+            new_text = "\n".join(lines)
+            if new_text != text:
+                path.write_text(new_text, encoding="utf-8")
+                changed_files += 1
+    print(f"Swift sources: {changed_files} files rebranded")
+    return 0
+
+
 if __name__ == "__main__":
+    rebrand_swift()
     sys.exit(main())

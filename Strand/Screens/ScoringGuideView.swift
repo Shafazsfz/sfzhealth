@@ -90,7 +90,7 @@ struct ScoringGuideView: View {
                         introCard
                         scoreCard(.charge,
                                   headline: String(localized: "Charge: how recovered are you?"),
-                                  body: String(localized: "Led by your heart-rate variability (HRV) measured against your own personal baseline, plus resting heart rate, last night's Rest, breathing rate, and a skin-temperature signal (an early illness or overreach flag). Higher HRV versus your baseline means more Charge. NOOP needs a few nights to learn your baseline first. Until then you'll see “Calibrating”."),
+                                  body: String(localized: "Led by your heart-rate variability (HRV) measured against your own personal baseline, plus resting heart rate, last night's Sleep, breathing rate, and a skin-temperature signal (an early illness or overreach flag). Higher HRV versus your baseline means more Recovery. Sfz Health needs a few nights to learn your baseline first. Until then you'll see “Calibrating”."),
                                   vsWhoop: String(localized: "Same core idea as WHOOP's Recovery % (HRV-led recovery), but our weighting and baseline maths are our own, and openly documented."))
                         scoreCard(.effort,
                                   headline: String(localized: "Effort: how hard did your heart work?"),
@@ -172,7 +172,7 @@ struct ScoringGuideView: View {
                 Text("THE THREE SCORES").font(StrandFont.overline)
                     .tracking(StrandFont.overlineTracking)
                     .foregroundStyle(StrandPalette.textSecondary)
-                Text("NOOP gives you three daily scores (Charge, Effort and Rest), each on a 0-100 scale. They're built from your strap's raw signals using published, peer-reviewed sport science, and computed entirely on your device. They are NOT WHOOP's scores: we don't have WHOOP's private algorithms and don't pretend to. They aim at the same three questions using open science, so they'll usually track WHOOP's in direction, but won't match number-for-number. And that's the point.")
+                Text("Sfz Health gives you three daily scores (Recovery, Strain and Sleep), each on a 0-100 scale. They're built from your strap's raw signals using published, peer-reviewed sport science, and computed entirely on your device. They are NOT WHOOP's scores: we don't have WHOOP's private algorithms and don't pretend to. They aim at the same three questions using open science, so they'll usually track WHOOP's in direction, but won't match number-for-number. And that's the point.")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -283,7 +283,7 @@ struct ScoringGuideView: View {
     private var confidenceCard: some View {
         NoopCard {
             VStack(alignment: .leading, spacing: 12) {
-                Text("How sure is NOOP?  ·  Solid · Building · Calibrating")
+                Text("How sure is Sfz Health?  ·  Solid · Building · Calibrating")
                     .font(StrandFont.headline)
                     .foregroundStyle(StrandPalette.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -293,7 +293,7 @@ struct ScoringGuideView: View {
                     StatePill("Building", tone: .warning, showsDot: true)
                     StatePill("Calibrating", tone: .neutral, showsDot: true)
                 }
-                Text("Every score carries a small honesty label. Calibrating means NOOP is still learning your baseline, or doesn't have enough data yet. Building means there's enough to show, but it's thin. Solid means full inputs are present. When NOOP can't compute a score honestly, it shows nothing rather than a fake number.")
+                Text("Every score carries a small honesty label. Calibrating means Sfz Health is still learning your baseline, or doesn't have enough data yet. Building means there's enough to show, but it's thin. Solid means full inputs are present. When Sfz Health can't compute a score honestly, it shows nothing rather than a fake number.")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)

@@ -109,7 +109,7 @@ final class LiveActivityController {
             shownState = nil
             startedAt = nil
             log((Self.listed(activity) == .ended ? "ended by iOS" : "gone from the Lock Screen (dismissed)")
-                + "; started again when NOOP is next on screen")
+                + "; started again when Sfz Health is next on screen")
         }
         // Re-adopt an activity that outlived a previous app session. ActivityKit keeps Live Activities
         // alive across launches/relaunches, but a fresh controller starts with `activity == nil`, so

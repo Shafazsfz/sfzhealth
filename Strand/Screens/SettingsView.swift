@@ -2485,6 +2485,7 @@ struct SettingsView: View {
                 iphoneExpectations
                 #endif
 
+                if false {   // sfz: no update checks or GitHub link in this personal build
                 // Check for updates — a single, user-initiated read of GitHub's public releases API.
                 // No background polling, no auto-update; sends nothing about you, just reads the version.
                 VStack(alignment: .leading, spacing: NoopMetrics.space2) {
@@ -2601,6 +2602,7 @@ struct SettingsView: View {
                     .contentShape(Rectangle())
                 }
                 .accessibilityLabel("Project home and source code on GitHub")
+                }   // sfz: updates check and project link hidden
 
                 Text("A standalone companion for your WHOOP. Everything stays on this device: your history, your live stream, your numbers. Nothing is uploaded. Sfz Health is an independent, experimental project, not the WHOOP app.")
                     .font(StrandFont.subhead)
@@ -2627,6 +2629,7 @@ struct SettingsView: View {
                         .stroke(StrandPalette.statusWarning.opacity(0.25), lineWidth: 1)
                 )
 
+                if false {   // sfz: "Built on" credits hidden in this personal build
                 rowDivider
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -2638,6 +2641,7 @@ struct SettingsView: View {
                 Text("Open-source BLE reverse-engineering work. Thank you.")
                     .font(StrandFont.footnote)
                     .foregroundStyle(StrandPalette.textTertiary)
+                }   // sfz: credits hidden
             }
         }
     }

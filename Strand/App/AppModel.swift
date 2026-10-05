@@ -2206,7 +2206,8 @@ final class AppModel: ObservableObject {
     /// night is z-scored against the personal baseline, then `CyclePhaseEngine.classify` reads the run.
     /// Gated behind the opt-in flag; clears the published result the moment it's turned off.
     private func computeCyclePhase() async {
-        guard cycleAwarenessEnabled else { cyclePhase = nil; cycleCurve = []; return }
+        // sfz: also off for any profile that isn't female, so switching to male hides it everywhere.
+        guard cycleAwarenessEnabled, profile.cycleAwarenessApplies else { cyclePhase = nil; cycleCurve = []; return }
         let days = repo.days
         guard let tempCfg = Baselines.metricCfg["skin_temp"],
               let rhrCfg = Baselines.metricCfg["resting_hr"],

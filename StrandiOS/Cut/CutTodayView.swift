@@ -40,26 +40,14 @@ struct CutTodayView: View {
         ScreenScaffold(title: "Goal", subtitle: LocalizedStringKey(Date().formatted(.dateTime.weekday(.wide).day().month(.wide))),
                        onRefresh: { ble.syncNow(); await load() }, lazy: false, topBackground: nil,
                        trailing: { gearMenu }) {
+            // sfz: one job per card, in the order you use them: today's calories, what you ate,
+            // the goal, then the fat/week view. Heart rate, battery, burned and steps tiles were
+            // removed: burn is already in the calories and fat cards, the rest lives on Today.
             VStack(spacing: NoopMetrics.sectionGap) {
                 budgetCard
-                fatCard
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: NoopMetrics.gap),
-                                    GridItem(.flexible(), spacing: NoopMetrics.gap)],
-                          spacing: NoopMetrics.gap) {
-                    tile("Heart rate", icon: "heart.fill", value: hrText, unit: hrText == "–" ? "" : "bpm",
-                         caption: live.connected ? "Live" : "Strap not connected", tint: StrandPalette.liquidHeart)
-                    tile("Battery", icon: batteryIcon, value: batteryText, unit: "",
-                         caption: live.charging == true ? "Charging" : (live.connected ? "Strap" : "Offline"),
-                         tint: StrandPalette.chargeColor)
-                    tile("Burned", icon: "flame.fill", value: format(burnedSoFar), unit: "kcal",
-                         caption: (burned?.activeKcal ?? 0) >= 1
-                            ? "\(format(burned?.activeKcal ?? 0)) from workouts" : "No workout yet",
-                         tint: StrandPalette.metricAmber)
-                    tile("Steps", icon: "figure.walk", value: steps.map { format($0) } ?? "–", unit: "",
-                         caption: "Goal 10,000", tint: StrandPalette.metricCyan)
-                }
                 foodCard
                 goalCard
+                fatCard
             }
         }
         .task {
@@ -97,28 +85,17 @@ struct CutTodayView: View {
         }
     }
 
-    /// With the More tab gone, Devices (pairing) and Settings are reached from here.
+    /// sfz: Devices, Apple Health and Settings already live in More and behind the profile button,
+    /// so the page keeps one control: the plan (calorie target, pace, maintenance).
     private var gearMenu: some View {
-        Menu {
-            Button { router.requestedDestination = .devices } label: {
-                Label("Devices", systemImage: "sensor.tag.radiowaves.forward")
-            }
-            Button { showHealth = true } label: {
-                Label("Apple Health", systemImage: "heart.text.square")
-            }
-            Button { showPlan = true } label: {
-                Label("Plan settings", systemImage: "slider.horizontal.3")
-            }
-            Button { showSettings = true } label: {
-                Label("Settings", systemImage: "gearshape")
-            }
-        } label: {
-            Image(systemName: "gearshape.fill")
-                .font(.system(size: 17, weight: .semibold))
+        Button { showPlan = true } label: {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(StrandPalette.textSecondary)
                 .frame(width: NoopMetrics.compactControlSize, height: NoopMetrics.compactControlSize)
         }
-        .accessibilityLabel("Settings")
+        .buttonStyle(.plain)
+        .accessibilityLabel("Plan settings")
     }
 
     // MARK: Cards
@@ -413,7 +390,7 @@ struct CutTodayView: View {
                             .font(StrandFont.caption)
                             .padding(.horizontal, NoopMetrics.space2)
                             .padding(.vertical, NoopMetrics.space1)
-                            .background(Capsule().fill(StrandPalette.accent.opacity(0.15)))
+                            .background(Capsule().strokeBorder(StrandPalette.hairline, lineWidth: 1))
                             .foregroundStyle(StrandPalette.accent)
                     }
                     .buttonStyle(.plain)

@@ -254,7 +254,8 @@ final class ProfileStore: ObservableObject {
     /// without a live store / UserDefaults. `nonisolated` because it is a pure function over its argument
     /// (no actor state), so the gate and its tests can call it from any context.
     nonisolated static func cycleAwarenessApplies(sex: String) -> Bool {
-        sex.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() != "male"
+        // sfz: female profiles only. Male, unset or anything else hides every cycle surface.
+        sex.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "female"
     }
 
     /// Whether the cycle-awareness OFFER should be VISIBLE for a profile: eligible by sex AND not hidden

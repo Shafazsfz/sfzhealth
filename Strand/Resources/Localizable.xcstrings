@@ -16836,6 +16836,9 @@
         }
       }
     },
+    "Recovery, Strain & Sleep" : {
+
+    },
     "Recovery, Strain and Sleep (and how they differ from WHOOP)." : {
 
     },
@@ -21620,6 +21623,9 @@
         }
       }
     },
+    "Today's three scores in the Dynamic Island while the strap is connected." : {
+
+    },
     "Today's Timeline" : {
 
     },
@@ -23133,9 +23139,6 @@
 
     },
     "Which wrist do you wear it on?" : {
-
-    },
-    "While the strap is connected." : {
 
     },
     "While your strap's battery is low, stop the always-on background HRV stream — the biggest continuous drain on the strap. A Live screen still shows heart rate, and it re-arms automatically once the strap is charged." : {

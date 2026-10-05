@@ -290,7 +290,7 @@ struct MenstrualCycleHomeCard: View {
     @State private var showingTracker = false
 
     private var shouldShow: Bool {
-        !cycleHidden && (profile.cycleAwarenessApplies || cycleEnabled || !starts.isEmpty)
+        !cycleHidden && profile.cycleAwarenessApplies   // sfz: female profiles only
     }
 
     var body: some View {

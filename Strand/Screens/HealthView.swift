@@ -1513,7 +1513,7 @@ private struct SkinTempSection: View {
             // apply to (female / nonbinary); it is NOT rendered for male profiles. If a profile that
             // previously enabled it later switches to male, we still honour the existing awareness card
             // rather than silently hiding their data; only the OPT-IN invitation is gated.
-            if cycleEnabled, let cycle = model.cyclePhase {
+            if cycleEnabled, model.profile.cycleAwarenessApplies, let cycle = model.cyclePhase {
                 CycleAwarenessCard(result: cycle, curve: model.cycleCurve,
                                    onLogPeriod: {
                                        Task {

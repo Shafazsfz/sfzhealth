@@ -28,7 +28,7 @@ enum UpdateAvailability {
     /// after onboarding and the Terms gate. Nothing about the user is sent, nothing is uploaded, and no
     /// data leaves the device — the offline promise is about the user's HEALTH DATA, and that is
     /// untouched. Anyone who disagrees turns it off in Settings, and it then makes no request at all.
-    static let defaultEnabled = true
+    static let defaultEnabled = false   // sfz: no automatic update checks (they point at upstream NOOP)
 
     /// Once a day. The thing being watched moves on the order of days-to-weeks, so anything tighter spends
     /// requests (and a little battery) to learn nothing.

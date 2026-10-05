@@ -43,7 +43,7 @@ enum TodaySection: String, CaseIterable, Identifiable {
     /// The section's display label in the Arrange sheet — matches the Android `TodaySection.title`.
     var title: String {
         switch self {
-        case .hero:           return String(localized: "Charge / Effort / Rest")
+        case .hero:           return String(localized: "Recovery / Strain / Sleep")
         case .liveSession:    return String(localized: "Start session")
         case .synthesis:      return String(localized: "Synthesis")
         case .keyMetrics:     return String(localized: "Key Metrics")

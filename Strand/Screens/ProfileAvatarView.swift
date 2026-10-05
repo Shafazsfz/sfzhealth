@@ -43,6 +43,15 @@ struct ProfileAvatarView: View {
                 .clipShape(Circle())
                 // A faint hairline ring so the photo edge reads cleanly on any card/canvas.
                 .overlay(Circle().strokeBorder(StrandPalette.hairline, lineWidth: 1))
+        } else if let badge = PlatformImage(named: "SfzBadge") {
+            // sfz: the app's own icon art when no photo is set. The image lives only in the local
+            // asset catalog (not in the public repo); without it the BrandMark below is used.
+            Image(platformImage: badge)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(StrandPalette.hairline, lineWidth: 1))
         } else {
             // Fallback: the NOOP loop BrandMark (the green ring + white core) instead of a generic
             // person glyph — the default avatar is now on-brand. BrandMark is intrinsically square and

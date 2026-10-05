@@ -183,10 +183,10 @@ struct AppleWatchSetupView: View {
                 Text("WHAT IT'S GREAT AT").font(StrandFont.overline)
                     .tracking(StrandFont.overlineTracking)
                     .foregroundStyle(StrandPalette.statusPositive)
-                bullet("bed.double.fill", String(localized: "Sleep & Rest"),
-                       String(localized: "Apple's sleep stages are strong, and they drive your Rest score directly."))
+                bullet("bed.double.fill", String(localized: "Sleep"),
+                       String(localized: "Apple's sleep stages are strong, and they drive your Sleep score directly."))
                 bullet("figure.walk", String(localized: "Steps & workouts"),
-                       String(localized: "Steps, active energy and logged workouts feed your Effort. Dense and reliable."))
+                       String(localized: "Steps, active energy and logged workouts feed your Strain. Dense and reliable."))
                 bullet("bolt.heart.fill", String(localized: "Fitness Age"),
                        String(localized: "Built from the watch's cardio-fitness VO₂ max, the same number the Fitness app shows."))
             }

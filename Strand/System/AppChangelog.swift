@@ -138,7 +138,7 @@ enum AppChangelog {
         ),
         Release(
             version: "10.6.0",
-            title: "An Effort scale you choose, a ring that gets to sleep, and far fewer wasted re-scores",
+            title: "A Strain scale you choose, a ring that gets to sleep, and far fewer wasted re-scores",
             date: "August 2026",
             items: [
                 "**Pick how Effort is scored (#1562, #1563).** Banister TRIMP is now wired end to end and selectable, so Effort can follow the method you trust rather than the one that happened to ship. A workout is also scored against the same HRmax as the day containing it (#1565).",
@@ -199,7 +199,7 @@ enum AppChangelog {
         ),
         Release(
             version: "9.3.0",
-            title: "Water and caffeine from Apple Health, a sharper Effort score, and an Oura resting-heart-rate fix",
+            title: "Water and caffeine from Apple Health, a sharper Strain score, and an Oura resting-heart-rate fix",
             date: "July 2026",
             items: [
                 "**Water and caffeine import themselves (#949).** Log a drink in Apple Health or Health Connect and it shows up in Sfz Health, kept in its own row so it can never overwrite what you typed by hand. iPhone will ask permission once for the two new data types.",
@@ -284,7 +284,7 @@ enum AppChangelog {
         ),
         Release(
             version: "8.6.2",
-            title: "Apple Health export, sleep nights recovered, and imported-ride Effort",
+            title: "Apple Health export, sleep nights recovered, and imported-ride Strain",
             date: "July 2026",
             items: [
                 "**Your data in Apple Health (iPhone) (#249).** Sleep stages, minute-by-minute heart rate, and your workouts now write to Apple Health, so other apps can read them. Thanks vishk23.",
@@ -457,7 +457,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "7.7.1",
-            title: "Bug fixes: Effort, the widget's day, and Oura reconnect",
+            title: "Bug fixes: Strain, the widget's day, and Oura reconnect",
             date: "July 2026",
             items: [
                 "**Effort stops reading zero after you swap straps.** If you re-added your band through the device manager, the Today heart-rate curve and your Effort could come back empty. They now read whichever strap you actually have paired, so your day fills in again.",
@@ -517,7 +517,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "7.4.0",
-            title: "A calmer Today, your Charge explained, and new HRV science under the hood",
+            title: "A calmer Today, your Recovery explained, and new HRV science under the hood",
             date: "June 2026",
             items: [
                 "**A simpler Today.** The dashboard had got busy, so we calmed it down: one clean read at the top, the daily synthesis folds into a single line you can expand, and the metric cards line up evenly. Less noise, the same depth when you want it.",
@@ -729,7 +729,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "5.3.0",
-            title: "Sleep, Charge and workouts, cleaned up",
+            title: "Sleep, Recovery and workouts, cleaned up",
             date: "June 2026",
             items: [
                 "**Your Sleep tab shows your actual night now**, not an afternoon nap that happened to end later. Days with a nap get a clear Main / Nap(s) / Total split so you can see what made up your Rest. (#518)",
@@ -913,7 +913,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "4.5.5",
-            title: "Today's Effort no longer drops to zero",
+            title: "Today's Strain no longer drops to zero",
             date: "June 2026",
             items: [
                 "**Fixed: the Effort number on Today could briefly show the right value, then fall to 0.** The live \"so far today\" Effort recalculation could under-read - especially on a WHOOP 5/MG with sparser heart rate, or after you'd logged a workout - and replace the real Effort you'd already earned. The gauge now never shows **less** than today's earned Effort. (#489 / #506)",
@@ -1120,7 +1120,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "4.0.1",
-            title: "Today's Effort goes live - plus sleep & alarm honesty",
+            title: "Today's Strain goes live - plus sleep & alarm honesty",
             date: "June 2026",
             items: [
                 "**Today's Effort now updates live through the day.** The Effort ring recomputes over today's heart rate as it happens (midnight → now), instead of showing yesterday's completed-day value - or a stale 0.0 early in the morning - until the next full re-score. Thanks @rad182 (#402).",
@@ -1326,7 +1326,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.17.1",
-            title: "Charge shows \"Calibrating\" instead of \"No data\" for new straps",
+            title: "Recovery shows \"Calibrating\" instead of \"No data\" for new straps",
             date: "June 2026",
             items: [
                 "Charge no longer shows a bare \"No data\" while it is still learning your baseline. A brand-new strap now reads \"Calibrating - 0 of 4 nights\" so it is clearly building, not broken - Charge needs a few nights of wear before it can score recovery (Effort and Rest show right away). Thanks @umarXBT (#335).",
@@ -1380,7 +1380,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.15.0",
-            title: "The new look everywhere - plus sleep, Effort & Bluetooth fixes",
+            title: "The new look everywhere - plus sleep, Strain & Bluetooth fixes",
             date: "June 2026",
             items: [
                 "The new look, everywhere: every screen now wears Sfz Health's premium dark design - scenic backdrops, glowing ring gauges and frosted per-domain cards across Sleep, Recovery, Stress, Workouts, Live, Health, Trends, Insights, Breathe, Coach and Settings, on Mac, iPhone and Android.",
@@ -1457,7 +1457,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.9.0",
-            title: "Background GPS, sleep-time editing, log-ahead, and a sharper Rest tile",
+            title: "Background GPS, sleep-time editing, log-ahead, and a sharper Sleep tile",
             date: "June 2026",
             items: [
                 "Fixed (Android): GPS workouts kept tracking with the screen off. Distance was under-counting badly (a 2.8 km ride logged as 0.4 km) because tracking ran on the screen - it now runs in the always-on background service, so your route survives the screen turning off and the phone going in a pocket. Thanks @pilleuspulcher-blip (#215).",
@@ -1520,7 +1520,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.8.4",
-            title: "New: a guide to how your Charge, Effort and Rest scores work",
+            title: "New: a guide to how your Recovery, Strain and Sleep scores work",
             date: "June 2026",
             items: [
                 "New: a clear in-app guide to how Sfz Health's three daily scores - Recovery, Strain and Sleep - are calculated, and how they differ from WHOOP's Recovery, Strain and Sleep. Tap the ⓘ on any score on the Today screen, or open it any time from Settings → About → How your scores work. New here? A one-time card points you to it.",
@@ -1627,7 +1627,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.6.4",
-            title: "Tidier workout names, correct Rest duration",
+            title: "Tidier workout names, correct Sleep duration",
             date: "June 2026",
             items: [
                 "Fixed: workout names from your strap now read as proper words - Traditional Strength Training instead of TraditionalStrengthTraining - on the Today tiles, the Workouts breakdown cards and the session list, on all platforms. Thanks @RichrdJ (#175).",
@@ -1651,7 +1651,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.6.1",
-            title: "Effort scale fix for imported data",
+            title: "Strain scale fix for imported data",
             date: "June 2026",
             items: [
                 "Fixed: imported WHOOP Day Strain and workout strain now correctly land on Sfz Health's 0-100 Strain axis (the 0-21 to 0-100 rescale was defined in v2.6.0 but not wired up), so imported and on-device Strain finally share one scale. And Sfz Health's own CSV export now writes Strain on WHOOP's 0-21 scale, so re-importing your own export round-trips losslessly.",

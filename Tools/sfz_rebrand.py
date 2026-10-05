@@ -30,7 +30,8 @@ KEEP_IF_CONTAINS = ("I am not a WHOOP employee", "I own the WHOOP device", "I un
                     "To the fullest extent the law allows", "NoopApp", "github.com", "Copyright", "PolyForm", "noop.fans", "r/NoopBand")
 
 # Keys where "Rest" means a workout pause or resting heart rate, not the sleep score.
-SKIP_KEYS = {"Rest (seconds)", "Rest period", "Rest HR", "Rest up"}
+# Bare "Rest" is also Today's advice word (push / maintain / rest); score uses are renamed in Swift.
+SKIP_KEYS = {"Rest", "Rest (seconds)", "Rest period", "Rest HR", "Rest up"}
 
 # "Charge" followed by one of these words is about the strap battery, not the score.
 BATTERY_FOLLOWERS = r"(?:it|your|the|before|now|up|tonight|overnight|level|cable|puck|soon|when|while)"
@@ -48,6 +49,8 @@ def rebrand(text: str) -> str:
         out = re.sub(rf"\b{word}( &| and| \+| ·| /|,) {word}\b", word, out)
     out = re.sub(r"\bSleep or Sleep\b", "Sleep", out)
     out = out.replace("Recovery (recovery)", "Recovery")
+    out = re.sub(r"\bAn Strain\b", "A Strain", out)
+    out = re.sub(r"\bStrain and rest\b", "Strain and sleep", out)
     out = out.replace("Recovery, Sfz Health's Recovery score,", "Sfz Health's Recovery score")
     return out
 
@@ -156,15 +159,23 @@ def main() -> int:
 
 # --- Swift string literals ----------------------------------------------------------------------
 # Many screens pass plain String text (blurbs, subtitles, error hints) that never goes through the
-# catalog, so the app name is also swapped inside Swift string literals. Only literals that name NOOP
-# are touched (bare words like "Charge" double as data keys in code and go through the catalog).
+# catalog, so names are also swapped inside Swift string literals: NOOP wherever it is text, and the
+# score words only where the literal is clearly on-screen (bare "Charge" etc. double as data keys).
 SWIFT_DIRS = ["Strand", "StrandiOS", "StrandiOSShared", "StrandiOSWidgets", "NOOPWatch",
               "NOOPWatchComplications", "Packages/StrandDesign/Sources"]
-SWIFT_SKIP_FILES = {"Terms.swift", "ProjectInfo.swift", "NoopScratch.swift", "RootView.swift", "HrBroadcaster.swift"}
+SWIFT_SKIP_FILES = {"IntervalTimerView.swift", "Terms.swift", "ProjectInfo.swift", "NoopScratch.swift", "RootView.swift", "HrBroadcaster.swift"}
 # Lines that are logs or identifiers rather than text a person reads.
 SWIFT_SKIP_LINE = re.compile(r"^\s*(//|#Preview)|\blog\??\(|Logger|os_log|NSLog|print\(|appendLog|\.debug\(|"
                              r"\.info\(|\.error\(|\.notice\(|\.warning\(|strap log|forKey|UserDefaults|"
-                             r"Notification\.Name|identifier|\.noop")
+                             r"Notification\.Name|identifier|\.noop|restSeconds|\.strained|\.rundown")
+SCORE_WORDS = re.compile(r"\b(NOOP|Charge|Effort|Rest)\b")
+# Text immediately before a literal that marks it as something a person reads.
+UI_CONTEXT = re.compile(
+    r"(?:\b(?:label|title|subtitle|overline|blurb|detail|message|caption|headline|accessibilityTitle|"
+    r"hint|prompt|placeholder|footer|header|eyebrow|kicker|trailing|leading|heading|body|summary)\s*:\s*"
+    r"|\b(?:Text|SectionHeader|Label|Button|Toggle|Section|navigationTitle|accessibilityLabel|"
+    r"accessibilityHint|accessibilityValue|LocalizedStringKey)\s*\(\s*(?:verbatim:\s*)?"
+    r"|String\(localized:\s*)$")
 SWIFT_LIT = re.compile(r'"(?:[^"\\\n]|\\.)*"')
 
 
@@ -175,22 +186,27 @@ def rebrand_swift() -> int:
             if path.name in SWIFT_SKIP_FILES or "Tests" in path.parts:
                 continue
             text = path.read_text(encoding="utf-8")
-            if "NOOP" not in text:
+            if not SCORE_WORDS.search(text):
                 continue
             lines = text.split("\n")
             for i, line in enumerate(lines):
-                if "NOOP" not in line or SWIFT_SKIP_LINE.search(line):
+                if not SCORE_WORDS.search(line) or SWIFT_SKIP_LINE.search(line):
                     continue
 
                 def fix(m):
                     lit = m.group(0)
-                    if "/" in lit or "_" in lit.replace("NOOP", ""):
-                        return lit   # paths, URLs, keys
-                    if not re.search(r"\bNOOP\b", lit):
-                        return lit
-                    # The literal is also its catalog key, so the catalog's Recovery/Strain/Sleep value
-                    # no longer applies once it changes: rename those words here too.
-                    return rebrand(lit)
+                    if "/" in lit or "_" in lit.replace("NOOP", "") or lit[1:-1] in (SKIP_KEYS - {"Rest"}):
+                        return lit   # paths, URLs, keys, workout "Rest"
+                    if re.search(r"\bNOOP\b", lit):
+                        # The literal is also its catalog key, so the catalog's Recovery/Strain/Sleep
+                        # value no longer applies once it changes: rename those words here too.
+                        return rebrand(lit)
+                    # Score words: only where the literal is clearly on-screen text (a UI call or a
+                    # label-style argument), never bare literals that the code compares or stores.
+                    before = line[:m.start()]
+                    if UI_CONTEXT.search(before):
+                        return rebrand(lit)
+                    return lit
 
                 lines[i] = SWIFT_LIT.sub(fix, line)
             new_text = "\n".join(lines)

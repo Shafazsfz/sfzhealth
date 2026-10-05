@@ -249,7 +249,7 @@ struct NOOPWidgetView: View {
             WidgetScoreRing(
                 text: snap.recovery.map(String.init),
                 fraction: snap.recovery.map { Double($0) / 100 },
-                label: "Charge",
+                label: "Recovery",
                 color: chargeColor,
                 diameter: diameter,
                 lineWidth: lineWidth,
@@ -260,7 +260,7 @@ struct NOOPWidgetView: View {
                 text: effortText,
                 // Fill is always the stored 0–100 axis so WHOOP 0–21 and native 0–100 agree on arc length.
                 fraction: snap.effort.map { Double($0) / 100 },
-                label: "Effort",
+                label: "Strain",
                 color: effortColor,
                 diameter: diameter,
                 lineWidth: lineWidth,
@@ -270,7 +270,7 @@ struct NOOPWidgetView: View {
             WidgetScoreRing(
                 text: snap.rest.map(String.init),
                 fraction: snap.rest.map { Double($0) / 100 },
-                label: "Rest",
+                label: "Sleep",
                 color: restColor,
                 diameter: diameter,
                 lineWidth: lineWidth,

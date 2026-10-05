@@ -2149,8 +2149,15 @@
         }
       }
     },
-    "Effort" : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "Strain"}}}
-
+    "Effort" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strain"
+          }
+        }
+      }
     },
     "Fill" : {
       "localizations" : {
@@ -3636,8 +3643,16 @@
         }
       }
     },
-    "NOOP" : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "Sfz Health"}}}
-
+    "NOOP" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sfz Health"
+          }
+        }
+      }
     },
     "Ocean" : {
 
@@ -4746,6 +4761,9 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Sfz Health" : {
+
     },
     "Sleep end" : {
 

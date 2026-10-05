@@ -2975,6 +2975,7 @@
       }
     },
     "Open NOOP on your iPhone to sync" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3037,6 +3038,9 @@
           }
         }
       }
+    },
+    "Open Sfz Health on your iPhone to sync" : {
+
     },
     "Pause" : {
       "localizations" : {

@@ -225,9 +225,9 @@ struct HowNoopWorksView: View {
 
         var name: String {
             switch self {
-            case .charge:     return String(localized: "Charge")
-            case .effort:     return String(localized: "Effort")
-            case .rest:       return String(localized: "Rest")
+            case .charge:     return String(localized: "Recovery")
+            case .effort:     return String(localized: "Strain")
+            case .rest:       return String(localized: "Sleep")
             case .fitnessAge: return String(localized: "Fitness Age")
             }
         }

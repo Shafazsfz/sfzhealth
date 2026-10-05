@@ -835,7 +835,7 @@ struct WorkoutsView: View {
                                  groups: [SportGroup], totalTimeH: Double) -> some View {
         let modal = modalSport(from: groups)
         VStack(alignment: .leading, spacing: 12) {
-            Text("Effort this \(effectiveRange.heroWord)")
+            Text("Strain this \(effectiveRange.heroWord)")
                 .font(StrandFont.headline)
                 .foregroundStyle(StrandPalette.textPrimary)
             HStack(spacing: NoopMetrics.gap) {
@@ -1591,8 +1591,8 @@ struct WorkoutsView: View {
     /// A full-sentence a11y label for a compact row.
     private func compactRowAccessibilityLabel(_ row: WorkoutRow, selectable: Bool, isSelected: Bool) -> String {
         let effort = row.strain != nil
-            ? String(localized: "Effort \(Self.effortCellLabel(strain: row.strain, scale: effortScale))")
-            : String(localized: "no Effort recorded")
+            ? String(localized: "Strain \(Self.effortCellLabel(strain: row.strain, scale: effortScale))")
+            : String(localized: "no Strain recorded")
         let base = String(localized: "\(WorkoutSource.displaySport(row.sport)), \(compactRowSubtitle(row)), \(effort)")
         guard selectionMode else { return base }
         if !selectable { return String(localized: "\(base). Imported, can't be merged.") }

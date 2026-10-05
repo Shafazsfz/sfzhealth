@@ -769,7 +769,7 @@ private struct ZoomPanModifier: ViewModifier {
             sleep: .init(start: pts.first!.date, end: pts.first!.date.addingTimeInterval(6 * 3600 + 6 * 60), label: "6:06"),
             workouts: [.init(start: pts[200].date, end: pts[215].date, symbol: "figure.run")],
             recovery: .init(date: pts.first!.date.addingTimeInterval(6 * 3600), label: "67% Recovery", color: StrandPalette.recoveryColor(67)),
-            effort: .init(date: pts.last!.date, label: "12.5 Effort", color: StrandPalette.strainColor(12.5), alignment: .trailing),
+            effort: .init(date: pts.last!.date, label: "12.5 Strain", color: StrandPalette.strainColor(12.5), alignment: .trailing),
             valueRange: 45...140
         )
     }

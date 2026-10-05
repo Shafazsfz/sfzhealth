@@ -314,7 +314,7 @@ struct SettingsView: View {
             Button("Recalibrate") { recalibrateHrvBaseline() }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("This restarts the roughly 4-night build-up for Charge and your HRV baseline. Your history stays. Use it if a bad first week, like wearing it while sick, set your baseline off.")
+            Text("This restarts the roughly 4-night build-up for Recovery and your HRV baseline. Your history stays. Use it if a bad first week, like wearing it while sick, set your baseline off.")
         }
         // #174: the switch going OFF is the moment to offer the undo. Declining leaves the flags set and
         // says so — which is still an improvement on the old behaviour, where the same tap silently left
@@ -983,7 +983,7 @@ struct SettingsView: View {
                 rowDivider
                 // Effort scale (#268) — show NOOP's native 0–100 Effort or WHOOP's 0–21 Day Strain axis.
                 // Display-only; the stored value never changes, so a flip just re-labels every Effort read-out.
-                FormRow(label: "Effort scale") {
+                FormRow(label: "Strain scale") {
                     Picker("Effort scale", selection: $effortScaleRaw) {
                         Text("0-100").tag(EffortScale.hundred.rawValue)
                         Text("0-21").tag(EffortScale.whoop.rawValue)
@@ -991,7 +991,7 @@ struct SettingsView: View {
                     .labelsHidden()
                     .pickerStyle(.menu)
                     .tint(StrandPalette.accent)
-                    .accessibilityLabel("Effort scale")
+                    .accessibilityLabel("Strain scale")
                 }
 
                 // #1545: directly under the Effort SCALE row on purpose. It shipped in the experimental
@@ -1003,7 +1003,7 @@ struct SettingsView: View {
                 Divider().overlay(StrandPalette.hairline)
 
                 Toggle(isOn: $banisterEffortEnabled) {
-                    Text("Effort: exponential intensity scale")
+                    Text("Strain: exponential intensity scale")
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textPrimary)
                 }
@@ -1017,7 +1017,7 @@ struct SettingsView: View {
                     // candidate and HRV-window toggles (analyzeRecent → refresh).
                     Task { await model.intelligence.analyzeRecent(); await model.repo.refresh() }
                 }
-                Text("Scores Effort on an exponential intensity curve (Banister TRIMP) instead of the default heart-rate zones (Edwards). The default earns nothing below half of your heart-rate reserve, so an hour of lifting — where hard sets average out against the rests — can score close to zero. The exponential curve has no floor and weights short, hard efforts far more heavily. Re-scores your history, and both scales reach the same maximum. Off by default.")
+                Text("Scores Strain on an exponential intensity curve (Banister TRIMP) instead of the default heart-rate zones (Edwards). The default earns nothing below half of your heart-rate reserve, so an hour of lifting — where hard sets average out against the rests — can score close to zero. The exponential curve has no floor and weights short, hard efforts far more heavily. Re-scores your history, and both scales reach the same maximum. Off by default.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1604,14 +1604,14 @@ struct SettingsView: View {
         SettingsSection(
             icon: "heart.text.square",
             title: "Recovery",
-            blurb: "Your Charge score learns a personal baseline from your heart-rate variability, resting heart rate and more over time. If a bad first week set it off, you can re-learn it from tonight. Your history stays."
+            blurb: "Your Recovery score learns a personal baseline from your heart-rate variability, resting heart rate and more over time. If a bad first week set it off, you can re-learn it from tonight. Your history stays."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 NoopButton("Recalibrate Charge baseline", systemImage: "arrow.triangle.2.circlepath", kind: .secondary) {
                     showRecalibrateConfirm = true
                 }
 
-                Text("Restarts the roughly 4-night build-up for Charge and your HRV baseline from tonight. Use it if a bad first week set your baseline off. Your history stays.")
+                Text("Restarts the roughly 4-night build-up for Recovery and your HRV baseline from tonight. Use it if a bad first week set your baseline off. Your history stays.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1631,7 +1631,7 @@ struct SettingsView: View {
             await model.intelligence.analyzeRecent()
             await model.repo.refresh()
         }
-        backupAlertTitle = String(localized: "Charge baseline recalibrating")
+        backupAlertTitle = String(localized: "Recovery baseline recalibrating")
         backupAlertMessage = String(localized: "Sfz Health will re-learn your baseline from tonight's data onward. Your history is kept, and it takes a few nights to settle.")
         showBackupAlert = true
     }
@@ -1904,7 +1904,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "shield.lefthalf.filled",
             title: "Experimental · Live Sessions",
-            blurb: "A one-tap guarded workout: the strap watches your heart rate against a band gated on today's Charge, and only ever buzzes to correct course. Silence means you're on track."
+            blurb: "A one-tap guarded workout: the strap watches your heart rate against a band gated on today's Recovery, and only ever buzzes to correct course. Silence means you're on track."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 Toggle(isOn: $liveSessionsBeta) {
@@ -2397,7 +2397,7 @@ struct SettingsView: View {
                             Text("How your scores work")
                                 .font(StrandFont.body)
                                 .foregroundStyle(StrandPalette.textPrimary)
-                            Text("Charge, Effort and Rest (and how they differ from WHOOP).")
+                            Text("Recovery, Strain and Sleep (and how they differ from WHOOP).")
                                 .font(StrandFont.footnote)
                                 .foregroundStyle(StrandPalette.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)

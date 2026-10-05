@@ -898,6 +898,7 @@
       }
     },
     "Charge out of date, last synced %@. Open NOOP on iPhone." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1154,6 +1155,7 @@
       }
     },
     "No data, open NOOP on iPhone" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1217,10 +1219,22 @@
         }
       }
     },
-    "NOOP" : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "Sfz Health"}}}
+    "No data, open Sfz Health on iPhone" : {
 
     },
+    "NOOP" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sfz Health"
+          }
+        }
+      }
+    },
     "NOOP · open on iPhone" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1285,6 +1299,7 @@
       }
     },
     "NOOP Charge" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1349,6 +1364,7 @@
       }
     },
     "NOOP. %@, %@, %@." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1413,6 +1429,7 @@
       }
     },
     "NOOP. No data yet, open NOOP on your iPhone to sync." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1477,6 +1494,7 @@
       }
     },
     "NOOP. Scores out of date, last synced %@. Open NOOP on iPhone to refresh." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1669,6 +1687,7 @@
       }
     },
     "Open NOOP" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1731,6 +1750,12 @@
           }
         }
       }
+    },
+    "Open Sfz Health" : {
+
+    },
+    "Recovery out of date, last synced %@. Open Sfz Health on iPhone." : {
+
     },
     "Rest" : {
       "localizations" : {
@@ -1795,6 +1820,31 @@
           }
         }
       }
+    },
+    "Sfz Health" : {
+
+    },
+    "Sfz Health · open on iPhone" : {
+
+    },
+    "Sfz Health Recovery" : {
+
+    },
+    "Sfz Health. %@, %@, %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Sfz Health. %1$@, %2$@, %3$@."
+          }
+        }
+      }
+    },
+    "Sfz Health. No data yet, open Sfz Health on your iPhone to sync." : {
+
+    },
+    "Sfz Health. Scores out of date, last synced %@. Open Sfz Health on iPhone to refresh." : {
+
     },
     "stale" : {
       "localizations" : {

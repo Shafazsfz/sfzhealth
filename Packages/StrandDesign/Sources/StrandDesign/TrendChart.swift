@@ -312,7 +312,7 @@ public struct TrendChart: View {
         // the same gradient for every vertex; segment identities and full-resolution data stay intact.
         let stops = gradient.toStops()
         let areaFill = LinearGradient(
-            colors: [StrandPalette.sample(stops: stops, at: unit(averageValue)).opacity(0.28), .clear],
+            colors: [.clear, .clear],   // sfz minimal: no wash under the line (was 0.28 tint)
             startPoint: .top, endPoint: .bottom)
         let lineStroke = valueGradient
         VStack(alignment: .leading, spacing: 8) {

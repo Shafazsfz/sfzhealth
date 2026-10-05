@@ -75,11 +75,7 @@ public extension View {
     @ViewBuilder
     func nativeLiquidGlassSearchChrome() -> some View {
         #if os(iOS)
-        if #available(iOS 26.0, *) {
-            self.glassEffect(.regular.interactive(), in: Capsule())
-        } else {
-            self.noopStandardSearchChrome()
-        }
+        self.noopStandardSearchChrome()   // sfz minimal: flat pill, no glass
         #else
         self.noopStandardSearchChrome()
         #endif
@@ -95,13 +91,15 @@ public extension View {
         @ViewBuilder fallback: () -> Fallback
     ) -> some View {
         #if os(iOS)
-        if #available(iOS 26.0, *) {
-            self
-                .buttonStyle(.glass)
-                .buttonBorderShape(capsule ? .capsule : .circle)
-                .controlSize(controlSize)
+        // sfz minimal: flat circle/capsule with a hairline, no glass material.
+        if capsule {
+            self.buttonStyle(.plain)
+                .background(NoopVisualStyle.surface, in: Capsule())
+                .overlay(Capsule().strokeBorder(NoopVisualStyle.border, lineWidth: 0.8))
         } else {
-            fallback()
+            self.buttonStyle(.plain)
+                .background(NoopVisualStyle.surface, in: Circle())
+                .overlay(Circle().strokeBorder(NoopVisualStyle.border, lineWidth: 0.8))
         }
         #else
         fallback()
@@ -113,11 +111,7 @@ public extension View {
     @ViewBuilder
     func nativeLiquidGlassCircleFinish() -> some View {
         #if os(iOS)
-        if #available(iOS 26.0, *) {
-            self.glassEffect(.regular.interactive(), in: Circle())
-        } else {
-            self
-        }
+        self   // sfz minimal: no glass finish
         #else
         self
         #endif

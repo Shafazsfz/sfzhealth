@@ -3058,10 +3058,12 @@ private extension View {
     func nativeLiquidGlassSyncButton() -> some View {
         #if os(iOS)
         if #available(iOS 26.0, *) {
+            // sfz minimal: flat capsule instead of glass.
             self
                 .buttonStyle(.plain)
                 .padding(NoopMetrics.syncIndicatorGlassPadding)
-                .glassEffect(.regular.interactive(), in: Capsule())
+                .background(NoopVisualStyle.surface, in: Capsule())
+                .overlay(Capsule().strokeBorder(NoopVisualStyle.border, lineWidth: 0.8))
         } else {
             self
                 .buttonStyle(LiquidPressStyle())

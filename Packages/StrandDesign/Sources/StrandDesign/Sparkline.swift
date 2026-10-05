@@ -86,7 +86,7 @@ public struct Sparkline: View {
                 // passes that re-rasterised on every scroll / body re-eval — the v7.0.2 lag regression.
                 // CoreAnimation already caches this flat layer natively.
                 ZStack {
-                    if showsArea, pts.count > 1 {
+                    if showsArea && false, pts.count > 1 {   // sfz minimal: no wash under the line
                         areaPath(pts, in: geo.size)
                             .fill(
                                 LinearGradient(

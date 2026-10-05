@@ -13,12 +13,15 @@ public struct NOOPActivityAttributes: ActivityAttributes {
         // Effort / strain on NOOP's 0–100 axis (#446) — one more stat in the Dynamic Island expanded
         // region. OPTIONAL with a nil default so an activity started by an older build still decodes.
         public var effort: Int?
+        // sfz: the Sleep score (0–100), so the banner can show Recovery · Strain · Sleep. Optional, like effort.
+        public var sleep: Int?
 
-        public init(bpm: Int?, recovery: Int?, bonded: Bool, effort: Int? = nil) {
+        public init(bpm: Int?, recovery: Int?, bonded: Bool, effort: Int? = nil, sleep: Int? = nil) {
             self.bpm = bpm
             self.recovery = recovery
             self.bonded = bonded
             self.effort = effort
+            self.sleep = sleep
         }
     }
 

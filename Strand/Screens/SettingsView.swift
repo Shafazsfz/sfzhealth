@@ -1572,8 +1572,8 @@ struct SettingsView: View {
             blurb: "Shown on the Lock Screen and in the Dynamic Island. A switch only hides one: Sfz Health still measures and records everything."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
-                liveNotificationSwitch("Live heart rate", isOn: $liveActivityEnabled,
-                                       detail: "While the strap is connected.")
+                liveNotificationSwitch("Recovery, Strain & Sleep", isOn: $liveActivityEnabled,
+                                       detail: "Today's three scores in the Dynamic Island while the strap is connected.")
                 rowDivider
                 liveNotificationSwitch("Lift Log session", isOn: $liftLiveActivityEnabled,
                                        detail: "Your set, rest and heart rate, and the Lock Screen light-up on a double-tap.")

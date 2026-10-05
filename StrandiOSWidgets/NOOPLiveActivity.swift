@@ -13,60 +13,50 @@ struct NOOPLiveActivity: Widget {
         context.isStale ? nil : context.state.bpm
     }
 
+    // sfz: the banner shows today's three scores (Recovery · Strain · Sleep) instead of live heart rate.
+    static func text(_ v: Int?, _ suffix: String = "") -> String { v.map { "\($0)\(suffix)" } ?? "–" }
+
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: NOOPActivityAttributes.self) { context in
-            // Lock Screen / banner presentation.
-            HStack(spacing: 14) {
-                Image(systemName: "waveform.path.ecg")
-                    .font(.title2)
-                    .foregroundStyle(StrandPalette.statusCritical)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(context.attributes.title)
-                        .font(.caption).foregroundStyle(StrandPalette.textSecondary)
-                    Text("\(Self.shownBpm(context).map(String.init) ?? "–") bpm")
-                        .font(.system(size: 26, weight: .bold, design: .rounded))
-                        .foregroundStyle(StrandPalette.textPrimary)
-                }
-                Spacer()
-                // Charge + Effort (#446) on the banner, mirroring the Dynamic Island expanded stats.
-                HStack(spacing: 12) {
-                    if let r = context.state.recovery {
-                        bannerStat(label: "Recovery", value: "\(r)%")
-                    }
-                    if let e = context.state.effort {
-                        bannerStat(label: "Strain", value: "\(e)")
-                    }
-                }
+            // Lock Screen / banner presentation: three plain columns.
+            HStack(spacing: 0) {
+                bannerStat(label: "Recovery", value: Self.text(context.state.recovery, "%"),
+                           tint: StrandPalette.chargeColor)
+                    .frame(maxWidth: .infinity)
+                bannerStat(label: "Strain", value: Self.text(context.state.effort),
+                           tint: StrandPalette.effortColor)
+                    .frame(maxWidth: .infinity)
+                bannerStat(label: "Sleep", value: Self.text(context.state.sleep, "%"),
+                           tint: StrandPalette.restColor)
+                    .frame(maxWidth: .infinity)
             }
             .padding()
             .activityBackgroundTint(StrandPalette.surfaceBase)
             .activitySystemActionForegroundColor(StrandPalette.textPrimary)
         } dynamicIsland: { context in
             DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) {
-                    Label("\(Self.shownBpm(context).map(String.init) ?? "–")", systemImage: "heart.fill")
-                        .foregroundStyle(StrandPalette.statusCritical)
-                }
-                DynamicIslandExpandedRegion(.trailing) {
-                    // Charge + Effort (#446) — one more stat alongside the leading live HR.
-                    HStack(spacing: 10) {
-                        if let r = context.state.recovery {
-                            statColumn(label: "Recovery", value: "\(r)%")
-                        }
-                        if let e = context.state.effort {
-                            statColumn(label: "Strain", value: "\(e)")
-                        }
+                DynamicIslandExpandedRegion(.bottom) {
+                    HStack(spacing: 0) {
+                        statColumn(label: "Recovery", value: Self.text(context.state.recovery, "%"),
+                                   tint: StrandPalette.chargeColor)
+                            .frame(maxWidth: .infinity)
+                        statColumn(label: "Strain", value: Self.text(context.state.effort),
+                                   tint: StrandPalette.effortColor)
+                            .frame(maxWidth: .infinity)
+                        statColumn(label: "Sleep", value: Self.text(context.state.sleep, "%"),
+                                   tint: StrandPalette.restColor)
+                            .frame(maxWidth: .infinity)
                     }
                 }
-                DynamicIslandExpandedRegion(.bottom) {
-                    Text(context.attributes.title).font(.caption).foregroundStyle(.secondary)
-                }
             } compactLeading: {
-                Image(systemName: "heart.fill").foregroundStyle(StrandPalette.statusCritical)
+                Text(Self.text(context.state.recovery, "%"))
+                    .foregroundStyle(StrandPalette.chargeColor)
             } compactTrailing: {
-                Text("\(Self.shownBpm(context).map(String.init) ?? "–")")
+                Text(Self.text(context.state.effort))
+                    .foregroundStyle(StrandPalette.effortColor)
             } minimal: {
-                Image(systemName: "heart.fill").foregroundStyle(StrandPalette.statusCritical)
+                Text(Self.text(context.state.recovery))
+                    .foregroundStyle(StrandPalette.chargeColor)
             }
         }
     }
@@ -81,10 +71,10 @@ struct NOOPLiveActivity: Widget {
 /// read as "the number doesn't line up with its label". `fixedSize` stops either line truncating so the
 /// pairing is never clipped at narrow widths.
 @ViewBuilder
-private func bannerStat(label: String, value: String) -> some View {
+private func bannerStat(label: String, value: String, tint: Color) -> some View {
     VStack(alignment: .center, spacing: 2) {
         Text(label).font(.caption2).foregroundStyle(StrandPalette.textSecondary)
-        Text(value).font(.headline).foregroundStyle(StrandPalette.textPrimary)
+        Text(value).font(.system(size: 24, weight: .bold, design: .rounded)).foregroundStyle(tint)
     }
     .multilineTextAlignment(.center)
     .fixedSize()
@@ -93,10 +83,10 @@ private func bannerStat(label: String, value: String) -> some View {
 /// Dynamic Island expanded-region stat column (label over value). File-scope for the same reason as
 /// `bannerStat`. #759 - centre-aligned + `fixedSize` for the same value-under-its-label fix as the banner.
 @ViewBuilder
-private func statColumn(label: String, value: String) -> some View {
+private func statColumn(label: String, value: String, tint: Color) -> some View {
     VStack(alignment: .center, spacing: 1) {
         Text(label).font(.caption2).foregroundStyle(.secondary)
-        Text(value).font(.headline)
+        Text(value).font(.headline).foregroundStyle(tint)
     }
     .multilineTextAlignment(.center)
     .fixedSize()

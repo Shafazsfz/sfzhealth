@@ -217,6 +217,32 @@ def rebrand_swift() -> int:
     return 0
 
 
+def english_only() -> int:
+    """sfz ships English only: drop every other language from the catalogs (smaller app, faster build).
+    Written in Xcode's own catalog layout so a later Xcode build doesn't reformat the file again."""
+    for path in CATALOGS:
+        if not path.exists():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        source = data.get("sourceLanguage", "en")
+        dropped = 0
+        for entry in data.get("strings", {}).values():
+            locs = entry.get("localizations")
+            if not locs:
+                continue
+            for lang in [l for l in locs if l != source]:
+                del locs[lang]
+                dropped += 1
+            if not locs:
+                del entry["localizations"]
+        if dropped:
+            text = json.dumps(data, ensure_ascii=False, indent=2, separators=(",", " : "), sort_keys=True)
+            path.write_text(text + "\n", encoding="utf-8")
+        print(f"{path}: {dropped} non-English translations removed")
+    return 0
+
+
 if __name__ == "__main__":
     rebrand_swift()
-    sys.exit(main())
+    main()
+    sys.exit(english_only())

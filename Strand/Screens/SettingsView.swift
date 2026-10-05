@@ -1097,6 +1097,7 @@ struct SettingsView: View {
                 // App-owned copy language. Apple binds a bundle localization at process launch, so this
                 // takes effect after the user reopens NOOP (the note below says so). Sits above the theme
                 // controls because it re-words everything under it.
+                if false {   // sfz: English only, so the language picker is hidden
                 FormRow(label: "Language") {
                     Picker("Language", selection: $appLanguageRaw) {
                         ForEach(AppLanguage.allCases) { language in
@@ -1116,6 +1117,7 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, NoopMetrics.space1)
                 rowDivider
+                }
                 // #1821: sits with Language rather than in Units because it is an app-owned display
                 // CONVENTION, not a unit of measurement — and like Language it offers "System default",
                 // which here means the device's own 24-Hour Time switch rather than the region default.

@@ -265,8 +265,7 @@ struct LiquidTodayView: View {
         // system UI (tab bar etc.) was another language. "Today"/"Yesterday" go through String(localized:)
         // (matching the classic TodayView.dayNavLabel), and the weekday name is formatted in the user's
         // locale, not the en_US_POSIX one used only for machine day-keys.
-        case 0: return String(localized: "Today")
-        case 1: return String(localized: "Yesterday")
+        // sfz: always the weekday name ("Monday"); the full date sits underneath.
         default:
             return selectedLogicalDay.formatted(.dateTime.weekday(.wide).locale(AppLanguage.activeLocale))
         }
@@ -2122,7 +2121,7 @@ struct LiquidTodayView: View {
         // weekday + month names regardless of the UI language. A locale-aware field template localizes both
         // the names AND the field order (e.g. fr "mercredi 4 juillet") in the user's locale.
         return selectedLogicalDay.formatted(
-            .dateTime.weekday(.wide).day().month(.wide).locale(AppLanguage.activeLocale))
+            .dateTime.day().month(.wide).year().locale(AppLanguage.activeLocale))   // sfz: "5 October 2026"
     }
 
     /// Provenance caption for the recovery-vitals card, keyed on the row a vital actually came from — NOT a

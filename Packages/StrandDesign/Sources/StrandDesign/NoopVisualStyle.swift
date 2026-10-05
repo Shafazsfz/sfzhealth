@@ -112,11 +112,7 @@ public struct NoopChromeSurface: View {
     public init() {}
 
     public var body: some View {
-        LinearGradient(
-            colors: [NoopVisualStyle.surfaceTop, NoopVisualStyle.surfaceBottom],
-            startPoint: .top,
-            endPoint: .bottom
-        )
+        NoopVisualStyle.surface   // sfz minimal: flat header, no top-lit ramp
         .overlay(alignment: .bottom) {
             Rectangle()
                 .fill(NoopVisualStyle.divider)

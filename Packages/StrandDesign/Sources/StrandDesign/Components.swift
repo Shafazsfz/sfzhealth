@@ -486,20 +486,7 @@ public struct SegmentedPillControl<T: Hashable>: View {
                         .background {
                             if sel {
                                 let selectedShape = RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                selectedShape
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [NoopVisualStyle.surfaceTop, NoopVisualStyle.surface],
-                                            startPoint: .top,
-                                            endPoint: .bottom
-                                        )
-                                    )
-                                    .overlay(
-                                        selectedShape.strokeBorder(
-                                            NoopVisualStyle.borderHighlight.opacity(0.62),
-                                            lineWidth: 0.75
-                                        )
-                                    )
+                                selectedShape.fill(NoopVisualStyle.surface)   // sfz minimal: flat, no bevel
                             }
                         }
                         .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -516,24 +503,7 @@ public struct SegmentedPillControl<T: Hashable>: View {
         .frame(maxWidth: equalWidth ? .infinity : nil)
         .background {
             let trackShape = RoundedRectangle(cornerRadius: 13, style: .continuous)
-            trackShape
-                .fill(
-                    LinearGradient(
-                        colors: [NoopVisualStyle.inset, NoopVisualStyle.canvas.opacity(0.78)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .overlay(
-                    trackShape.strokeBorder(
-                        LinearGradient(
-                            colors: [NoopVisualStyle.borderHighlight.opacity(0.48), NoopVisualStyle.border],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 0.8
-                    )
-                )
+            trackShape.fill(NoopVisualStyle.inset)   // sfz minimal: flat track, no inner shade or rim
         }
     }
 }

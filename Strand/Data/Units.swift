@@ -121,7 +121,7 @@ enum UnitPrefs {
     static let liveActivityKey = "liveActivity.enabled"
     static func liveActivityEnabled() -> Bool {
         UserDefaults.standard.object(forKey: liveActivityKey) == nil
-            ? true : UserDefaults.standard.bool(forKey: liveActivityKey)
+            ? false : UserDefaults.standard.bool(forKey: liveActivityKey)   // sfz: off unless turned on in Settings
     }
 
     /// Whether the strap-sync Live Activity may show, iOS only. Its own switch, deliberately separate from

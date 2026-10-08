@@ -28,6 +28,10 @@ struct SmartAlarmView: View {
     @State private var showNotifDeniedAlert = false
     /// Earliest wake time the nudge is derived from (minutes since midnight). Seeded from the store.
     @State private var wakeMinutes = WindDownNudge.wakeMinutes
+    // sfz: sleep need, lead and the bedtime reminder, editable here.
+    @State private var sleepNeed = WindDownNudge.sleepNeedMinutes
+    @State private var lead = WindDownNudge.leadMinutes
+    @State private var bedtimeOn = WindDownNudge.bedtimeReminder
 
     // PR#554 (MumiZed) — per-day wake overrides. `perDayOn` reflects whether ANY override is set; the
     // `overrides` map mirrors the store so the pickers stay in sync. Additive: with none set, the nudge
@@ -397,6 +401,43 @@ struct SmartAlarmView: View {
                     Text("You'll be reminded around \(timeLabel(WindDownNudge.nudgeMinuteOfDay())).")
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textSecondary)
+
+                    // sfz: the two numbers the nudge is built from, plus a bedtime reminder and a countdown.
+                    Stepper(value: Binding(get: { sleepNeed }, set: { sleepNeed = $0; WindDownNudge.setSleepNeedMinutes($0) }),
+                            in: 300...660, step: 15) {
+                        HStack {
+                            Text("Sleep you need").font(StrandFont.body).foregroundStyle(StrandPalette.textPrimary)
+                            Spacer()
+                            Text("\(sleepNeed / 60)h \(sleepNeed % 60)m").font(StrandFont.body).foregroundStyle(StrandPalette.textSecondary)
+                        }
+                    }
+                    Stepper(value: Binding(get: { lead }, set: { lead = $0; WindDownNudge.setLeadMinutes($0) }),
+                            in: 0...120, step: 15) {
+                        HStack {
+                            Text("Nudge before bedtime").font(StrandFont.body).foregroundStyle(StrandPalette.textPrimary)
+                            Spacer()
+                            Text(lead == 0 ? "At bedtime" : "\(lead) min").font(StrandFont.body).foregroundStyle(StrandPalette.textSecondary)
+                        }
+                    }
+                    Toggle(isOn: Binding(get: { bedtimeOn }, set: { bedtimeOn = $0; WindDownNudge.setBedtimeReminder($0) })) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Also remind me at bedtime").font(StrandFont.body).foregroundStyle(StrandPalette.textPrimary)
+                            Text("A second notification at \(timeLabel(WindDownNudge.bedtimeMinuteOfDay())), lights out.")
+                                .font(StrandFont.footnote).foregroundStyle(StrandPalette.textTertiary)
+                        }
+                    }
+                    .toggleStyle(.switch).tint(StrandPalette.accent)
+                    TimelineView(.periodic(from: .now, by: 60)) { tick in
+                        if let next = WindDownNudge.nextNudge(from: tick.date) {
+                            let mins = max(0, Int(next.nudge.timeIntervalSince(tick.date) / 60))
+                            HStack(spacing: 6) {
+                                Image(systemName: "timer").foregroundStyle(StrandPalette.restColor)
+                                Text("Wind down in \(mins / 60)h \(mins % 60)m · bed at \(next.bedtime.formatted(date: .omitted, time: .shortened))")
+                                    .font(StrandFont.footnote.weight(.semibold))
+                                    .foregroundStyle(StrandPalette.textPrimary)
+                            }
+                        }
+                    }
                     // Answers "so what actually wakes me?" in the one place the question gets asked,
                     // beside the time that does not. Only shown when there IS a strap alarm to name.
                     if let next = nextStrapAlarmLabel {

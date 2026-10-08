@@ -25,6 +25,56 @@ enum WindDownNudge {
         // Empty / no entry for a day = that day uses the default `wakeMinutes`, so the feature is purely
         // additive (no override → exactly the old single-time behaviour).
         static let perDayWake = "windDown.perDayWakeMinutes"
+        // sfz: a second reminder at bedtime itself (default on).
+        static let bedtime = "windDown.bedtimeReminder"
+    }
+
+    // MARK: - sfz: adjustable sleep need and lead, bedtime reminder, next-nudge countdown
+
+    private static let bedtimeId = "wind-down-bedtime"
+    private static var bedtimePerDayIds: [String] { (1...7).map { "\(bedtimeId)-wd\($0)" } }
+
+    static var bedtimeReminder: Bool { UserDefaults.standard.object(forKey: K.bedtime) as? Bool ?? true }
+
+    static func setBedtimeReminder(_ on: Bool) {
+        UserDefaults.standard.set(on, forKey: K.bedtime)
+        if isEnabled { schedule() }
+    }
+
+    static func setSleepNeedMinutes(_ minutes: Int) {
+        UserDefaults.standard.set(min(max(minutes, 5 * 60), 11 * 60), forKey: K.sleepNeed)
+        if isEnabled { schedule() }
+    }
+
+    static func setLeadMinutes(_ minutes: Int) {
+        UserDefaults.standard.set(min(max(minutes, 0), 120), forKey: K.lead)
+        if isEnabled { schedule() }
+    }
+
+    /// Bedtime for a weekday's wake: wake − sleep need, wrapped into [0, 1440).
+    static func bedtimeMinuteOfDay(forWeekday weekday: Int) -> Int {
+        let day = 24 * 60
+        return (((wakeMinutes(forWeekday: weekday) - sleepNeedMinutes) % day) + day) % day
+    }
+
+    static func bedtimeMinuteOfDay() -> Int {
+        let day = 24 * 60
+        return (((wakeMinutes - sleepNeedMinutes) % day) + day) % day
+    }
+
+    /// The next wind-down nudge and the bedtime it leads to, from `now`, honouring per-day wake times.
+    static func nextNudge(from now: Date = Date()) -> (nudge: Date, bedtime: Date)? {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: now)
+        var best: (Date, Date)?
+        for offset in 0...8 {
+            guard let wakeDay = cal.date(byAdding: .day, value: offset, to: today) else { continue }
+            let wake = wakeMinutes(forWeekday: cal.component(.weekday, from: wakeDay))
+            guard let bed = cal.date(byAdding: .minute, value: wake - sleepNeedMinutes, to: wakeDay),
+                  let nudge = cal.date(byAdding: .minute, value: -leadMinutes, to: bed) else { continue }
+            if nudge > now, best == nil || nudge < best!.0 { best = (nudge, bed) }
+        }
+        return best
     }
 
     static var isEnabled: Bool { UserDefaults.standard.bool(forKey: K.enabled) }
@@ -139,7 +189,7 @@ enum WindDownNudge {
             UserDefaults.standard.set(false, forKey: K.enabled)
             // Clear the single trigger AND any per-day triggers (PR#554) so disabling leaves nothing behind.
             UNUserNotificationCenter.current()
-                .removePendingNotificationRequests(withIdentifiers: [requestId] + perDayRequestIds)
+                .removePendingNotificationRequests(withIdentifiers: [requestId] + perDayRequestIds + [bedtimeId] + bedtimePerDayIds)
             completion?(.off)
             return
         }
@@ -195,11 +245,42 @@ enum WindDownNudge {
     /// a stale trigger behind.
     private static var perDayRequestIds: [String] { (1...7).map { "\(requestId)-wd\($0)" } }
 
+    /// sfz: "Bedtime" at wake − sleep need, alongside the wind-down nudge, when switched on.
+    private static func scheduleBedtime(_ center: UNUserNotificationCenter) {
+        guard bedtimeReminder else { return }
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Bedtime")
+        let need = sleepNeedMinutes
+        content.body = String(localized: "Lights out now for \(need / 60)h \(need % 60)m of sleep before your wake time.")
+        content.sound = .default
+        if hasPerDayOverrides {
+            for weekday in 1...7 {
+                let raw = wakeMinutes(forWeekday: weekday) - sleepNeedMinutes
+                let minute = bedtimeMinuteOfDay(forWeekday: weekday)
+                let shift = raw < 0 ? -(((-raw - 1) / (24 * 60)) + 1) : raw / (24 * 60)
+                var comps = DateComponents()
+                comps.weekday = shiftedWeekday(weekday: weekday, by: shift)
+                comps.hour = minute / 60
+                comps.minute = minute % 60
+                center.add(UNNotificationRequest(identifier: "\(bedtimeId)-wd\(weekday)", content: content,
+                                                 trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)))
+            }
+        } else {
+            let minute = bedtimeMinuteOfDay()
+            var comps = DateComponents()
+            comps.hour = minute / 60
+            comps.minute = minute % 60
+            center.add(UNNotificationRequest(identifier: bedtimeId, content: content,
+                                             trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)))
+        }
+    }
+
     private static func schedule() {
         let center = UNUserNotificationCenter.current()
         // Clear BOTH the single trigger and any per-day triggers so switching between the two modes (or
         // editing an override) never double-fires or leaves an orphaned reminder.
-        center.removePendingNotificationRequests(withIdentifiers: [requestId] + perDayRequestIds)
+        center.removePendingNotificationRequests(withIdentifiers: [requestId] + perDayRequestIds + [bedtimeId] + bedtimePerDayIds)
+        scheduleBedtime(center)
 
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Time to wind down")

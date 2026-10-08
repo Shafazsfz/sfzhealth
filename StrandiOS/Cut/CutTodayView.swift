@@ -1269,6 +1269,7 @@ struct SfzHabitCard: View {
     var onOpen: () -> Void
     var onTargetHit: () -> Void
     @ObservedObject private var store = SfzHabitStore.shared
+    @State private var pickingParts = false
 
     private var today: String { SfzHabitStore.today }
     private var target: Double { habit.target(on: today) }
@@ -1417,16 +1418,31 @@ struct SfzHabitCard: View {
 
     private var gymRow: some View {
         let st = store.gymState(habit.id)
+        let parts = store.gymParts(habit.id)
         return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
-            Text(st == .done ? "Done" : st == .rest ? "Rest day" : st == .skipped ? "Skipped" : "Not yet")
-                .font(StrandFont.title2).foregroundStyle(StrandPalette.textPrimary)
+            Text(st == .done ? (parts.isEmpty ? "Done" : parts.joined(separator: " · "))
+                 : st == .rest ? "Rest day" : st == .skipped ? "Skipped" : "Not yet")
+                .font(parts.isEmpty ? StrandFont.title2 : StrandFont.subhead.weight(.semibold))
+                .foregroundStyle(StrandPalette.textPrimary)
+                .lineLimit(2).minimumScaleFactor(0.7)
             HStack(spacing: 6) {
-                chip("Done", filled: st == .done) { store.setGym(habit.id, st == .done ? nil : .done) }
+                chip("Done", filled: st == .done) {
+                    if st == .done { store.setGym(habit.id, nil) } else { store.setGym(habit.id, .done); pickingParts = true }
+                }
                 chip("Skip", filled: st == .skipped) { store.setGym(habit.id, st == .skipped ? nil : .skipped) }
                 chip("Rest", filled: st == .rest) { store.setGym(habit.id, st == .rest ? nil : .rest) }
             }
-            Text("\(habit.restPerWeek) rest days a week").font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+            if st == .done {
+                Button { pickingParts = true } label: {
+                    Text(parts.isEmpty ? "What did you train?" : "Change")
+                        .font(StrandFont.caption.weight(.semibold)).foregroundStyle(StrandPalette.accent)
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text("\(habit.restPerWeek) rest days a week").font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+            }
         }
+        .sheet(isPresented: $pickingParts) { SfzGymPartsSheet(habitId: habit.id) }
     }
 
     private var autoValue: some View {
@@ -1534,6 +1550,18 @@ struct SfzHabitDetail: View {
             }
 
             if h.kind == .gym {
+                Section {
+                    SfzGymPartsGrid(habitId: h.id)
+                    let counts = store.gymPartCounts(h.id)
+                    if !counts.isEmpty {
+                        Text(counts.prefix(8).map { "\($0.part) \($0.count)×" }.joined(separator: " · "))
+                            .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                    }
+                } header: {
+                    Text("What you trained today")
+                } footer: {
+                    Text("Under the grid: how often you trained each in the last 30 days, so a skipped leg day shows.")
+                }
                 Section("Rest days") {
                     Stepper(value: Binding(get: { h.restPerWeek }, set: { var x = h; x.restPerWeek = $0; store.update(x) }),
                             in: 0...6) {
@@ -1775,7 +1803,7 @@ struct SfzAddHabitSheet: View {
                 Section {
                     TextField("Name, e.g. Lunges", text: $name)
                     Picker("Type", selection: $kind) {
-                        ForEach(SfzHabitKind.allCases) { k in Text(k.label).tag(k) }
+                        ForEach(SfzHabitKind.allCases.filter { $0 != .screen }) { k in Text(k.label).tag(k) }
                     }
                     .onChange(of: kind) { _, k in target = k.defaultTarget }
                     if kind.hasTarget {
@@ -2435,5 +2463,65 @@ struct SfzConsistencyHeatmap: View {
                 }
             }
         }
+    }
+}
+
+
+/// Splits and body parts to tag a gym session with. Tapping one marks the gym done for the day.
+struct SfzGymPartsGrid: View {
+    let habitId: UUID
+    var day: String = SfzHabitStore.today
+    @ObservedObject private var store = SfzHabitStore.shared
+
+    var body: some View {
+        let chosen = Set(store.gymParts(habitId, day: day))
+        let cols = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
+        LazyVGrid(columns: cols, spacing: 8) {
+            ForEach(SfzHabitStore.gymParts, id: \.self) { part in
+                let on = chosen.contains(part)
+                Button { store.toggleGymPart(habitId, part, day: day) } label: {
+                    Text(part).font(StrandFont.subhead.weight(on ? .semibold : .regular))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity).padding(.vertical, 10)
+                        .background(Capsule().fill(on ? StrandPalette.accent : StrandPalette.accent.opacity(0.10)))
+                        .foregroundStyle(on ? Color.white : StrandPalette.accent)
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+/// The sheet that opens after tapping Done on a gym card.
+struct SfzGymPartsSheet: View {
+    let habitId: UUID
+    @ObservedObject private var store = SfzHabitStore.shared
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: NoopMetrics.space4) {
+                    Text("Pick a split, the body parts, or both.")
+                        .font(StrandFont.subhead).foregroundStyle(StrandPalette.textSecondary)
+                    SfzGymPartsGrid(habitId: habitId)
+                    let counts = store.gymPartCounts(habitId)
+                    if !counts.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("LAST 30 DAYS").font(StrandFont.overline).tracking(1.4).foregroundStyle(StrandPalette.textSecondary)
+                            Text(counts.prefix(10).map { "\($0.part) \($0.count)×" }.joined(separator: " · "))
+                                .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                        }
+                    }
+                }
+                .padding(NoopMetrics.screenHPadding)
+            }
+            .background(StrandPalette.surfaceBase)
+            .navigationTitle("What did you train?")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+        .presentationDetents([.medium, .large])
     }
 }

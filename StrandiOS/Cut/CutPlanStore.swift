@@ -551,6 +551,8 @@ final class SfzHabitStore: ObservableObject {
     /// habit id → day → each amount logged (reps, seconds, or 1 for done).
     @Published private(set) var logs: [String: [String: [Double]]] { didSet { save(logs, K.logs); changed() } }
     @Published private(set) var gym: [String: [String: SfzGymState]] { didSet { save(gym, K.gym); changed() } }
+    /// What each gym session trained: habit id → day → body parts or split ("Push", "Legs", …).
+    @Published private(set) var gymTags: [String: [String: [String]]] { didSet { save(gymTags, K.gymTags) } }
     /// Automatic values: kind → day → value, refreshed by the Goal page.
     @Published private(set) var auto: [String: [String: Double]] { didSet { save(auto, K.auto) } }
     /// Timers that are running: habit id → when they started.
@@ -565,7 +567,13 @@ final class SfzHabitStore: ObservableObject {
         static let habits = "sfz.habits", logs = "sfz.habitLogs", gym = "sfz.habitGym", auto = "sfz.habitAuto"
         static let running = "sfz.habitTimers", challenge = "sfz.challenge", finished = "sfz.challengesDone"
         static let roundUp = "sfz.habitRoundUp", roundUpAt = "sfz.habitRoundUpAt", seeded = "sfz.habitsSeeded"
+        static let gymTags = "sfz.habitGymTags", screenRemoved = "sfz.habitScreenRemoved"
     }
+
+    /// The choices offered after a gym session, in the order shown.
+    static let gymParts = ["Push", "Pull", "Legs", "Upper", "Lower", "Full body",
+                           "Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms",
+                           "Core", "Glutes", "Calves", "Cardio", "Mobility"]
 
     nonisolated static var today: String { Repository.localDayKey(Date()) }
 
@@ -573,6 +581,7 @@ final class SfzHabitStore: ObservableObject {
         habits = Self.load(d, K.habits) ?? []
         logs = Self.load(d, K.logs) ?? [:]
         gym = Self.load(d, K.gym) ?? [:]
+        gymTags = Self.load(d, K.gymTags) ?? [:]
         auto = Self.load(d, K.auto) ?? [:]
         running = Self.load(d, K.running) ?? [:]
         let savedChallenge: SfzChallenge? = Self.load(d, K.challenge)
@@ -584,6 +593,15 @@ final class SfzHabitStore: ObservableObject {
             d.set(true, forKey: K.seeded)
             if habits.isEmpty {
                 habits = Self.starters.map { Self.make($0) }
+                save(habits, K.habits)
+            }
+        }
+        // Screen-time habits need automatic tracking, which needs a paid developer team; without it
+        // they're removed rather than logged by hand.
+        if !d.bool(forKey: K.screenRemoved) {
+            d.set(true, forKey: K.screenRemoved)
+            if habits.contains(where: { $0.kind == .screen }) {
+                habits.removeAll { $0.kind == .screen }
                 save(habits, K.habits)
             }
         }
@@ -600,7 +618,6 @@ final class SfzHabitStore: ObservableObject {
         .init(name: "Water", icon: "drop", kind: .water, target: 3000),
         .init(name: "No sugar", icon: "nosign", kind: .check, target: 1),
         .init(name: "Reading", icon: "book", kind: .check, target: 1),
-        .init(name: "Instagram", icon: "hourglass", kind: .screen, target: 30),
     ]
 
     /// Presets offered under Add habit.
@@ -624,7 +641,6 @@ final class SfzHabitStore: ObservableObject {
         .init(name: "Floss", icon: "mouth", kind: .check, target: 1),
         .init(name: "No smoking", icon: "nosign", kind: .check, target: 1),
         .init(name: "Progress photo", icon: "camera", kind: .check, target: 1),
-        .init(name: "Screen time", icon: "iphone", kind: .screen, target: 120),
     ]
 
     static func make(_ spec: SfzChallengeTemplate.HabitSpec, from day: String = SfzHabitStore.today) -> SfzHabit {
@@ -725,6 +741,26 @@ final class SfzHabitStore: ObservableObject {
     }
 
     func gymState(_ id: UUID, day: String = SfzHabitStore.today) -> SfzGymState? { gym[id.uuidString]?[day] }
+
+    func gymParts(_ id: UUID, day: String = SfzHabitStore.today) -> [String] { gymTags[id.uuidString]?[day] ?? [] }
+
+    func toggleGymPart(_ id: UUID, _ part: String, day: String = SfzHabitStore.today) {
+        var byDay = gymTags[id.uuidString] ?? [:]
+        var list = byDay[day] ?? []
+        if let i = list.firstIndex(of: part) { list.remove(at: i) } else { list.append(part) }
+        byDay[day] = list.isEmpty ? nil : list
+        gymTags[id.uuidString] = byDay
+        if !list.isEmpty, gymState(id, day: day) != .done { setGym(id, .done, day: day) }
+    }
+
+    /// How often each part was trained in the last `days` days, most first.
+    func gymPartCounts(_ id: UUID, days: Int = 30) -> [(part: String, count: Int)] {
+        var counts: [String: Int] = [:]
+        for offset in 0..<days {
+            for p in gymParts(id, day: Self.dayKey(offset: -offset, from: Self.today)) { counts[p, default: 0] += 1 }
+        }
+        return counts.map { ($0.key, $0.value) }.sorted { $0.1 > $1.1 || ($0.1 == $1.1 && $0.0 < $1.0) }
+    }
 
     func setGym(_ id: UUID, _ state: SfzGymState?, day: String = SfzHabitStore.today) {
         var byDay = gym[id.uuidString] ?? [:]

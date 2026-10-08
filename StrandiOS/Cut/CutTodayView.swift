@@ -26,6 +26,28 @@ struct CutTodayView: View {
     @State private var showSettings = false
     @State private var showHealth = false
 
+    /// sfz: the Goal page's cards, in order; any can be hidden from Edit page.
+    enum GoalSection: String, CaseIterable, Identifiable {
+        case challenge, habits, consistency, calories, food, water, weight, week, fat
+        var id: String { rawValue }
+        var title: String {
+            switch self {
+            case .challenge: return "Challenge"
+            case .habits: return "Today's habits"
+            case .consistency: return "Consistency grid"
+            case .calories: return "Calories left"
+            case .food: return "Food today"
+            case .water: return "Water today"
+            case .weight: return "Weight goal"
+            case .week: return "This week"
+            case .fat: return "Fat lost"
+            }
+        }
+    }
+    @AppStorage("sfz.goal.hidden") private var hiddenRaw = ""
+    private var hiddenSections: Set<String> { Set(hiddenRaw.split(separator: ",").map(String.init)) }
+    @State private var editingPage = false
+
     private var dayKey: String { Repository.localDayKey(Date()) }
     private var male: Bool { profile.sex != "female" }
 
@@ -48,15 +70,19 @@ struct CutTodayView: View {
             // the goal, then the fat/week view. Heart rate, battery, burned and steps tiles were
             // removed: burn is already in the calories and fat cards, the rest lives on Today.
             VStack(spacing: NoopMetrics.sectionGap) {
-                SfzChallengeCard()
-                SfzHabitsSection()
-                SfzConsistencyHeatmap()
-                budgetCard
-                foodCard
-                waterCard
-                goalCard
-                weekCard
-                fatCard
+                ForEach(GoalSection.allCases.filter { !hiddenSections.contains($0.rawValue) }) { section in
+                    switch section {
+                    case .challenge: SfzChallengeCard()
+                    case .habits: SfzHabitsSection()
+                    case .consistency: SfzConsistencyHeatmap()
+                    case .calories: budgetCard
+                    case .food: foodCard
+                    case .water: waterCard
+                    case .weight: goalCard
+                    case .week: weekCard
+                    case .fat: fatCard
+                    }
+                }
             }
         }
         .task {
@@ -69,6 +95,7 @@ struct CutTodayView: View {
         .sheet(isPresented: $showAddFood) { AddFoodSheet(day: dayKey) }
         .sheet(isPresented: $showWeight) { LogWeightSheet() }
         .sheet(isPresented: $showPlan) { CutPlanSheet() }
+        .sheet(isPresented: $editingPage) { editPageSheet }
         .sheet(isPresented: $showGoal) { GoalSheet(currentKg: estimate.kg) }
         .sheet(isPresented: $showHealth, onDismiss: { Task { await load() } }) {
             NavigationStack {
@@ -97,14 +124,41 @@ struct CutTodayView: View {
     /// sfz: Devices, Apple Health and Settings already live in More and behind the profile button,
     /// so the page keeps one control: the plan (calorie target, pace, maintenance).
     private var gearMenu: some View {
-        Button { showPlan = true } label: {
+        Menu {
+            Button { showPlan = true } label: { Label("Calorie plan", systemImage: "slider.horizontal.3") }
+            Button { editingPage = true } label: { Label("Edit page", systemImage: "square.grid.2x2") }
+        } label: {
             Image(systemName: "slider.horizontal.3")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(StrandPalette.textSecondary)
                 .frame(width: NoopMetrics.compactControlSize, height: NoopMetrics.compactControlSize)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Plan settings")
+        .accessibilityLabel("Plan and page settings")
+    }
+
+    /// Show or hide each card on the Goal page.
+    private var editPageSheet: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    ForEach(GoalSection.allCases) { section in
+                        Toggle(section.title, isOn: Binding(
+                            get: { !hiddenSections.contains(section.rawValue) },
+                            set: { on in
+                                var h = hiddenSections
+                                if on { h.remove(section.rawValue) } else { h.insert(section.rawValue) }
+                                hiddenRaw = GoalSection.allCases.map(\.rawValue).filter { h.contains($0) }.joined(separator: ",")
+                            }))
+                        .tint(StrandPalette.accent)
+                    }
+                } footer: {
+                    Text("Hidden cards keep their data. The \"Calories under target\" habit uses the same allowance as the Calories left card.")
+                }
+            }
+            .navigationTitle("Edit page")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { editingPage = false } } }
+        }
     }
 
     // MARK: Cards
@@ -733,7 +787,8 @@ struct CutTodayView: View {
         let est = await repo.exploreSeries(key: "steps_est", source: "my-whoop", days: 3).last { $0.day == key }?.value
         let measured = repo.today?.day == key ? repo.today?.steps : nil
         steps = measured.map(Double.init) ?? apple.map(Double.init) ?? est
-        await SfzHabitAuto.refresh(repo: repo, plan: plan, hrMax: profile.hrMax, stepsToday: steps)
+        await SfzHabitAuto.refresh(repo: repo, plan: plan, profile: profile, activeToday: burned?.activeKcal ?? 0,
+                                   stepsToday: steps)
 
     }
 
@@ -1090,7 +1145,9 @@ struct GoalSheet: View {
 /// marks Gym done on days the WHOOP recorded a workout, then applies challenge rules.
 @MainActor
 enum SfzHabitAuto {
-    static func refresh(repo: Repository, plan: CutPlanStore, hrMax: Int, stepsToday: Double?) async {
+    static func refresh(repo: Repository, plan: CutPlanStore, profile: ProfileStore, activeToday: Double,
+                        stepsToday: Double?) async {
+        let hrMax = profile.hrMax
         let store = SfzHabitStore.shared
         let cal = Calendar.current
         var span = 35
@@ -1116,6 +1173,20 @@ enum SfzHabitAuto {
             var v: [String: Double] = [:]
             for r in await repo.hydrationHistory(days: span) { v[r.day] = r.value }
             store.setAuto(.water, v)
+        }
+        if kinds.contains(.calories) {
+            // Calories eaten (with the logging buffer) against that day's food allowance from the plan.
+            var eaten: [String: Double] = [:], allowance: [String: Double] = [:]
+            for k in keys where !plan.entries(day: k).isEmpty {
+                let e = plan.eaten(day: k)
+                let active = k == todayKey ? activeToday : (plan.activeByDay[k] ?? 0)
+                let b = plan.budget(weightKg: profile.weightKg, heightCm: profile.heightCm, age: profile.age,
+                                    male: profile.sex != "female", activeKcal: active, eaten: e)
+                eaten[k] = e
+                allowance[k] = b.allowance
+            }
+            store.setCalorieTargets(allowance)
+            store.setAuto(.calories, eaten)
         }
         if kinds.contains(.protein) {
             var v: [String: Double] = [:]
@@ -1318,6 +1389,7 @@ struct SfzHabitCard: View {
         case .check: check
         case .gym: gymRow
         case .screen: SfzScreenCardBody(habit: habit, status: status)
+        case .calories: caloriesValue
         default: autoValue
         }
     }
@@ -1443,6 +1515,26 @@ struct SfzHabitCard: View {
             }
         }
         .sheet(isPresented: $pickingParts) { SfzGymPartsSheet(habitId: habit.id) }
+    }
+
+    /// Linked to the calorie card: today's food against today's allowance.
+    private var caloriesValue: some View {
+        let eaten = store.value(habit, day: today) ?? 0
+        let allowance = store.auto["caloriesTarget"]?[today]
+        let over = allowance.map { eaten > $0 } ?? false
+        return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
+                Text("\(Int(eaten.rounded()).formatted())").font(StrandFont.title2)
+                    .foregroundStyle(over ? StrandPalette.statusCritical : StrandPalette.textPrimary)
+                Text(allowance.map { "/ \(Int($0.rounded()).formatted()) kcal" } ?? "kcal")
+                    .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+            }
+            bar(allowance.map { eaten / max($0, 1) } ?? 0)
+            Spacer(minLength: 0)
+            Text(over ? "Over today's target" : eaten == 0 ? "Log food below" : "Within target so far")
+                .font(StrandFont.caption)
+                .foregroundStyle(over ? StrandPalette.statusCritical : StrandPalette.textTertiary)
+        }
     }
 
     private var autoValue: some View {

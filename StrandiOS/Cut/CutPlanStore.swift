@@ -344,10 +344,10 @@ enum SfzHealthWriter {
 
 /// What a habit measures and how it is logged.
 enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
-    case counter, timer, check, gym, steps, water, sleep, zone, protein, screen
+    case counter, timer, check, gym, steps, water, sleep, zone, protein, screen, calories
     var id: String { rawValue }
     /// Filled from the WHOOP, the iPhone or other logs; never tapped.
-    var isAuto: Bool { [.steps, .water, .sleep, .zone, .protein, .screen].contains(self) }
+    var isAuto: Bool { [.steps, .water, .sleep, .zone, .protein, .screen, .calories].contains(self) }
     var label: String {
         switch self {
         case .counter: return "Counter"
@@ -360,6 +360,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return "Active Zone Minutes (from your WHOOP)"
         case .protein: return "Protein (from your food log)"
         case .screen: return "Screen time limit"
+        case .calories: return "Calories within your daily target (from Goal)"
         }
     }
     /// Counter: reps. Timer: seconds. Check and gym: 1. Water: ml. Sleep: minutes. Zone: minutes. Protein: g.
@@ -374,6 +375,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return 30
         case .protein: return 120
         case .screen: return 30
+        case .calories: return 1
         }
     }
     var defaultIcon: String {
@@ -388,6 +390,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return "heart"
         case .protein: return "fork.knife"
         case .screen: return "hourglass"
+        case .calories: return "flame"
         }
     }
     /// Target stepper: range and step, in stored units.
@@ -402,6 +405,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return 5...300
         case .protein: return 20...400
         case .screen: return 5...600
+        case .calories: return 1...1
         }
     }
     var targetStep: Double {
@@ -415,9 +419,11 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return 5
         case .protein: return 5
         case .screen: return 5
+        case .calories: return 1
         }
     }
-    var hasTarget: Bool { self != .check && self != .gym }
+    /// Calories take their target from the Goal plan (today's food allowance), not from the habit.
+    var hasTarget: Bool { self != .check && self != .gym && self != .calories }
 
     /// A value in this kind's stored units, as people read it: "50", "1:30", "3.0 L", "7h 30m".
     func format(_ v: Double) -> String {
@@ -435,6 +441,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
             return Int(v.rounded()).formatted()
         case .zone: return "\(Int(v.rounded())) min"
         case .protein: return "\(Int(v.rounded())) g"
+        case .calories: return "\(Int(v.rounded()).formatted()) kcal"
         case .screen:
             let m = Int(v.rounded())
             return m >= 60 ? "\(m / 60)h \(m % 60)m" : "\(m) min"
@@ -523,7 +530,7 @@ struct SfzChallengeTemplate: Identifiable {
                              length: 75, strict: true, habits: [
             HabitSpec(name: "Workout 45 min", icon: "figure.strengthtraining.traditional", kind: .check, target: 1),
             HabitSpec(name: "Outdoor workout 45 min", icon: "figure.run", kind: .check, target: 1),
-            HabitSpec(name: "Follow your diet", icon: "fork.knife", kind: .check, target: 1),
+            HabitSpec(name: "Calories under target", icon: "flame", kind: .calories, target: 1),
             HabitSpec(name: "No alcohol", icon: "wineglass", kind: .check, target: 1),
             HabitSpec(name: "Water", icon: "drop", kind: .water, target: 3800),
             HabitSpec(name: "Read 10 pages", icon: "book", kind: .check, target: 1),
@@ -598,6 +605,17 @@ final class SfzHabitStore: ObservableObject {
         }
         // Screen-time habits need automatic tracking, which needs a paid developer team; without it
         // they're removed rather than logged by hand.
+        // Added after the first habits: the calorie-target habit and skin care, once, for existing pages.
+        if !d.bool(forKey: "sfz.habitsAddedCalSkin") {
+            d.set(true, forKey: "sfz.habitsAddedCalSkin")
+            var changedList = false
+            for spec in Self.starters where spec.kind == .calories || spec.name == "Skin care" {
+                if !habits.contains(where: { $0.name.lowercased() == spec.name.lowercased() }) {
+                    habits.append(Self.make(spec)); changedList = true
+                }
+            }
+            if changedList { save(habits, K.habits) }
+        }
         if !d.bool(forKey: K.screenRemoved) {
             d.set(true, forKey: K.screenRemoved)
             if habits.contains(where: { $0.kind == .screen }) {
@@ -618,6 +636,8 @@ final class SfzHabitStore: ObservableObject {
         .init(name: "Water", icon: "drop", kind: .water, target: 3000),
         .init(name: "No sugar", icon: "nosign", kind: .check, target: 1),
         .init(name: "Reading", icon: "book", kind: .check, target: 1),
+        .init(name: "Calories under target", icon: "flame", kind: .calories, target: 1),
+        .init(name: "Skin care", icon: "face.smiling", kind: .check, target: 1),
     ]
 
     /// Presets offered under Add habit.
@@ -641,6 +661,10 @@ final class SfzHabitStore: ObservableObject {
         .init(name: "Floss", icon: "mouth", kind: .check, target: 1),
         .init(name: "No smoking", icon: "nosign", kind: .check, target: 1),
         .init(name: "Progress photo", icon: "camera", kind: .check, target: 1),
+        .init(name: "Calories under target", icon: "flame", kind: .calories, target: 1),
+        .init(name: "Skin care (morning)", icon: "sun.horizon", kind: .check, target: 1),
+        .init(name: "Skin care (night)", icon: "moon.stars", kind: .check, target: 1),
+        .init(name: "Sunscreen", icon: "sun.max.trianglebadge.exclamationmark", kind: .check, target: 1),
     ]
 
     static func make(_ spec: SfzChallengeTemplate.HabitSpec, from day: String = SfzHabitStore.today) -> SfzHabit {
@@ -768,6 +792,14 @@ final class SfzHabitStore: ObservableObject {
         gym[id.uuidString] = byDay
     }
 
+    /// The day's food allowance from the Goal plan, kept beside the calories eaten.
+    func setCalorieTargets(_ values: [String: Double]) {
+        guard (auto["caloriesTarget"] ?? [:]) != values else { return }
+        var merged = auto["caloriesTarget"] ?? [:]
+        for (k, v) in values { merged[k] = v }
+        auto["caloriesTarget"] = merged
+    }
+
     func setAuto(_ kind: SfzHabitKind, _ values: [String: Double]) {
         guard (auto[kind.rawValue] ?? [:]) != values else { return }
         var merged = auto[kind.rawValue] ?? [:]
@@ -818,6 +850,14 @@ final class SfzHabitStore: ObservableObject {
         if day > today { return .future }
         if day < h.createdDay { return .before }
         if !h.isDue(on: date) { return .notDue }
+        if h.kind == .calories {
+            // Food logged that day against that day's allowance. Today stays open until the day ends;
+            // a past day with nothing logged doesn't count either way.
+            guard let eaten = auto[SfzHabitKind.calories.rawValue]?[day] else { return day == today ? .open : .noData }
+            let allowance = auto["caloriesTarget"]?[day] ?? .infinity
+            if day == today { return eaten > allowance ? .partial : .open }
+            return eaten <= allowance ? .met : .missed
+        }
         if h.kind == .screen {
             // Under the limit is the goal; over it is a miss straight away.
             let id = h.id.uuidString

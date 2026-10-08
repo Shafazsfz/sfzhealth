@@ -141,6 +141,10 @@ struct RootTabView: View {
             moreTab(path: $tabPaths[4], scrollSignal: scrollTop[4]).tag(4)
         }
         .tint(StrandPalette.accent)
+        // sfz: the habits strip on Today opens the Goal tab.
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("sfz.openGoal"))) { _ in
+            selectedTab = 3
+        }
         // Switching Coach off while STANDING on it leaves `selectedTab` pointing at a tag no tab claims
         // any more, which renders as an empty tab rather than as an error. Send that wearer to Today, and
         // only in that case, so a flip made from anywhere else does not move them.

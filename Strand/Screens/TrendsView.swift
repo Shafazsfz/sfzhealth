@@ -923,11 +923,12 @@ private func previewRepo() -> Repository {
 
 /// The cards a wearer can show in the Key metrics grid, in display order.
 enum SfzKeyMetric: String, CaseIterable, Identifiable {
-    case weight, energy, intake, carbs, fat, protein, steps, exerciseDays, zoneMinutes, water,
+    case habits, weight, energy, intake, carbs, fat, protein, steps, exerciseDays, zoneMinutes, water,
          sleep, hrv, restingHr, breathing, spo2, skinTemp
     var id: String { rawValue }
     var title: String {
         switch self {
+        case .habits: return "Habits"
         case .weight: return "Weight"
         case .energy: return "Energy burned"
         case .intake: return "Calorie intake"
@@ -957,6 +958,7 @@ enum SfzKeyMetric: String, CaseIterable, Identifiable {
     }
     var tint: Color {
         switch self {
+        case .habits: return StrandPalette.chargeColor
         case .weight, .intake, .carbs, .fat, .protein: return StrandPalette.metricAmber
         case .energy, .zoneMinutes, .exerciseDays: return StrandPalette.effortColor
         case .steps, .water, .spo2: return StrandPalette.metricCyan
@@ -989,6 +991,7 @@ struct SfzKeyMetricsGrid: View {
     @EnvironmentObject var profile: ProfileStore
     @ObservedObject private var plan = CutPlanStore.shared
     @AppStorage("sfz.keyMetrics.hidden") private var hiddenRaw = ""
+    @ObservedObject private var habitStore = SfzHabitStore.shared
     @State private var data: [SfzKeyMetric: SfzKeyMetricData] = [:]
     @State private var editing = false
 
@@ -1033,7 +1036,7 @@ struct SfzKeyMetricsGrid: View {
                 }
             }
         }
-        .task(id: "\(repo.refreshSeq)-\(repo.hydrationSeq)-\(plan.food.values.reduce(0) { $0 + $1.count })-\(plan.weighIns.count)") { await load() }
+        .task(id: "\(repo.refreshSeq)-\(repo.hydrationSeq)-\(habitStore.dayScore(Date()).met)-\(habitStore.habits.count)-\(plan.food.values.reduce(0) { $0 + $1.count })-\(plan.weighIns.count)") { await load() }
         .sheet(isPresented: $editing) { editSheet }
     }
 
@@ -1232,6 +1235,18 @@ struct SfzKeyMetricsGrid: View {
             }
         } else {
             vital(.skinTemp, skinDev, unit: "°C", digits: 1, signed: true)
+        }
+
+        // Habits: share of the day's due habits met, each of the last seven days.
+        let habitStore = SfzHabitStore.shared
+        if !habitStore.habits.isEmpty {
+            let scores = days.map { habitStore.dayScore($0) }
+            let pct = scores.map { s -> Double? in s.due > 0 ? Double(s.met) / Double(s.due) * 100 : nil }
+            let weekMet = scores.reduce(0) { $0 + $1.met }, weekDue = scores.reduce(0) { $0 + $1.due }
+            let todayScore = scores.last ?? (met: 0, due: 0)
+            out[.habits] = SfzKeyMetricData(
+                headline: "\(todayScore.met) of \(todayScore.due)", unit: "today", days: pct,
+                note: weekDue > 0 ? "\(Int((Double(weekMet) / Double(weekDue) * 100).rounded()))% this week" : nil)
         }
 
         // Weight: weigh-ins over the last three months, else the current estimate.

@@ -48,6 +48,8 @@ struct CutTodayView: View {
             // the goal, then the fat/week view. Heart rate, battery, burned and steps tiles were
             // removed: burn is already in the calories and fat cards, the rest lives on Today.
             VStack(spacing: NoopMetrics.sectionGap) {
+                SfzChallengeCard()
+                SfzHabitsSection()
                 budgetCard
                 foodCard
                 waterCard
@@ -730,6 +732,7 @@ struct CutTodayView: View {
         let est = await repo.exploreSeries(key: "steps_est", source: "my-whoop", days: 3).last { $0.day == key }?.value
         let measured = repo.today?.day == key ? repo.today?.steps : nil
         steps = measured.map(Double.init) ?? apple.map(Double.init) ?? est
+        await SfzHabitAuto.refresh(repo: repo, plan: plan, hrMax: profile.hrMax, stepsToday: steps)
 
     }
 
@@ -1076,6 +1079,1059 @@ struct GoalSheet: View {
                         .foregroundStyle(StrandPalette.textSecondary)
                 }
             }
+        }
+    }
+}
+
+// MARK: - sfz: Habits on the Goal page
+
+/// Fills the automatic habits (steps, water, sleep, Active Zone Minutes, protein) for recent days,
+/// marks Gym done on days the WHOOP recorded a workout, then applies challenge rules.
+@MainActor
+enum SfzHabitAuto {
+    static func refresh(repo: Repository, plan: CutPlanStore, hrMax: Int, stepsToday: Double?) async {
+        let store = SfzHabitStore.shared
+        let cal = Calendar.current
+        var span = 35
+        if let c = store.challenge { span = max(span, min(400, SfzHabitStore.daysBetween(c.startDay, SfzHabitStore.today) + 2)) }
+        let days = (0..<span).compactMap { cal.date(byAdding: .day, value: -$0, to: cal.startOfDay(for: Date())) }
+        let keys = days.map { Repository.localDayKey($0) }
+        let todayKey = SfzHabitStore.today
+        let byDay = Dictionary(repo.days.map { ($0.day, $0) }, uniquingKeysWith: { _, b in b })
+        let kinds = Set(store.habits.map(\.kind))
+
+        if kinds.contains(.steps) {
+            var v: [String: Double] = [:]
+            for k in keys { if let s = byDay[k]?.steps { v[k] = Double(s) } }
+            if let t = stepsToday { v[todayKey] = t }
+            store.setAuto(.steps, v)
+        }
+        if kinds.contains(.sleep) {
+            var v: [String: Double] = [:]
+            for k in keys { if let s = byDay[k]?.totalSleepMin { v[k] = s } }
+            store.setAuto(.sleep, v)
+        }
+        if kinds.contains(.water) {
+            var v: [String: Double] = [:]
+            for r in await repo.hydrationHistory(days: span) { v[r.day] = r.value }
+            store.setAuto(.water, v)
+        }
+        if kinds.contains(.protein) {
+            var v: [String: Double] = [:]
+            for k in keys where !plan.entries(day: k).isEmpty { v[k] = plan.protein(day: k) }
+            store.setAuto(.protein, v)
+        }
+        if kinds.contains(.zone) {
+            var v: [String: Double] = [:]
+            let fallbackRest = Double(repo.today?.restingHr ?? repo.days.last(where: { $0.restingHr != nil })?.restingHr ?? 60)
+            // Past days don't change once synced, so only today and days not yet known are read.
+            let known = store.auto[SfzHabitKind.zone.rawValue] ?? [:]
+            for (i, day) in days.prefix(35).enumerated() where i == 0 || known[keys[i]] == nil {
+                guard let next = cal.date(byAdding: .day, value: 1, to: day) else { continue }
+                let b = await repo.hrBuckets(from: Int(day.timeIntervalSince1970),
+                                             to: Int(next.timeIntervalSince1970) - 1, bucketSeconds: 60)
+                if b.isEmpty { continue }
+                let rest = byDay[keys[i]]?.restingHr.map(Double.init) ?? fallbackRest
+                v[keys[i]] = Double(CutTodayView.zonePoints(b, rest: rest, hrMax: Double(hrMax)))
+            }
+            store.setAuto(.zone, v)
+        }
+        if kinds.contains(.gym) {
+            let rows = await repo.workoutRows(days: 35)
+            let workoutDays = Set(rows.map { Repository.localDayKey(Date(timeIntervalSince1970: TimeInterval($0.startTs))) })
+            for h in store.habits where h.kind == .gym {
+                for k in workoutDays where k >= h.createdDay && store.gymState(h.id, day: k) == nil {
+                    store.setGym(h.id, .done, day: k)
+                }
+            }
+        }
+        store.enforceStrict()
+        store.checkFinished()
+        SfzHabitReminders.schedule(store)
+    }
+}
+
+/// Colour for a day's status in calendars and badges.
+func sfzStatusColor(_ s: SfzDayStatus) -> Color {
+    switch s {
+    case .met: return StrandPalette.chargeColor
+    case .partial: return StrandPalette.statusWarning
+    case .missed: return StrandPalette.statusCritical.opacity(0.75)
+    case .rest: return StrandPalette.restColor.opacity(0.6)
+    default: return StrandPalette.hairline
+    }
+}
+
+/// A Monday-first month-style grid of days coloured by status.
+struct SfzStatusGrid: View {
+    let days: [Date]
+    let status: (Date) -> SfzDayStatus
+
+    var body: some View {
+        let cal = Calendar.current
+        let lead = days.first.map { (cal.component(.weekday, from: $0) + 5) % 7 } ?? 0
+        let cols = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
+        VStack(spacing: 4) {
+            HStack(spacing: 4) {
+                ForEach(["M", "T", "W", "T", "F", "S", "S"].indices, id: \.self) { i in
+                    Text(["M", "T", "W", "T", "F", "S", "S"][i]).font(.system(size: 10, design: .rounded))
+                        .foregroundStyle(StrandPalette.textTertiary).frame(maxWidth: .infinity)
+                }
+            }
+            LazyVGrid(columns: cols, spacing: 4) {
+                ForEach(0..<lead, id: \.self) { _ in Color.clear.frame(height: 26) }
+                ForEach(days, id: \.self) { d in
+                    let isToday = cal.isDateInToday(d)
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(sfzStatusColor(status(d)))
+                        .frame(height: 26)
+                        .overlay(Text("\(cal.component(.day, from: d))")
+                            .font(.system(size: 10, weight: isToday ? .bold : .regular, design: .rounded))
+                            .foregroundStyle(StrandPalette.textPrimary.opacity(0.8)))
+                        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .stroke(isToday ? StrandPalette.textPrimary : .clear, lineWidth: 1.5))
+                }
+            }
+            HStack(spacing: 10) {
+                legend(.met, "Met"); legend(.partial, "Partly"); legend(.missed, "Missed"); legend(.rest, "Rest")
+            }
+            .padding(.top, 2)
+        }
+    }
+
+    private func legend(_ s: SfzDayStatus, _ label: String) -> some View {
+        HStack(spacing: 4) {
+            RoundedRectangle(cornerRadius: 3).fill(sfzStatusColor(s)).frame(width: 10, height: 10)
+            Text(label).font(.system(size: 10, design: .rounded)).foregroundStyle(StrandPalette.textTertiary)
+        }
+    }
+}
+
+/// Today's habits: a two-column grid of cards with an overall count, Add habit, and a detail page per habit.
+struct SfzHabitsSection: View {
+    @ObservedObject private var store = SfzHabitStore.shared
+    @EnvironmentObject var ble: BLEManager
+    @State private var detail: SfzHabit?
+    @State private var adding = false
+
+    var body: some View {
+        let score = store.dayScore(Date())
+        VStack(alignment: .leading, spacing: NoopMetrics.space3) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("TODAY'S HABITS").font(StrandFont.overline).tracking(1.6).foregroundStyle(StrandPalette.textSecondary)
+                Spacer()
+                Text("\(score.met) of \(score.due) done").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                Button { adding = true } label: {
+                    Label("Add", systemImage: "plus").font(StrandFont.caption)
+                        .padding(.horizontal, NoopMetrics.space3).padding(.vertical, NoopMetrics.space1)
+                        .background(Capsule().fill(StrandPalette.accent.opacity(0.12)))
+                }
+                .buttonStyle(.plain).foregroundStyle(StrandPalette.accent)
+            }
+            GeometryReader { g in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(StrandPalette.hairline)
+                    Capsule().fill(StrandPalette.chargeColor)
+                        .frame(width: score.due > 0 && score.met > 0 ? max(8, g.size.width * CGFloat(score.met) / CGFloat(score.due)) : 0)
+                }
+            }
+            .frame(height: 6)
+            if store.habits.isEmpty {
+                Text("No habits yet. Tap Add to pick push-ups, a plank timer, water and more.")
+                    .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+            }
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: NoopMetrics.space3),
+                                GridItem(.flexible(), spacing: NoopMetrics.space3)], spacing: NoopMetrics.space3) {
+                ForEach(store.habits) { h in
+                    SfzHabitCard(habit: h, onOpen: { detail = h }, onTargetHit: { ble.buzzStrapOnce() })
+                }
+            }
+        }
+        .sheet(item: $detail) { h in SfzHabitDetail(habitId: h.id) }
+        .sheet(isPresented: $adding) { SfzAddHabitSheet() }
+    }
+}
+
+/// One habit on the Goal page. Counter: +1 / +5 / +10. Timer: Start / Stop. Yes / No: one tap.
+/// Gym: Done, Skip or Rest. Automatic habits fill themselves. Tap the card for the detail page.
+struct SfzHabitCard: View {
+    let habit: SfzHabit
+    var onOpen: () -> Void
+    var onTargetHit: () -> Void
+    @ObservedObject private var store = SfzHabitStore.shared
+
+    private var today: String { SfzHabitStore.today }
+    private var target: Double { habit.target(on: today) }
+    private var due: Bool { habit.isDue(on: Date()) }
+    private var status: SfzDayStatus { store.status(habit, on: Date()) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            HStack(spacing: 6) {
+                Image(systemName: habit.icon).font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(status == .met ? StrandPalette.chargeColor : StrandPalette.accent)
+                    .frame(width: 18)
+                Text(habit.name).font(StrandFont.subhead.weight(.semibold)).foregroundStyle(StrandPalette.textPrimary)
+                    .lineLimit(1).minimumScaleFactor(0.75)
+                Spacer(minLength: 0)
+                if status == .met {
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(StrandPalette.chargeColor)
+                }
+            }
+            if due {
+                content
+            } else {
+                Spacer(minLength: 0)
+                Text("Not due today").font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+            }
+        }
+        .padding(NoopMetrics.space3)
+        .frame(maxWidth: .infinity, minHeight: 138, alignment: .topLeading)
+        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(StrandPalette.surfaceRaised))
+        .opacity(due ? 1 : 0.6)
+        .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .onTapGesture(perform: onOpen)
+    }
+
+    @ViewBuilder private var content: some View {
+        switch habit.kind {
+        case .counter: counter
+        case .timer: timer
+        case .check: check
+        case .gym: gymRow
+        default: autoValue
+        }
+    }
+
+    private func bar(_ frac: Double) -> some View {
+        GeometryReader { g in
+            ZStack(alignment: .leading) {
+                Capsule().fill(StrandPalette.hairline)
+                Capsule().fill(frac >= 1 ? StrandPalette.chargeColor : StrandPalette.accent)
+                    .frame(width: frac > 0 ? max(6, g.size.width * CGFloat(min(frac, 1))) : 0)
+            }
+        }
+        .frame(height: 6)
+    }
+
+    private func valueLine(_ v: Double) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 3) {
+            Text(habit.kind.format(v)).font(StrandFont.title2).foregroundStyle(StrandPalette.textPrimary)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text("/ \(habit.kind.format(target))").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                .lineLimit(1).minimumScaleFactor(0.7)
+        }
+    }
+
+    private func chip(_ label: String, filled: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label).font(StrandFont.caption.weight(.semibold))
+                .lineLimit(1).minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity).padding(.vertical, 7)
+                .background(Capsule().fill(filled ? StrandPalette.accent : StrandPalette.accent.opacity(0.12)))
+                .foregroundStyle(filled ? Color.white : StrandPalette.accent)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var counter: some View {
+        let v = store.value(habit, day: today) ?? 0
+        return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            valueLine(v)
+            bar(v / max(target, 1))
+            HStack(spacing: 6) {
+                chip("+1") { store.log(habit.id, 1) }
+                chip("+5") { store.log(habit.id, 5) }
+                chip("+10") { store.log(habit.id, 10) }
+            }
+        }
+    }
+
+    private var timer: some View {
+        let running = store.isRunning(habit.id)
+        return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            TimelineView(.periodic(from: .now, by: running ? 1 : 60)) { ctx in
+                let secs = store.timerSeconds(habit.id, now: ctx.date)
+                VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+                    valueLine(secs)
+                    bar(secs / max(target, 1))
+                }
+            }
+            chip(running ? "Stop" : "Start", filled: running) {
+                if running {
+                    store.stopTimer(habit.id)
+                    SfzHabitReminders.cancelTimerAlert(habit)
+                } else {
+                    let remaining = target - store.timerSeconds(habit.id)
+                    store.startTimer(habit.id)
+                    if remaining > 0 {
+                        SfzHabitReminders.timerAlert(habit, after: remaining)
+                        let id = habit.id
+                        let hit = onTargetHit
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
+                            if SfzHabitStore.shared.isRunning(id) { hit() }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var check: some View {
+        let done = status == .met
+        return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            Spacer(minLength: 0)
+            Button { store.toggleCheck(habit.id) } label: {
+                HStack {
+                    Image(systemName: done ? "checkmark.circle.fill" : "circle").font(.system(size: 22))
+                    Text(done ? "Done" : "Mark done").font(StrandFont.subhead)
+                }
+                .frame(maxWidth: .infinity).padding(.vertical, 10)
+                .background(Capsule().fill(done ? StrandPalette.chargeColor.opacity(0.15) : StrandPalette.accent.opacity(0.10)))
+                .foregroundStyle(done ? StrandPalette.chargeColor : StrandPalette.accent)
+            }
+            .buttonStyle(.plain)
+            Text(store.streak(habit) > 0 ? "\(store.streak(habit))-day streak" : " ")
+                .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+        }
+    }
+
+    private var gymRow: some View {
+        let st = store.gymState(habit.id)
+        return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            Text(st == .done ? "Done" : st == .rest ? "Rest day" : st == .skipped ? "Skipped" : "Not yet")
+                .font(StrandFont.title2).foregroundStyle(StrandPalette.textPrimary)
+            HStack(spacing: 6) {
+                chip("Done", filled: st == .done) { store.setGym(habit.id, st == .done ? nil : .done) }
+                chip("Skip", filled: st == .skipped) { store.setGym(habit.id, st == .skipped ? nil : .skipped) }
+                chip("Rest", filled: st == .rest) { store.setGym(habit.id, st == .rest ? nil : .rest) }
+            }
+            Text("\(habit.restPerWeek) rest days a week").font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+        }
+    }
+
+    private var autoValue: some View {
+        let v = store.value(habit, day: today) ?? 0
+        let source: String = {
+            switch habit.kind {
+            case .steps: return "From your WHOOP and iPhone"
+            case .water: return "From your water log"
+            case .sleep: return "Last night, from your WHOOP"
+            case .zone: return "From your WHOOP"
+            case .protein: return "From your food log"
+            default: return ""
+            }
+        }()
+        return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            valueLine(v)
+            bar(v / max(target, 1))
+            Spacer(minLength: 0)
+            Text(source).font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary).lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+    }
+}
+
+/// Everything about one habit: today's log, streaks and a five-week calendar, the target (changes
+/// apply from tomorrow unless you choose today), days, reminders, name, and removing it.
+struct SfzHabitDetail: View {
+    let habitId: UUID
+    @ObservedObject private var store = SfzHabitStore.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var draftTarget: Double = 0
+    @State private var applyToday = false
+    @State private var newReminder = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date()
+    @State private var name = ""
+    @State private var confirmLower = false
+    @State private var confirmRemove = false
+
+    private var today: String { SfzHabitStore.today }
+    private static let weekdayOrder = [2, 3, 4, 5, 6, 7, 1]
+    private static let weekdayLetters = ["M", "T", "W", "T", "F", "S", "S"]
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let h = store.habit(habitId) {
+                    form(h)
+                } else {
+                    Text("This habit was removed.").foregroundStyle(StrandPalette.textSecondary)
+                }
+            }
+            .navigationTitle(store.habit(habitId)?.name ?? "Habit")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+        .onAppear {
+            if let h = store.habit(habitId) { draftTarget = h.target(on: today); name = h.name }
+        }
+    }
+
+    private var lowersStrictChallenge: Bool {
+        guard let c = store.challenge, c.strict, c.endedDay == nil, c.habitIds.contains(habitId),
+              let h = store.habit(habitId) else { return false }
+        return draftTarget < h.target(on: today)
+    }
+
+    private func saveTarget() {
+        store.setTarget(habitId, to: draftTarget, fromToday: applyToday)
+    }
+
+    @ViewBuilder private func form(_ h: SfzHabit) -> some View {
+        Form {
+            Section("Today") { todayRows(h) }
+
+            Section("Progress") {
+                HStack {
+                    stat("\(store.streak(h))", "Streak")
+                    stat("\(store.bestStreak(h))", "Best")
+                    stat(store.consistency(h).map { "\(Int(($0 * 100).rounded()))%" } ?? "–", "Last 30 days")
+                }
+                SfzStatusGrid(days: Self.lastFiveWeeks) { store.status(h, on: $0) }
+                    .padding(.vertical, 4)
+            }
+
+            if h.kind.hasTarget {
+                Section {
+                    Stepper(value: $draftTarget, in: h.kind.targetRange, step: h.kind.targetStep) {
+                        HStack {
+                            Text("Target")
+                            Spacer()
+                            Text(h.kind.format(draftTarget)).foregroundStyle(StrandPalette.textSecondary)
+                        }
+                    }
+                    Toggle("Apply from today", isOn: $applyToday).tint(StrandPalette.accent)
+                    Button("Save target") {
+                        if lowersStrictChallenge { confirmLower = true } else { saveTarget() }
+                    }
+                    .disabled(draftTarget == h.target(on: applyToday ? today : SfzHabitStore.dayKey(offset: 1, from: today)))
+                } header: {
+                    Text("Target")
+                } footer: {
+                    Text("Changes start tomorrow unless you choose today. Past days keep the target they had.")
+                }
+            }
+
+            if h.kind == .gym {
+                Section("Rest days") {
+                    Stepper(value: Binding(get: { h.restPerWeek }, set: { var x = h; x.restPerWeek = $0; store.update(x) }),
+                            in: 0...6) {
+                        HStack { Text("Rest days a week"); Spacer(); Text("\(h.restPerWeek)").foregroundStyle(StrandPalette.textSecondary) }
+                    }
+                }
+            }
+
+            Section {
+                HStack(spacing: 6) {
+                    ForEach(0..<7, id: \.self) { i in
+                        let wd = Self.weekdayOrder[i]
+                        let on = h.weekdays.isEmpty || h.weekdays.contains(wd)
+                        Button {
+                            var x = h
+                            var set = Set(x.weekdays.isEmpty ? Self.weekdayOrder : x.weekdays)
+                            if set.contains(wd) { set.remove(wd) } else { set.insert(wd) }
+                            x.weekdays = set.count == 7 || set.isEmpty ? [] : Array(set).sorted()
+                            store.update(x)
+                        } label: {
+                            Text(Self.weekdayLetters[i]).font(StrandFont.subhead.weight(.semibold))
+                                .frame(width: 34, height: 34)
+                                .background(Circle().fill(on ? StrandPalette.accent : StrandPalette.hairline))
+                                .foregroundStyle(on ? Color.white : StrandPalette.textSecondary)
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                }
+            } header: {
+                Text("Days")
+            } footer: {
+                Text(h.weekdays.isEmpty ? "Every day." : "Only on the days shown. Other days don't count against you.")
+            }
+
+            Section {
+                ForEach(h.reminders.sorted(), id: \.self) { m in
+                    HStack {
+                        Image(systemName: "bell").foregroundStyle(StrandPalette.accent)
+                        Text(Self.clock(m))
+                        Spacer()
+                        Button(role: .destructive) {
+                            var x = h; x.reminders.removeAll { $0 == m }; store.update(x)
+                        } label: { Image(systemName: "minus.circle.fill") }
+                        .buttonStyle(.borderless).foregroundStyle(StrandPalette.statusCritical)
+                    }
+                }
+                HStack {
+                    DatePicker("New reminder", selection: $newReminder, displayedComponents: .hourAndMinute)
+                    Button("Add") {
+                        let c = Calendar.current.dateComponents([.hour, .minute], from: newReminder)
+                        let m = (c.hour ?? 8) * 60 + (c.minute ?? 0)
+                        var x = h
+                        if !x.reminders.contains(m) { x.reminders.append(m) }
+                        store.update(x)
+                        SfzHabitReminders.requestPermission()
+                    }
+                    .buttonStyle(.borderless)
+                }
+            } header: {
+                Text("Reminders")
+            } footer: {
+                Text("A reminder is skipped once the habit is done for the day.")
+            }
+
+            Section("Name") {
+                TextField("Name", text: $name)
+                    .onSubmit { renameIfNeeded(h) }
+                Button("Save name") { renameIfNeeded(h) }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || name == h.name)
+            }
+
+            if let c = store.challenge, c.endedDay == nil, !c.habitIds.contains(h.id) {
+                Section {
+                    Button("Add to \(c.name)") { store.addToChallenge(h.id) }
+                } footer: {
+                    Text("It counts toward the challenge from tomorrow.")
+                }
+            }
+
+            Section {
+                Button("Move up") { store.move(h.id, by: -1) }
+                Button("Move down") { store.move(h.id, by: 1) }
+                Button("Remove habit", role: .destructive) { confirmRemove = true }
+            }
+        }
+        .alert("Lower a challenge target?", isPresented: $confirmLower) {
+            Button("Lower it", role: .destructive) { saveTarget() }
+            Button("Keep", role: .cancel) {}
+        } message: {
+            Text("This is a strict challenge. Lowering a target marks it Modified.")
+        }
+        .confirmationDialog("Remove \(h.name)?", isPresented: $confirmRemove, titleVisibility: .visible) {
+            Button("Remove", role: .destructive) { store.remove(h.id); dismiss() }
+        } message: {
+            Text(store.challenge?.habitIds.contains(h.id) == true
+                 ? "It is part of your challenge. Its past days are kept."
+                 : "Its past days are kept.")
+        }
+    }
+
+    private func renameIfNeeded(_ h: SfzHabit) {
+        let n = name.trimmingCharacters(in: .whitespaces)
+        guard !n.isEmpty, n != h.name else { return }
+        var x = h; x.name = n; store.update(x)
+    }
+
+    @ViewBuilder private func todayRows(_ h: SfzHabit) -> some View {
+        switch h.kind {
+        case .counter, .timer:
+            let entries = store.entries(h.id)
+            HStack {
+                Text(h.kind.format(h.kind == .timer ? store.timerSeconds(h.id) : entries.reduce(0, +)))
+                    .font(StrandFont.title2)
+                Text("of \(h.kind.format(h.target(on: today)))").foregroundStyle(StrandPalette.textSecondary)
+            }
+            if !entries.isEmpty {
+                Text(entries.map { h.kind == .timer ? h.kind.format($0) : "+\(Int($0))" }.joined(separator: "  "))
+                    .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                Button("Undo last") { store.undo(h.id) }
+            }
+            if h.kind == .counter {
+                HStack {
+                    ForEach([1, 5, 10, 25], id: \.self) { n in
+                        Button("+\(n)") { store.log(h.id, Double(n)) }.buttonStyle(.borderless)
+                    }
+                }
+            }
+        case .check:
+            Toggle("Done today", isOn: Binding(get: { !store.entries(h.id).isEmpty }, set: { _ in store.toggleCheck(h.id) }))
+                .tint(StrandPalette.chargeColor)
+        case .gym:
+            Picker("Today", selection: Binding(get: { store.gymState(h.id).map(\.rawValue) ?? "" },
+                                               set: { store.setGym(h.id, SfzGymState(rawValue: $0)) })) {
+                Text("Not yet").tag("")
+                Text("Done").tag("done")
+                Text("Skipped").tag("skipped")
+                Text("Rest").tag("rest")
+            }
+            .pickerStyle(.segmented)
+        default:
+            HStack {
+                Text(h.kind.format(store.value(h, day: today) ?? 0)).font(StrandFont.title2)
+                Text("of \(h.kind.format(h.target(on: today)))").foregroundStyle(StrandPalette.textSecondary)
+            }
+            if h.kind == .water {
+                NavigationLink("Open the water log") { HydrationView() }
+            }
+            Text(h.kind.label).font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+        }
+    }
+
+    private func stat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value).font(StrandFont.title2).foregroundStyle(StrandPalette.textPrimary)
+            Text(label).font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    static var lastFiveWeeks: [Date] {
+        var cal = Calendar.current
+        cal.firstWeekday = 2
+        let today = cal.startOfDay(for: Date())
+        let monday = cal.dateInterval(of: .weekOfYear, for: today)?.start ?? today
+        let start = cal.date(byAdding: .day, value: -28, to: monday) ?? monday
+        return (0..<35).compactMap { cal.date(byAdding: .day, value: $0, to: start) }
+    }
+
+    static func clock(_ minutes: Int) -> String {
+        var c = DateComponents(); c.hour = minutes / 60; c.minute = minutes % 60
+        return (Calendar.current.date(from: c) ?? Date()).formatted(date: .omitted, time: .shortened)
+    }
+}
+
+/// Add a habit from the presets, or make your own.
+struct SfzAddHabitSheet: View {
+    @ObservedObject private var store = SfzHabitStore.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var kind: SfzHabitKind = .counter
+    @State private var target: Double = SfzHabitKind.counter.defaultTarget
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    let taken = Set(store.habits.map { $0.name.lowercased() })
+                    let cols = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
+                    LazyVGrid(columns: cols, spacing: 8) {
+                        ForEach(SfzHabitStore.presets.indices, id: \.self) { i in
+                            let p = SfzHabitStore.presets[i]
+                            let added = taken.contains(p.name.lowercased())
+                            Button {
+                                if !added { store.add(SfzHabitStore.make(p)) }
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Image(systemName: p.icon).foregroundStyle(StrandPalette.accent)
+                                        Spacer()
+                                        Image(systemName: added ? "checkmark.circle.fill" : "plus.circle.fill")
+                                            .foregroundStyle(added ? StrandPalette.chargeColor : StrandPalette.accent)
+                                    }
+                                    Text(p.name).font(StrandFont.subhead.weight(.semibold))
+                                        .foregroundStyle(StrandPalette.textPrimary).lineLimit(1).minimumScaleFactor(0.7)
+                                    Text(p.kind.hasTarget ? p.kind.format(p.target) : (p.kind == .gym ? "Done / skip / rest" : "Yes / no"))
+                                        .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                                }
+                                .padding(10)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(StrandPalette.surfaceRaised))
+                                .opacity(added ? 0.6 : 1)
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                    .listRowBackground(Color.clear)
+                } header: {
+                    Text("Tap to add")
+                }
+
+                Section {
+                    TextField("Name, e.g. Lunges", text: $name)
+                    Picker("Type", selection: $kind) {
+                        ForEach(SfzHabitKind.allCases) { k in Text(k.label).tag(k) }
+                    }
+                    .onChange(of: kind) { _, k in target = k.defaultTarget }
+                    if kind.hasTarget {
+                        Stepper(value: $target, in: kind.targetRange, step: kind.targetStep) {
+                            HStack { Text("Target"); Spacer(); Text(kind.format(target)).foregroundStyle(StrandPalette.textSecondary) }
+                        }
+                    }
+                    Button("Add habit") {
+                        let n = name.trimmingCharacters(in: .whitespaces)
+                        store.add(SfzHabitStore.make(.init(name: n, icon: kind.defaultIcon, kind: kind, target: target)))
+                        name = ""
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                } header: {
+                    Text("Your own")
+                }
+            }
+            .navigationTitle("Add habit")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+    }
+}
+
+// MARK: - sfz: Challenges
+
+/// The challenge at the top of the Goal page: Day X of N, today's checklist, streak and consistency.
+/// With none running, a short invitation to start one.
+struct SfzChallengeCard: View {
+    @ObservedObject private var store = SfzHabitStore.shared
+    @State private var picking = false
+    @State private var showing = false
+
+    var body: some View {
+        Group {
+            if let c = store.challenge {
+                Button { showing = true } label: { active(c) }.buttonStyle(.plain)
+            } else {
+                Button { picking = true } label: { invite }.buttonStyle(.plain)
+            }
+        }
+        .sheet(isPresented: $picking) { SfzChallengePicker() }
+        .sheet(isPresented: $showing) { SfzChallengeDetail() }
+    }
+
+    private var invite: some View {
+        NoopCard {
+            HStack(spacing: NoopMetrics.space3) {
+                Image(systemName: "flag.checkered").font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(StrandPalette.accent)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Start a challenge").font(StrandFont.headline).foregroundStyle(StrandPalette.textPrimary)
+                    Text("75 Hard, 75 Soft, 30-day push-ups, or your own.")
+                        .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").foregroundStyle(StrandPalette.textTertiary)
+            }
+        }
+    }
+
+    private func active(_ c: SfzChallenge) -> some View {
+        let n = min(store.dayNumber(c), c.length)
+        let done = c.endedDay != nil
+        let habits = store.challengeHabits(c)
+        return NoopCard {
+            VStack(alignment: .leading, spacing: NoopMetrics.space3) {
+                HStack {
+                    Text("\(c.name.uppercased()) · \(c.strict ? "STRICT" : "FLEXIBLE")\(c.modified ? " · MODIFIED" : "")")
+                        .font(StrandFont.overline).tracking(1.4).foregroundStyle(StrandPalette.textSecondary)
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Spacer()
+                    Image(systemName: "chevron.right").font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+                }
+                Text(done ? "Completed: \(c.length) days"
+                     : c.effectiveStart > SfzHabitStore.today ? "Starts tomorrow · \(c.length) days" : "Day \(n) of \(c.length)")
+                    .font(StrandFont.title2).foregroundStyle(done ? StrandPalette.chargeColor : StrandPalette.textPrimary)
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(StrandPalette.hairline)
+                        Capsule().fill(StrandPalette.chargeColor)
+                            .frame(width: max(8, g.size.width * CGFloat(done ? 1 : Double(n - 1) / Double(max(c.length, 1)))))
+                    }
+                }
+                .frame(height: 8)
+                if !done {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(habits) { h in
+                            let st = store.status(h, on: Date())
+                            HStack(spacing: 8) {
+                                Image(systemName: st == .met ? "checkmark.circle.fill" : st == .partial ? "circle.lefthalf.filled" : st == .rest ? "moon.circle" : "circle")
+                                    .foregroundStyle(st == .met ? StrandPalette.chargeColor : StrandPalette.textTertiary)
+                                Text(h.name).font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
+                                Spacer()
+                                if h.kind.hasTarget {
+                                    Text("\(h.kind.format(h.kind == .timer ? store.timerSeconds(h.id) : (store.value(h, day: SfzHabitStore.today) ?? 0))) / \(h.kind.format(h.target(on: SfzHabitStore.today)))")
+                                        .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                                }
+                            }
+                        }
+                    }
+                }
+                let pct = store.challengeConsistency(c).map { "\(Int(($0 * 100).rounded()))% consistent" } ?? "Consistency shows after day 1"
+                Text("\(store.challengeStreak(c))-day streak · \(pct)")
+                    .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+            }
+        }
+    }
+}
+
+/// Choose a challenge template, or build your own.
+struct SfzChallengePicker: View {
+    @ObservedObject private var store = SfzHabitStore.shared
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if let c = store.challenge, c.endedDay == nil {
+                    Section {
+                        Text("Starting a new challenge ends \(c.name) (day \(store.dayNumber(c)) of \(c.length)).")
+                            .font(StrandFont.caption).foregroundStyle(StrandPalette.statusWarning)
+                    }
+                }
+                Section("Templates") {
+                    ForEach(SfzChallengeTemplate.all) { t in
+                        NavigationLink {
+                            SfzChallengeSetup(template: t, onStarted: { dismiss() })
+                        } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text(t.name).font(StrandFont.headline)
+                                    Spacer()
+                                    Text("\(t.length) days · \(t.strict ? "Strict" : "Flexible")")
+                                        .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                                }
+                                Text(t.blurb).font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+                Section("Your own") {
+                    NavigationLink {
+                        SfzChallengeSetup(template: nil, onStarted: { dismiss() })
+                    } label: {
+                        Label("Custom challenge", systemImage: "slider.horizontal.3")
+                    }
+                }
+            }
+            .navigationTitle("Start a challenge")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+        }
+    }
+}
+
+/// Name, length, mode, start day and habits for a new challenge.
+struct SfzChallengeSetup: View {
+    let template: SfzChallengeTemplate?
+    var onStarted: () -> Void
+    @ObservedObject private var store = SfzHabitStore.shared
+    @State private var name = ""
+    @State private var length = 30
+    @State private var strict = false
+    @State private var startTomorrow = false
+    @State private var chosen: Set<UUID> = []
+
+    var body: some View {
+        Form {
+            Section("Challenge") {
+                TextField("Name", text: $name)
+                Stepper(value: $length, in: 7...365) {
+                    HStack { Text("Length"); Spacer(); Text("\(length) days").foregroundStyle(StrandPalette.textSecondary) }
+                }
+                Picker("Start", selection: $startTomorrow) {
+                    Text("Today").tag(false)
+                    Text("Tomorrow").tag(true)
+                }
+                .pickerStyle(.segmented)
+            }
+            Section {
+                Picker("Mode", selection: $strict) {
+                    Text("Flexible").tag(false)
+                    Text("Strict").tag(true)
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text("Mode")
+            } footer: {
+                Text(strict
+                     ? "Strict: miss anything on a day and you go back to Day 1. Lowering a target marks the challenge Modified."
+                     : "Flexible: a missed day lowers your consistency but the challenge carries on. You can pause a day for illness or travel.")
+            }
+            if let t = template, !t.habits.isEmpty {
+                Section {
+                    ForEach(t.habits.indices, id: \.self) { i in
+                        let spec = t.habits[i]
+                        HStack {
+                            Image(systemName: spec.icon).foregroundStyle(StrandPalette.accent).frame(width: 24)
+                            Text(spec.name)
+                            Spacer()
+                            if spec.kind.hasTarget {
+                                Text(spec.kind.format(spec.target)).foregroundStyle(StrandPalette.textSecondary)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Every day")
+                } footer: {
+                    Text("Habits you already have are reused; the rest are added to your Goal page.")
+                }
+            }
+            Section {
+                ForEach(store.habits) { h in
+                    Button {
+                        if chosen.contains(h.id) { chosen.remove(h.id) } else { chosen.insert(h.id) }
+                    } label: {
+                        HStack {
+                            Image(systemName: chosen.contains(h.id) ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(chosen.contains(h.id) ? StrandPalette.accent : StrandPalette.textTertiary)
+                            Text(h.name).foregroundStyle(StrandPalette.textPrimary)
+                        }
+                    }
+                }
+            } header: {
+                Text(template?.habits.isEmpty == false ? "Also include" : "Habits")
+            }
+            Section {
+                Button("Start challenge") {
+                    let n = name.trimmingCharacters(in: .whitespaces)
+                    store.start(name: n.isEmpty ? (template?.name ?? "My challenge") : n, length: length, strict: strict,
+                                specs: template?.habits ?? [], habitIds: Array(chosen), startTomorrow: startTomorrow)
+                    onStarted()
+                }
+                .disabled((template?.habits.isEmpty ?? true) && chosen.isEmpty)
+            }
+        }
+        .navigationTitle(template?.name ?? "Custom challenge")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            name = template?.name ?? "My challenge"
+            length = template?.length ?? 30
+            strict = template?.strict ?? false
+            if template?.id == "90day" { chosen = Set(store.habits.map(\.id)) }
+        }
+    }
+}
+
+/// The running challenge in full: progress, the whole calendar, today's habits, the change log, and
+/// pause, restart or end.
+struct SfzChallengeDetail: View {
+    @ObservedObject private var store = SfzHabitStore.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmEnd = false
+    @State private var confirmRestart = false
+    @State private var picking = false
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let c = store.challenge { content(c) } else { Text("No challenge running.") }
+            }
+            .navigationTitle(store.challenge?.name ?? "Challenge")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+        .sheet(isPresented: $picking) { SfzChallengePicker() }
+    }
+
+    private func calendarDays(_ c: SfzChallenge) -> [Date] {
+        let start = c.startDay
+        let total = max(c.length + c.pausedDays.count + SfzHabitStore.daysBetween(c.startDay, c.effectiveStart), 1)
+        let shown = min(total, 400)
+        return (0..<shown).map { SfzHabitStore.date(SfzHabitStore.dayKey(offset: $0, from: start)) }
+    }
+
+    @ViewBuilder private func content(_ c: SfzChallenge) -> some View {
+        let n = min(store.dayNumber(c), c.length)
+        Form {
+            Section {
+                HStack {
+                    stat(c.endedDay == nil ? "\(n)" : "\(c.length)", "of \(c.length) days")
+                    stat("\(store.challengeStreak(c))", "Streak")
+                    stat(store.challengeConsistency(c).map { "\(Int(($0 * 100).rounded()))%" } ?? "–", "Consistent")
+                }
+                Text(summary(c)).font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+            }
+            Section("Calendar") {
+                SfzStatusGrid(days: calendarDays(c)) { store.challengeStatus(c, on: $0) }
+                    .padding(.vertical, 4)
+            }
+            Section("Today") {
+                ForEach(store.challengeHabits(c)) { h in
+                    let st = store.status(h, on: Date())
+                    HStack {
+                        Image(systemName: h.icon).foregroundStyle(StrandPalette.accent).frame(width: 24)
+                        Text(h.name)
+                        Spacer()
+                        Text(st == .met ? "Done" : st == .rest ? "Rest" : st == .notDue ? "Not due" : "To do")
+                            .foregroundStyle(st == .met ? StrandPalette.chargeColor : StrandPalette.textSecondary)
+                    }
+                }
+            }
+            if !c.notes.isEmpty {
+                Section("Changes") {
+                    ForEach(Array(c.notes.indices.reversed()), id: \.self) { i in
+                        Text(c.notes[i]).font(StrandFont.caption)
+                    }
+                }
+            }
+            Section {
+                if c.endedDay != nil {
+                    Button("Finish and keep the record") { store.endChallenge(); dismiss() }
+                    Button("Start another challenge") { picking = true }
+                } else {
+                    if !c.strict {
+                        Button("Pause today (sick or travelling)") { store.pauseToday() }
+                            .disabled(c.pausedDays.contains(SfzHabitStore.today))
+                    }
+                    Button("Restart from Day 1") { confirmRestart = true }
+                    Button("End challenge", role: .destructive) { confirmEnd = true }
+                }
+            } footer: {
+                Text("Target changes start tomorrow and never change past days. In a strict challenge, raising a target is fine; lowering one or removing a habit marks it Modified.")
+            }
+        }
+        .alert("Restart from Day 1?", isPresented: $confirmRestart) {
+            Button("Restart", role: .destructive) { store.restartChallenge() }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert("End \(c.name)?", isPresented: $confirmEnd) {
+            Button("End", role: .destructive) { store.endChallenge(); dismiss() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your record so far is kept.")
+        }
+    }
+
+    private func summary(_ c: SfzChallenge) -> String {
+        var parts: [String] = [c.strict ? "Strict" : "Flexible"]
+        if c.modified { parts.append("modified") }
+        parts.append("started " + SfzHabitStore.date(c.startDay).formatted(.dateTime.day().month(.wide)))
+        if !c.restartDays.isEmpty { parts.append("\(c.restartDays.count) restart" + (c.restartDays.count == 1 ? "" : "s")) }
+        return parts.joined(separator: " · ")
+    }
+
+    private func stat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value).font(StrandFont.title2).foregroundStyle(StrandPalette.textPrimary)
+            Text(label).font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+
+/// A one-line habits summary on Today; tapping it opens the Goal tab.
+struct SfzTodayHabitsStrip: View {
+    @ObservedObject private var store = SfzHabitStore.shared
+
+    var body: some View {
+        let score = store.dayScore(Date())
+        if score.due > 0 || store.challenge != nil {
+            Button {
+                NotificationCenter.default.post(name: Notification.Name("sfz.openGoal"), object: nil)
+            } label: {
+                NoopCard {
+                    VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+                        HStack {
+                            Image(systemName: "checklist").foregroundStyle(StrandPalette.chargeColor)
+                            Text("Habits \(score.met) of \(score.due) today")
+                                .font(StrandFont.subhead.weight(.semibold)).foregroundStyle(StrandPalette.textPrimary)
+                            Spacer()
+                            if let c = store.challenge, c.endedDay == nil, c.effectiveStart <= SfzHabitStore.today {
+                                Text("\(c.name) · Day \(min(store.dayNumber(c), c.length))")
+                                    .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                                    .lineLimit(1)
+                            }
+                            Image(systemName: "chevron.right").font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+                        }
+                        GeometryReader { g in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(StrandPalette.hairline)
+                                Capsule().fill(StrandPalette.chargeColor)
+                                    .frame(width: score.met > 0 ? max(6, g.size.width * CGFloat(score.met) / CGFloat(max(score.due, 1))) : 0)
+                            }
+                        }
+                        .frame(height: 6)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
         }
     }
 }

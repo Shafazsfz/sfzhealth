@@ -358,6 +358,9 @@ struct LiquidTodayView: View {
                     // pinned above the reorderable block so an active manual workout is immediately visible
                     // and opens the existing workout flow. Today also offers Start when no workout is active.
                     ActiveWorkoutIndicatorSection(showStart: selectedDayOffset == 0)
+                    #if os(iOS)
+                    if selectedDayOffset == 0 { SfzTodayHabitsStrip() }
+                    #endif
                     // #today-layout (parity with Android): every Today section — the Charge/Effort/Rest hero
                     // and Start-session included — renders in the user's saved order. Reorder via the Arrange
                     // sheet (the header's up/down button; native drag rows); the order persists under the

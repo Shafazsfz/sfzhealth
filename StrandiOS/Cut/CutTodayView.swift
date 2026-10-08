@@ -15,6 +15,8 @@ struct CutTodayView: View {
 
     @State private var burned: Calories.DayEnergyEstimate?
     @State private var steps: Double?
+    /// sfz: this week's workouts (Monday onwards) for the "This week" card.
+    @State private var weekRows: [WorkoutRow] = []
     @State private var showAddFood = false
     @State private var showWeight = false
     @State private var showPlan = false
@@ -47,6 +49,7 @@ struct CutTodayView: View {
                 budgetCard
                 foodCard
                 goalCard
+                weekCard
                 fatCard
             }
         }
@@ -294,6 +297,66 @@ struct CutTodayView: View {
     }
 
     /// Grams (under 1 kg) or kilograms of fat for a kcal deficit; sign dropped (the label carries it).
+    // MARK: This week (sfz)
+
+    /// Monday 00:00 of the current week, local time.
+    private static var weekStart: Date {
+        var cal = Calendar.current
+        cal.firstWeekday = 2
+        return cal.dateInterval(of: .weekOfYear, for: Date())?.start ?? Calendar.current.startOfDay(for: Date())
+    }
+
+    static func thisWeeksWorkouts(repo: Repository) async -> [WorkoutRow] {
+        let lo = Int(weekStart.timeIntervalSince1970)
+        return await repo.workoutRows(days: 8).filter { $0.startTs >= lo }
+    }
+
+    /// Minutes of workouts this week; a row without a stored duration counts its start-to-end span.
+    static func cardioMinutes(_ rows: [WorkoutRow]) -> Int {
+        Int(rows.reduce(0.0) { $0 + max(0, $1.durationS ?? Double($1.endTs - $1.startTs)) } / 60)
+    }
+
+    /// Distinct local days this week with at least one workout.
+    static func exerciseDays(_ rows: [WorkoutRow]) -> Int {
+        Set(rows.map { Repository.localDayKey(Date(timeIntervalSince1970: TimeInterval($0.startTs))) }).count
+    }
+
+    private var weekCard: some View {
+        let minutes = Self.cardioMinutes(weekRows)
+        let days = Self.exerciseDays(weekRows)
+        return NoopCard {
+            VStack(alignment: .leading, spacing: NoopMetrics.space4) {
+                Text("THIS WEEK").font(StrandFont.overline).tracking(1.6).foregroundStyle(StrandPalette.textSecondary)
+                weekRow("Cardio minutes", value: minutes, target: plan.weeklyCardioTarget, unit: "min",
+                        tint: StrandPalette.effortColor)
+                weekRow("Exercise days", value: days, target: plan.exerciseDaysTarget, unit: "days",
+                        tint: StrandPalette.chargeColor)
+                Text("Counts workouts recorded or detected since Monday.")
+                    .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+            }
+        }
+    }
+
+    private func weekRow(_ label: String, value: Int, target: Int, unit: String, tint: Color) -> some View {
+        let frac = target > 0 ? min(Double(value) / Double(target), 1) : 0
+        return VStack(alignment: .leading, spacing: NoopMetrics.space1) {
+            HStack {
+                Text(label).font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
+                Spacer()
+                Text("\(value) / \(target) \(unit)").font(StrandFont.bodyNumber)
+                    .foregroundStyle(value >= target ? good : StrandPalette.textSecondary)
+            }
+            GeometryReader { g in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(StrandPalette.hairline)
+                    Capsule().fill(tint).frame(width: value > 0 ? max(8, g.size.width * frac) : 0)
+                }
+            }
+            .frame(height: 8)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
     private func fatText(_ kcal: Double) -> String {
         let g = abs(kcal) / CutPlanStore.kcalPerKgFat * 1000
         return g < 1000 ? "\(Int(g.rounded())) g" : String(format: "%.2f kg", g / 1000)
@@ -358,9 +421,12 @@ struct CutTodayView: View {
                         Spacer()
                         VStack(alignment: .trailing, spacing: 2) {
                             Text("\(e.kcal) kcal").font(StrandFont.bodyNumber).foregroundStyle(StrandPalette.textPrimary)
-                            if let p = e.protein {
-                                Text("\(Int(p.rounded())) g protein").font(StrandFont.caption)
-                                    .foregroundStyle(StrandPalette.metricPurple)
+                            let macros = [e.protein.map { "\(Int($0.rounded())) g P" },
+                                          e.carbs.map { "\(Int($0.rounded())) g C" },
+                                          e.fat.map { "\(Int($0.rounded())) g F" }].compactMap { $0 }
+                            if !macros.isEmpty {
+                                Text(macros.joined(separator: " · ")).font(StrandFont.caption)
+                                    .foregroundStyle(StrandPalette.textSecondary)
                             }
                         }
                         Button { plan.removeFood(e.id, day: dayKey) } label: {
@@ -569,6 +635,8 @@ struct CutTodayView: View {
         }
         await backfillActive()
 
+        weekRows = await Self.thisWeeksWorkouts(repo: repo)
+
         let key = dayKey
         let apple = await repo.appleDailyRows(days: 3).filter { $0.day == key }.compactMap { $0.steps }.max()
         let est = await repo.exploreSeries(key: "steps_est", source: "my-whoop", days: 3).last { $0.day == key }?.value
@@ -607,7 +675,11 @@ private struct AddFoodSheet: View {
     @State private var name = ""
     @State private var kcal = ""
     @State private var protein = ""
+    @State private var carbs = ""
+    @State private var fat = ""
     @FocusState private var kcalFocused: Bool
+
+    private func grams(_ text: String) -> Double? { Double(text.replacingOccurrences(of: ",", with: ".")) }
 
     var body: some View {
         NavigationStack {
@@ -619,19 +691,24 @@ private struct AddFoodSheet: View {
                         .focused($kcalFocused)
                     TextField("Protein, g (optional)", text: $protein)
                         .keyboardType(.decimalPad)
+                    TextField("Carbs, g (optional)", text: $carbs)
+                        .keyboardType(.decimalPad)
+                    TextField("Fat, g (optional)", text: $fat)
+                        .keyboardType(.decimalPad)
                 }
                 let recent = plan.recentFoods()
                 if !recent.isEmpty {
                     Section("Recent") {
                         ForEach(recent) { f in
                             Button {
-                                plan.addFood(name: f.name, kcal: f.kcal, protein: f.protein, day: day)
+                                plan.addFood(name: f.name, kcal: f.kcal, protein: f.protein, carbs: f.carbs,
+                                             fat: f.fat, day: day)
                                 dismiss()
                             } label: {
                                 HStack {
                                     Text(f.name).foregroundStyle(StrandPalette.textPrimary)
                                     Spacer()
-                                    Text(f.protein.map { "\(f.kcal) kcal · \(Int($0.rounded())) g P" } ?? "\(f.kcal) kcal")
+                                    Text(f.summary)
                                         .foregroundStyle(StrandPalette.textSecondary)
                                 }
                             }
@@ -645,8 +722,8 @@ private struct AddFoodSheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        plan.addFood(name: name, kcal: Int(kcal) ?? 0,
-                                     protein: Double(protein.replacingOccurrences(of: ",", with: ".")), day: day)
+                        plan.addFood(name: name, kcal: Int(kcal) ?? 0, protein: grams(protein),
+                                     carbs: grams(carbs), fat: grams(fat), day: day)
                         dismiss()
                     }
                     .disabled((Int(kcal) ?? 0) <= 0)
@@ -752,6 +829,14 @@ private struct CutPlanSheet: View {
                         Text("None").tag(0.0)
                         Text("Half").tag(0.5)
                         Text("All").tag(1.0)
+                    }
+                }
+                Section("This week") {
+                    Stepper(value: $plan.weeklyCardioTarget, in: 30...600, step: 10) {
+                        row("Cardio minutes", "\(plan.weeklyCardioTarget) min")
+                    }
+                    Stepper(value: $plan.exerciseDaysTarget, in: 1...7) {
+                        row("Exercise days", "\(plan.exerciseDaysTarget) days")
                     }
                 }
                 Section {

@@ -1,5 +1,8 @@
 import Foundation
 import Combine
+#if os(iOS)
+import HealthKit
+#endif
 
 /// Personal weight-loss plan: goal, daily deficit, a per-day food log and weigh-ins.
 /// Everything lives in UserDefaults on this device, like `ProfileStore`.
@@ -14,6 +17,18 @@ final class CutPlanStore: ObservableObject {
         var at: Date
         /// Grams of protein; nil when not entered (entries from before protein tracking decode as nil).
         var protein: Double?
+        /// sfz: grams of carbohydrate and fat; optional, and nil for entries logged before they existed.
+        var carbs: Double? = nil
+        var fat: Double? = nil
+
+        /// "450 kcal · 30 g P · 40 g C · 15 g F", leaving out anything not entered.
+        var summary: String {
+            var parts = ["\(kcal) kcal"]
+            if let p = protein { parts.append("\(Int(p.rounded())) g P") }
+            if let c = carbs { parts.append("\(Int(c.rounded())) g C") }
+            if let f = fat { parts.append("\(Int(f.rounded())) g F") }
+            return parts.joined(separator: " · ")
+        }
     }
 
     struct WeighIn: Codable, Identifiable, Equatable {
@@ -40,6 +55,9 @@ final class CutPlanStore: ObservableObject {
     @Published var logBuffer: Double { didSet { d.set(logBuffer, forKey: K.logBuffer) } }
     /// Daily protein target in grams per kg of GOAL weight (2.0 = 150 g at 75 kg).
     @Published var proteinPerKg: Double { didSet { d.set(proteinPerKg, forKey: K.proteinPerKg) } }
+    /// sfz: weekly targets for the "This week" card: workout minutes and days with a workout.
+    @Published var weeklyCardioTarget: Int { didSet { d.set(weeklyCardioTarget, forKey: K.weeklyCardio) } }
+    @Published var exerciseDaysTarget: Int { didSet { d.set(exerciseDaysTarget, forKey: K.exerciseDays) } }
     /// Food log keyed by local day key (`yyyy-MM-dd`).
     @Published private(set) var food: [String: [FoodEntry]] { didSet { save(food, K.food) } }
     @Published private(set) var weighIns: [WeighIn] { didSet { save(weighIns, K.weighIns) } }
@@ -53,6 +71,7 @@ final class CutPlanStore: ObservableObject {
         static let startDay = "cut.startDay", logBuffer = "cut.logBuffer", proteinPerKg = "cut.proteinPerKg"
         static let deficit = "cut.dailyDeficit", targetDate = "cut.targetDate", workoutShare = "cut.workoutShare", eatBack = "cut.workoutEatBack"
         static let food = "cut.food", weighIns = "cut.weighIns", active = "cut.activeByDay"
+        static let weeklyCardio = "cut.weeklyCardioMin", exerciseDays = "cut.exerciseDaysTarget"
     }
 
     private init() {
@@ -69,6 +88,8 @@ final class CutPlanStore: ObservableObject {
         workoutEatBack = d.object(forKey: K.eatBack) as? Double ?? 0.5
         logBuffer = d.object(forKey: K.logBuffer) as? Double ?? 0.10
         proteinPerKg = d.object(forKey: K.proteinPerKg) as? Double ?? 2.0
+        weeklyCardioTarget = d.object(forKey: K.weeklyCardio) as? Int ?? 150
+        exerciseDaysTarget = d.object(forKey: K.exerciseDays) as? Int ?? 5
         let loadedFood: [String: [FoodEntry]] = Self.load(d, K.food) ?? [:]
         food = loadedFood
         weighIns = Self.load(d, K.weighIns) ?? []
@@ -80,6 +101,16 @@ final class CutPlanStore: ObservableObject {
         if d.string(forKey: K.startDay) == nil { d.set(startDay, forKey: K.startDay) }
         // didSet does not fire in init; pin a derived date so it doesn't slide forward each launch.
         if d.object(forKey: K.targetDate) == nil { d.set(targetDate, forKey: K.targetDate) }
+        // sfz: food logged before Apple Health writing existed goes in once, so Health has the full log.
+        let backfillKey = "sfz.health.foodBackfilled"
+        if !d.bool(forKey: backfillKey) {
+            let all = loadedFood.values.flatMap { $0 }
+            if !all.isEmpty {
+                Task { if await SfzHealthWriter.saveFoods(all) { UserDefaults.standard.set(true, forKey: backfillKey) } }
+            } else {
+                d.set(true, forKey: backfillKey)
+            }
+        }
     }
 
     func setActive(_ kcal: Double, day: String) {
@@ -97,11 +128,16 @@ final class CutPlanStore: ObservableObject {
     /// Calories as counted everywhere: logged plus the under-logging buffer.
     func eaten(day: String) -> Double { Double(logged(day: day)) * (1 + logBuffer) }
 
-    func addFood(name: String, kcal: Int, protein: Double? = nil, day: String) {
+    func addFood(name: String, kcal: Int, protein: Double? = nil, carbs: Double? = nil, fat: Double? = nil,
+                 day: String) {
         guard kcal > 0 else { return }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        food[day, default: []].append(FoodEntry(name: trimmed.isEmpty ? "Food" : trimmed, kcal: kcal, at: Date(),
-                                                protein: protein.flatMap { $0 > 0 ? $0 : nil }))
+        let entry = FoodEntry(name: trimmed.isEmpty ? "Food" : trimmed, kcal: kcal, at: Date(),
+                              protein: protein.flatMap { $0 > 0 ? $0 : nil },
+                              carbs: carbs.flatMap { $0 > 0 ? $0 : nil },
+                              fat: fat.flatMap { $0 > 0 ? $0 : nil })
+        food[day, default: []].append(entry)
+        SfzHealthWriter.saveFood(entry)   // sfz: also into Apple Health (Google Health reads it from there)
     }
 
     /// Protein logged for the day, grams (as typed; the calorie buffer does not apply).
@@ -111,6 +147,7 @@ final class CutPlanStore: ObservableObject {
     var proteinTarget: Double { goalKg * proteinPerKg }
 
     func removeFood(_ id: UUID, day: String) {
+        SfzHealthWriter.deleteFood(id: id)   // sfz: remove the matching Apple Health samples too
         food[day]?.removeAll { $0.id == id }
         if food[day]?.isEmpty == true { food[day] = nil }
     }
@@ -119,7 +156,7 @@ final class CutPlanStore: ObservableObject {
     func recentFoods(limit: Int = 6) -> [FoodEntry] {
         var seen = Set<String>()
         return food.values.flatMap { $0 }.sorted { $0.at > $1.at }.filter {
-            seen.insert("\($0.name.lowercased())|\($0.kcal)|\($0.protein ?? 0)").inserted
+            seen.insert("\($0.name.lowercased())|\($0.kcal)|\($0.protein ?? 0)|\($0.carbs ?? 0)|\($0.fat ?? 0)").inserted
         }.prefix(limit).map { $0 }
     }
 
@@ -222,3 +259,81 @@ final class CutPlanStore: ObservableObject {
         d.data(forKey: key).flatMap { try? JSONDecoder().decode(T.self, from: $0) }
     }
 }
+
+
+// MARK: - sfz: Apple Health writes for food and mindful minutes
+
+#if os(iOS)
+/// Writes sfz's own logs into Apple Health so other apps (Google Health, Fitness) see them:
+/// food from the Goal page (calories, protein, carbs, fat) and Breathe sessions (mindful minutes).
+/// Every food sample carries `HKMetadataKeyExternalUUID = "sfz:food:<entry id>"`, which is how a
+/// removed entry's samples are found and deleted. Failures are silent: the in-app log is the source
+/// of truth and nothing here blocks it.
+enum SfzHealthWriter {
+    private static let store = HKHealthStore()
+
+    private static let energy = HKQuantityType(.dietaryEnergyConsumed)
+    private static let protein = HKQuantityType(.dietaryProtein)
+    private static let carbs = HKQuantityType(.dietaryCarbohydrates)
+    private static let fat = HKQuantityType(.dietaryFatTotal)
+    private static let mindful = HKCategoryType(.mindfulSession)
+    private static var foodTypes: Set<HKSampleType> { [energy, protein, carbs, fat] }
+
+    /// Asks once for the share types it needs (iOS only prompts for ones never asked about) and
+    /// reports whether calories, the one always written, may be saved.
+    private static func authorized(_ types: Set<HKSampleType>, key: HKSampleType) async -> Bool {
+        guard HKHealthStore.isHealthDataAvailable() else { return false }
+        do { try await store.requestAuthorization(toShare: types, read: []) } catch { return false }
+        return store.authorizationStatus(for: key) == .sharingAuthorized
+    }
+
+    private static func externalKey(_ id: UUID) -> String { "sfz:food:\(id.uuidString)" }
+
+    private static func samples(for e: CutPlanStore.FoodEntry) -> [HKQuantitySample] {
+        let meta: [String: Any] = [HKMetadataKeyExternalUUID: externalKey(e.id), HKMetadataKeyFoodType: e.name]
+        func sample(_ t: HKQuantityType, _ unit: HKUnit, _ v: Double) -> HKQuantitySample? {
+            guard store.authorizationStatus(for: t) == .sharingAuthorized, v > 0 else { return nil }
+            return HKQuantitySample(type: t, quantity: HKQuantity(unit: unit, doubleValue: v),
+                                    start: e.at, end: e.at, metadata: meta)
+        }
+        return [sample(energy, .kilocalorie(), Double(e.kcal)),
+                e.protein.flatMap { sample(protein, .gram(), $0) },
+                e.carbs.flatMap { sample(carbs, .gram(), $0) },
+                e.fat.flatMap { sample(fat, .gram(), $0) }].compactMap { $0 }
+    }
+
+    static func saveFood(_ e: CutPlanStore.FoodEntry) {
+        Task { _ = await saveFoods([e]) }
+    }
+
+    /// Returns true when the samples were saved (or there was nothing to save).
+    @discardableResult
+    static func saveFoods(_ entries: [CutPlanStore.FoodEntry]) async -> Bool {
+        guard await authorized(foodTypes, key: energy) else { return false }
+        let all = entries.flatMap { samples(for: $0) }
+        guard !all.isEmpty else { return true }
+        do { try await store.save(all); return true } catch { return false }
+    }
+
+    static func deleteFood(id: UUID) {
+        Task {
+            let predicate = HKQuery.predicateForObjects(withMetadataKey: HKMetadataKeyExternalUUID,
+                                                        allowedValues: [externalKey(id)])
+            for t in [energy, protein, carbs, fat] where store.authorizationStatus(for: t) == .sharingAuthorized {
+                _ = try? await store.deleteObjects(of: t, predicate: predicate)
+            }
+        }
+    }
+
+    /// A Breathe session as mindful minutes. Sessions under a minute are not saved.
+    static func saveMindful(start: Date, end: Date) {
+        guard end.timeIntervalSince(start) >= 60 else { return }
+        Task {
+            guard await authorized([mindful], key: mindful) else { return }
+            let sample = HKCategorySample(type: mindful, value: HKCategoryValue.notApplicable.rawValue,
+                                          start: start, end: end)
+            try? await store.save(sample)
+        }
+    }
+}
+#endif

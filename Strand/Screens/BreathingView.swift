@@ -117,6 +117,8 @@ private struct BreathingContent: View {
     @State private var sessionLength: SessionLength = .ten
     @State private var showEdu = false
     @State private var running = false
+    /// sfz: when the current session started, for saving it to Apple Health as mindful minutes.
+    @State private var sessionStartedAt: Date?
 
     /// 0 = fully contracted, 1 = fully expanded. Drives the orb scale.
     @State private var orbProgress: CGFloat = 0
@@ -718,6 +720,7 @@ private struct BreathingContent: View {
 
     private func start() {
         running = true
+        sessionStartedAt = Date()
         ScreenIdle.keepAwake(true)
         sessionSeconds = 0
         breathCount = 0
@@ -750,6 +753,10 @@ private struct BreathingContent: View {
         // actually buzzing, so a stop on an idle trainer stays silent.
         if wasRunning { model.stopHaptics() }
         if wasRunning { captureOutcome() }
+        #if os(iOS)
+        if wasRunning, let began = sessionStartedAt { SfzHealthWriter.saveMindful(start: began, end: Date()) }
+        #endif
+        sessionStartedAt = nil
         if reduceMotion {
             orbProgress = 0
         } else {

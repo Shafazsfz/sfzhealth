@@ -18,6 +18,7 @@ struct CutTodayView: View {
     /// sfz: this week's workouts (Monday onwards) for the "This week" card.
     @State private var weekRows: [WorkoutRow] = []
     @State private var zoneMinutes: Int = 0
+    @State private var waterML: Double = 0
     @State private var showAddFood = false
     @State private var showWeight = false
     @State private var showPlan = false
@@ -49,6 +50,7 @@ struct CutTodayView: View {
             VStack(spacing: NoopMetrics.sectionGap) {
                 budgetCard
                 foodCard
+                waterCard
                 goalCard
                 weekCard
                 fatCard
@@ -435,6 +437,57 @@ struct CutTodayView: View {
         let todayLogged = !plan.entries(day: dayKey).isEmpty
         let today = todayLogged ? (burnedSoFar - plan.eaten(day: dayKey)) / CutPlanStore.kcalPerKgFat : 0
         return (base.kg - today, base.days + (todayLogged ? 1 : 0))
+    }
+
+    /// sfz: today's water with one-tap adds; the full log (edit, delete, custom size) opens from here.
+    private var waterCard: some View {
+        let goal = repo.hydrationGoalML(profileSex: profile.sex)
+        let frac = goal > 0 ? min(waterML / Double(goal), 1) : 0
+        return NoopCard {
+            VStack(alignment: .leading, spacing: NoopMetrics.space3) {
+                HStack {
+                    Text("WATER TODAY").font(StrandFont.overline).tracking(1.6).foregroundStyle(StrandPalette.textSecondary)
+                    Spacer()
+                    NavigationLink(value: TabRoute.hydration) {
+                        HStack(spacing: 2) {
+                            Text("Log").font(StrandFont.caption)
+                            Image(systemName: "chevron.right").font(StrandFont.caption)
+                        }
+                        .foregroundStyle(StrandPalette.accent)
+                    }
+                    .buttonStyle(.plain)
+                }
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text("\(Int(waterML)) ml").font(StrandFont.title2).foregroundStyle(StrandPalette.textPrimary)
+                    Text("of \(goal) ml").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                }
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(StrandPalette.hairline)
+                        Capsule().fill(StrandPalette.metricCyan).frame(width: waterML > 0 ? max(8, g.size.width * frac) : 0)
+                    }
+                }
+                .frame(height: 8)
+                HStack(spacing: NoopMetrics.space2) {
+                    ForEach([250, 500, 750], id: \.self) { ml in
+                        Button {
+                            Task {
+                                await repo.logHydration(amountMl: ml)
+                                waterML = await repo.hydrationTotal(day: dayKey)
+                            }
+                        } label: {
+                            Text("+\(ml) ml").font(StrandFont.subhead)
+                                .frame(maxWidth: .infinity).padding(.vertical, NoopMetrics.space2)
+                                .background(Capsule().fill(StrandPalette.metricCyan.opacity(0.14)))
+                                .foregroundStyle(StrandPalette.metricCyan)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Add \(ml) millilitres of water")
+                    }
+                }
+            }
+        }
+        .task(id: repo.hydrationSeq) { waterML = await repo.hydrationTotal(day: dayKey) }
     }
 
     private var foodCard: some View {

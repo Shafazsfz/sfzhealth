@@ -296,7 +296,8 @@ struct TrendsView: View {
                        // section reveal is unchanged; this only defers building that stack until it scrolls in.
                        onRefresh: { await repo.refresh() },
                        lazy: true,
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: liquidScaffoldSky(),
+                       trailing: { shareRecapIcon }) {
             if repo.days.isEmpty {
                 ComingSoon(what: repo.loaded
                     ? "Trends need history to draw. Import your WHOOP export in Data Sources to see weeks, months and years instantly."
@@ -413,19 +414,34 @@ struct TrendsView: View {
                 } else {
                     WeeklyDigestContent(digest: digest, compact: true, showsHeader: false)
                         .padding(.top, NoopMetrics.space1)
-                    // Share this week's recap as an image. Renders the digest card (with its header) to a
-                    // PNG off-screen and hands it to the share sheet / Save panel — reuses TrendsReport's
-                    // ImageRenderer path. Only offered when the week actually holds data.
-                    NoopButton("Share recap", systemImage: "square.and.arrow.up", kind: .secondary) {
-                        let page = WeeklyDigestContent(digest: digest, compact: true, showsHeader: true)
-                            .frame(width: 380)
-                            .padding(24)
-                            .background(StrandPalette.surfaceBase)
-                            .environment(\.colorScheme, colorScheme)
-                        TrendsReportRenderer.exportPNG(page: page, suggestedName: "noop-recap-\(weekAnchorDay).png")
-                    }
                 }
             }
+        }
+    }
+
+    /// sfz: Share this week's recap as an image, from a small icon beside the Trends title. Renders the
+    /// digest card (with its header) to a PNG off-screen and hands it to the share sheet. Hidden when the
+    /// selected week holds no data.
+    @ViewBuilder private var shareRecapIcon: some View {
+        let digest = WeeklyDigestSource.digest(from: repo.days, anchorDay: weekAnchorDay)
+        if !repo.days.isEmpty, !digest.isEmpty {
+            Button {
+                let page = WeeklyDigestContent(digest: digest, compact: true, showsHeader: true)
+                    .frame(width: 380)
+                    .padding(24)
+                    .background(StrandPalette.surfaceBase)
+                    .environment(\.colorScheme, colorScheme)
+                TrendsReportRenderer.exportPNG(page: page, suggestedName: "sfz-recap-\(weekAnchorDay).png")
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+                    .font(StrandFont.subhead.weight(.semibold))
+                    .foregroundStyle(StrandPalette.accent)
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(StrandPalette.hairline))
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Share this week's recap")
         }
     }
 
@@ -1006,37 +1022,78 @@ struct SfzKeyMetricsGrid: View {
                                 GridItem(.flexible(), spacing: NoopMetrics.space3)],
                       spacing: NoopMetrics.space3) {
                 ForEach(shown) { m in
-                    SfzKeyMetricCard(metric: m, data: data[m] ?? SfzKeyMetricData())
+                    if m == .water {
+                        NavigationLink(value: TabRoute.hydration) {
+                            SfzKeyMetricCard(metric: m, data: data[m] ?? SfzKeyMetricData())
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        SfzKeyMetricCard(metric: m, data: data[m] ?? SfzKeyMetricData())
+                    }
                 }
             }
         }
-        .task(id: "\(repo.refreshSeq)-\(plan.food.values.reduce(0) { $0 + $1.count })-\(plan.weighIns.count)") { await load() }
+        .task(id: "\(repo.refreshSeq)-\(repo.hydrationSeq)-\(plan.food.values.reduce(0) { $0 + $1.count })-\(plan.weighIns.count)") { await load() }
         .sheet(isPresented: $editing) { editSheet }
     }
 
+    private func setShown(_ m: SfzKeyMetric, _ on: Bool) {
+        var h = hidden
+        if on { h.remove(m.rawValue) } else { h.insert(m.rawValue) }
+        hiddenRaw = SfzKeyMetric.allCases.map(\.rawValue).filter { h.contains($0) }.joined(separator: ",")
+    }
+
+    /// Edit shows the real cards: tap one to remove it from Trends, or tap one under "Add a card" to add it.
     private var editSheet: some View {
-        NavigationStack {
-            List {
-                Section {
-                    ForEach(SfzKeyMetric.allCases) { m in
-                        Toggle(m.title, isOn: Binding(
-                            get: { !hidden.contains(m.rawValue) },
-                            set: { on in
-                                var h = hidden
-                                if on { h.remove(m.rawValue) } else { h.insert(m.rawValue) }
-                                hiddenRaw = SfzKeyMetric.allCases.map(\.rawValue).filter { h.contains($0) }
-                                    .joined(separator: ",")
-                            }))
-                        .tint(StrandPalette.accent)
+        let showing = shown
+        let available = SfzKeyMetric.allCases.filter { hidden.contains($0.rawValue) }
+        let cols = [GridItem(.flexible(), spacing: NoopMetrics.space3), GridItem(.flexible(), spacing: NoopMetrics.space3)]
+        return NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: NoopMetrics.space4) {
+                    Text("On Trends").font(StrandFont.headline).foregroundStyle(StrandPalette.textPrimary)
+                    if showing.isEmpty {
+                        Text("No cards showing. Add one below.").font(StrandFont.caption)
+                            .foregroundStyle(StrandPalette.textTertiary)
                     }
-                } footer: {
-                    Text("Choose which cards show on Trends.")
+                    LazyVGrid(columns: cols, spacing: NoopMetrics.space3) {
+                        ForEach(showing) { m in editTile(m, on: true) }
+                    }
+                    Text("Add a card").font(StrandFont.headline).foregroundStyle(StrandPalette.textPrimary)
+                        .padding(.top, NoopMetrics.space2)
+                    if available.isEmpty {
+                        Text("Every card is already on Trends.").font(StrandFont.caption)
+                            .foregroundStyle(StrandPalette.textTertiary)
+                    }
+                    LazyVGrid(columns: cols, spacing: NoopMetrics.space3) {
+                        ForEach(available) { m in editTile(m, on: false) }
+                    }
                 }
+                .padding(NoopMetrics.screenHPadding)
+                .animation(.easeInOut(duration: 0.2), value: hiddenRaw)
             }
+            .background(StrandPalette.surfaceBase)
             .navigationTitle("Key metrics")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { editing = false } } }
         }
+    }
+
+    /// A card as it will look, with a remove (minus) or add (plus) badge in the corner.
+    private func editTile(_ m: SfzKeyMetric, on: Bool) -> some View {
+        Button { setShown(m, !on) } label: {
+            SfzKeyMetricCard(metric: m, data: data[m] ?? SfzKeyMetricData())
+                .opacity(on ? 1 : 0.85)
+                .overlay(alignment: .topTrailing) {
+                    Image(systemName: on ? "minus.circle.fill" : "plus.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(on ? StrandPalette.textTertiary : StrandPalette.accent)
+                        .background(Circle().fill(StrandPalette.surfaceBase))
+                        .padding(6)
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(on ? "Remove \(m.title)" : "Add \(m.title)")
     }
 
     // MARK: Loading
@@ -1139,7 +1196,7 @@ struct SfzKeyMetricsGrid: View {
         let goal = repo.hydrationGoalML(profileSex: profile.sex)
         out[.water] = SfzKeyMetricData(
             headline: w.last.flatMap { $0 }.map { Self.fmt($0) } ?? "No data", unit: w.last.flatMap { $0 } == nil ? "" : "ml",
-            days: w, note: "Goal \(Self.fmt(Double(goal))) ml")
+            days: w, note: "Tap to log · goal \(Self.fmt(Double(goal))) ml")
 
         // Sleep
         let sleep = rows.map { $0?.totalSleepMin }
@@ -1158,7 +1215,24 @@ struct SfzKeyMetricsGrid: View {
         vital(.restingHr, rows.map { $0?.restingHr.map(Double.init) }, unit: "bpm")
         vital(.breathing, rows.map { $0?.respRateBpm }, unit: "brpm", digits: 1)
         vital(.spo2, rows.map { $0?.spo2Pct }, unit: "%", digits: 1)
-        vital(.skinTemp, rows.map { r in r?.skinTempDevC.flatMap { abs($0) < 5 ? $0 : nil } }, unit: "°C", digits: 1, signed: true)
+        // Skin temperature: the night's absolute wrist temperature; older rows only carry a deviation, and
+        // imports write an absolute into the deviation column, so sort each value by its size.
+        let skinAbs = rows.map { r -> Double? in
+            if let a = r?.skinTempC { return a }
+            if let d = r?.skinTempDevC, SkinTempDisplay.kind(of: d) == .absolute { return d }
+            return nil
+        }
+        let skinDev = rows.map { r -> Double? in
+            r?.skinTempDevC.flatMap { SkinTempDisplay.kind(of: $0) == .deviation ? $0 : nil }
+        }
+        if skinAbs.contains(where: { $0 != nil }) {
+            vital(.skinTemp, skinAbs, unit: "°C", digits: 1)
+            if let dev = latest(skinDev) {
+                out[.skinTemp]?.note = "\(dev >= 0 ? "+" : "")\(Self.fmt(dev, 1)) °C vs your usual"
+            }
+        } else {
+            vital(.skinTemp, skinDev, unit: "°C", digits: 1, signed: true)
+        }
 
         // Weight: weigh-ins over the last three months, else the current estimate.
         let since = Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date()

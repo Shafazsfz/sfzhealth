@@ -46,7 +46,7 @@ struct LiquidTodayView: View {
     /// The Coach master switch (`noop.coachEnabled`, shared by name with Android). Default ON. Gates the
     /// Today launcher card here; the tab and the daily brief read the same key.
     @AppStorage("noop.coachEnabled") private var coachEnabled = true
-    @AppStorage(HydrationStore.enabledKey) private var hydrationEnabled = false
+    @AppStorage(HydrationStore.enabledKey) private var hydrationEnabled = true   // sfz: on by default
     /// Today's hydration total + goal (ml), resolved in `load()`. nil → the card shows "—".
     @State private var hydrationTotalML: Double?
     @State private var hydrationGoalML: Int?

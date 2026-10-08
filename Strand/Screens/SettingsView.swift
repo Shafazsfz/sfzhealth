@@ -155,7 +155,7 @@ struct SettingsView: View {
     @AppStorage(QuietMotionPrefs.enabledKey) private var quietMotion = false
     // Hydration tracker (opt-in, MVP). Default OFF — when off the hydration dashboard card + detail are
     // hidden. Mirrors the Android pref so the toggle reads the same on both platforms.
-    @AppStorage(HydrationStore.enabledKey) private var hydrationEnabled = false
+    @AppStorage(HydrationStore.enabledKey) private var hydrationEnabled = true   // sfz: on by default
 
     /// Opt-in "Auto-detect workouts" (default OFF). When ON, Today scans the last day or two of HR for a
     /// sustained-elevated window and offers — via a single dismissible card — to save it as a workout.
@@ -1713,7 +1713,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "drop.fill",
             title: "Features",
-            blurb: "Optional trackers, off by default. Turn them on to add their cards. Everything stays on \(Platform.deviceNounPhrase)."
+            blurb: "Optional trackers. Turn them off to hide their cards. Everything stays on \(Platform.deviceNounPhrase)."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.space2 + 2) {
                 Toggle(isOn: $hydrationEnabled) {

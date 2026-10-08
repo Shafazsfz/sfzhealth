@@ -7,7 +7,7 @@ enum AppChangelog {
 
     /// Bump this when you add a release below. The "What's New" sheet shows automatically when the
     /// stored last-seen version is behind this. (Decoupled from the bundle version on purpose.)
-    static let currentVersion = "12.0.0"
+    static let currentVersion = "1.0.0"
 
     struct Release: Identifiable {
         let version: String
@@ -19,6 +19,23 @@ enum AppChangelog {
 
     /// Newest first.
     static let releases: [Release] = [
+        // sfz releases. sfz keeps its own version numbers; the NOOP releases below are what it is built on.
+        Release(
+            version: "1.0.0",
+            title: "sfz 1.0: a Goal page with habits, challenges and your own targets",
+            date: "October 2026",
+            items: [
+                "**Goal page.** Calories left, food with protein, carbs and fat, water, weight goal, this week's Active Zone Minutes and exercise days, and fat lost. Every card can be shown or hidden from Edit page.",
+                "**Habits.** Counters (push-ups, pull-ups, crunches), timers (plank), yes/no (no sugar, reading, skin care), gym with done, skip or rest and what you trained, plus steps, water, calories under target and burn target filled in for you. Set reminders, days and targets on each, or every target on one Targets page.",
+                "**Challenges.** 75 Hard, 75 Soft, 30-day push-ups, 90 days or your own, strict or flexible. Day X of N, streaks, consistency, a calendar, and a choice to restart or switch to flexible after a miss.",
+                "**Consistency grid.** Twenty weeks at a glance, all-or-nothing in a strict challenge, and it can start fresh when your targets change.",
+                "**Trends.** Key metrics cards in the style of Google Health, with your habits, food, water, sleep and vitals over the week.",
+                "**Sleep and reminders.** Wind-down nudge with your sleep need, a bedtime reminder and a countdown; reminders to put your WHOOP back on, with snooze and quiet hours; high and low heart rate alerts.",
+                "**Today.** Your cards three to a row, a habits summary, and Recovery, Strain and Sleep in the Dynamic Island.",
+                "**Apple Health.** Food (calories, protein, carbs, fat) and Breathe sessions as mindful minutes are written to Apple Health.",
+                "Built on NOOP 12.0.0.",
+            ]
+        ),
         Release(
             version: "12.0.0",
             title: "Today your way, heart rate any app can read, and Italian",

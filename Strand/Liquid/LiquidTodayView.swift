@@ -47,6 +47,8 @@ struct LiquidTodayView: View {
     /// Today launcher card here; the tab and the daily brief read the same key.
     @AppStorage("noop.coachEnabled") private var coachEnabled = true
     @AppStorage(HydrationStore.enabledKey) private var hydrationEnabled = true   // sfz: on by default
+    /// sfz: Your cards as a three-up grid (default) or the original list.
+    @AppStorage("sfz.yourCardsGrid") private var yourCardsGrid = true
     /// Today's hydration total + goal (ml), resolved in `load()`. nil → the card shows "—".
     @State private var hydrationTotalML: Double?
     @State private var hydrationGoalML: Int?
@@ -770,6 +772,14 @@ struct LiquidTodayView: View {
                 Text("YOUR CARDS").font(StrandFont.overline).tracking(1.6)
                     .foregroundStyle(StrandPalette.textTertiary)
                 Spacer()
+                Button { yourCardsGrid.toggle() } label: {
+                    Image(systemName: yourCardsGrid ? "list.bullet" : "square.grid.3x3")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(StrandPalette.accent)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(yourCardsGrid ? "Show as a list" : "Show as a grid")
+                .padding(.trailing, 10)
                 Button { customizationDestination = .yourCards } label: {
                     // #492 item 4 parity: unify the Your Cards / Key Metrics edit affordance to "EDIT" across
                     // platforms (Android #563). Reuse the localized "Edit" key, uppercased at display, so this
@@ -785,13 +795,26 @@ struct LiquidTodayView: View {
             // Data-driven off the SAME @AppStorage the CUSTOMISE editor writes, so add / remove /
             // reorder in Customise reflects on the home screen live. The hydration filter mirrors classic
             // TodayView's `enabledDashboardCards` and Android's `it != HYDRATION || hydrationEnabled`.
-            ForEach(DashboardCardPrefs.decodeEnabled(dashboardCardsRaw)
-                        .filter { hydrationEnabled || $0 != .hydration }
-                        // Coach off means the AI is off, so the launcher card goes with the tab: leaving it
-                        // on Today would offer a feature the wearer has just switched off. Same gate shape
-                        // as hydration, so a card they had added keeps its place and returns on re-enable.
-                        .filter { coachEnabled || $0 != .coach }) { card in
-                liquidCard(for: card)
+            let cards = DashboardCardPrefs.decodeEnabled(dashboardCardsRaw)
+                .filter { hydrationEnabled || $0 != .hydration }
+                // Coach off means the AI is off, so the launcher card goes with the tab: leaving it
+                // on Today would offer a feature the wearer has just switched off. Same gate shape
+                // as hydration, so a card they had added keeps its place and returns on re-enable.
+                .filter { coachEnabled || $0 != .coach }
+            if yourCardsGrid {
+                // sfz: three to a row. The 30-day steps card keeps its full width underneath.
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                    ForEach(cards.filter { $0 != .stepsAverage30 }) { card in
+                        liquidCard(for: card)
+                    }
+                }
+                ForEach(cards.filter { $0 == .stepsAverage30 }) { card in
+                    liquidCard(for: card)
+                }
+            } else {
+                ForEach(cards) { card in
+                    liquidCard(for: card)
+                }
             }
         }
     }
@@ -1127,6 +1150,30 @@ struct LiquidTodayView: View {
     @ViewBuilder
     private func cardLinkBody(title: String, sub: String, value: String,
                               tint: Color, frac: Double?) -> some View {
+        if yourCardsGrid {
+            // sfz: compact tile for the three-up grid.
+            VStack(alignment: .leading, spacing: 6) {
+                LiquidVessel(value: frac, tint: tint, animated: false, tapPassesThrough: true)
+                    .frame(width: 24, height: 24)
+                Spacer(minLength: 0)
+                Text(value.isEmpty ? "›" : value).font(StrandFont.number(16)).foregroundStyle(StrandPalette.textPrimary)
+                    .lineLimit(1).minimumScaleFactor(0.55)
+                Text(title.uppercased()).font(StrandFont.overlineScaled(9)).tracking(0.6)
+                    .foregroundStyle(StrandPalette.textSecondary)
+                    .lineLimit(2).minimumScaleFactor(0.8)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, minHeight: 96, alignment: .topLeading)
+            .padding(10)
+            .background(NoopPanelSurface(tint: tint, cornerRadius: 18, surfaceOpacity: cardOpacity))
+        } else {
+            cardRowBody(title: title, sub: sub, value: value, tint: tint, frac: frac)
+        }
+    }
+
+    @ViewBuilder
+    private func cardRowBody(title: String, sub: String, value: String,
+                             tint: Color, frac: Double?) -> some View {
         HStack(spacing: 12) {
                 // tapPassesThrough: the vessel's splash gesture would otherwise swallow the enclosing
                 // Button's tap, leaving a dead 30pt disc on the leading edge of a tappable card row.

@@ -16,9 +16,13 @@ enum SfzScreenTime {
             try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
             return isAuthorized
         } catch {
+            lastError = error.localizedDescription
             return false
         }
     }
+
+    /// Why the last request failed, shown under the button.
+    static var lastError: String?
 
     private static func watchingKey(_ id: String) -> String { "sfz.screen.watching.\(id)" }
 
@@ -117,6 +121,7 @@ struct SfzScreenSetupSection: View {
     @State private var selection = FamilyActivitySelection()
     @State private var denied = false
     @State private var refresh = 0
+    @State private var authorized = SfzScreenTime.isAuthorized
 
     var body: some View {
         let id = habit.id.uuidString
@@ -128,24 +133,39 @@ struct SfzScreenSetupSection: View {
                     .frame(height: 60)
                     .id(refresh)
             }
-            Button(count > 0 ? "Change apps (\(count) chosen)" : "Choose apps") {
-                Task {
-                    if await SfzScreenTime.authorize() {
-                        selection = SfzScreenShared.selection(id) ?? FamilyActivitySelection()
-                        picking = true
-                    } else {
-                        denied = true
+            if !authorized {
+                // Step 1: iOS shows its own "Allow sfz to access Screen Time?" sheet right here,
+                // confirmed with Face ID or the passcode. No trip to Settings.
+                Button {
+                    Task {
+                        denied = false
+                        authorized = await SfzScreenTime.authorize()
+                        denied = !authorized
+                        if authorized {
+                            selection = SfzScreenShared.selection(id) ?? FamilyActivitySelection()
+                            picking = true
+                        }
                     }
+                } label: {
+                    Label("Allow Screen Time access", systemImage: "hourglass.badge.plus")
+                }
+            } else {
+                // Step 2: Apple's app list. Search Instagram and tick it.
+                Button(count > 0 ? "Change apps (\(count) chosen)" : "Choose apps") {
+                    selection = SfzScreenShared.selection(id) ?? FamilyActivitySelection()
+                    picking = true
                 }
             }
             if denied {
-                Text("Screen Time access was not allowed. You can allow it in Settings → Screen Time.")
+                Text("iOS didn't allow it\(SfzScreenTime.lastError.map { ": \($0)" } ?? "."). Tap Allow again and confirm with Face ID or your passcode.")
                     .font(StrandFont.caption).foregroundStyle(StrandPalette.statusWarning)
             }
         } header: {
             Text("Apps")
         } footer: {
-            Text("Apple doesn't let apps choose Instagram for you. In Apple's list, search \"\(habit.name)\" and tick it. Your average shows above before you set the limit; going over the limit marks the day missed.")
+            Text(authorized
+                 ? "Apple doesn't let apps choose Instagram for you. In Apple's list, search \"\(habit.name)\" and tick it. Your average shows above before you set the limit; going over the limit marks the day missed."
+                 : "First allow Screen Time access. iOS asks right here; nothing to change in Settings.")
         }
         .familyActivityPicker(isPresented: $picking, selection: $selection)
         .onChange(of: selection) { _, sel in

@@ -1606,6 +1606,7 @@ struct SfzHabitDetail: View {
     @State private var name = ""
     @State private var confirmLower = false
     @State private var confirmRemove = false
+    @State private var askFresh = false
 
     private var today: String { SfzHabitStore.today }
     private static let weekdayOrder = [2, 3, 4, 5, 6, 7, 1]
@@ -1638,6 +1639,7 @@ struct SfzHabitDetail: View {
     private func saveTarget() {
         store.setTarget(habitId, to: draftTarget, fromToday: applyToday)
         SfzScreenTime.sync(store)
+        if applyToday { askFresh = true }
     }
 
     @ViewBuilder private func form(_ h: SfzHabit) -> some View {
@@ -1802,6 +1804,12 @@ struct SfzHabitDetail: View {
             Button("Keep", role: .cancel) {}
         } message: {
             Text("This is a strict challenge. Lowering a target marks it Modified.")
+        }
+        .alert("Start the grid fresh?", isPresented: $askFresh) {
+            Button("Start fresh from today") { store.gridStart = SfzHabitStore.today }
+            Button("Keep history", role: .cancel) {}
+        } message: {
+            Text("The new target applies from today. You can start the consistency grid and perfect-day streak again from today; nothing is deleted.")
         }
         .confirmationDialog("Remove \(h.name)?", isPresented: $confirmRemove, titleVisibility: .visible) {
             Button("Remove", role: .destructive) { store.remove(h.id); dismiss() }
@@ -2417,6 +2425,7 @@ struct SfzTargetsSheet: View {
     @State private var draft: [UUID: Double] = [:]
     @State private var fromToday = false
     @State private var confirmLower = false
+    @State private var askFresh = false
     @State private var detail: SfzHabit?
 
     private var list: [SfzHabit] {
@@ -2486,6 +2495,8 @@ struct SfzTargetsSheet: View {
                     Button("Save \(changes.count) change\(changes.count == 1 ? "" : "s")") {
                         if lowersStrict { confirmLower = true } else { save() }
                     }
+                    Button("Start the consistency grid fresh from today") { store.gridStart = SfzHabitStore.today }
+                        .disabled(store.gridStart == SfzHabitStore.today)
                     .disabled(changes.isEmpty)
                 } footer: {
                     Text("Tap a habit's bell for its reminders, days and history.")
@@ -2499,6 +2510,12 @@ struct SfzTargetsSheet: View {
                 Button("Keep", role: .cancel) {}
             } message: {
                 Text("This is a strict challenge. Lowering a target marks it Modified.")
+            }
+            .alert("Start the grid fresh?", isPresented: $askFresh) {
+                Button("Start fresh from today") { store.gridStart = SfzHabitStore.today }
+                Button("Keep history", role: .cancel) {}
+            } message: {
+                Text("Your new targets apply from today. Earlier days were measured against the old ones, so you can start the consistency grid and perfect-day streak again from today. Nothing is deleted, and you can show all history again any time.")
             }
         }
         .sheet(item: $detail) { h in SfzHabitDetail(habitId: h.id) }
@@ -2519,9 +2536,11 @@ struct SfzTargetsSheet: View {
     }
 
     private func save() {
+        let today = fromToday
         for (h, v) in changes { store.setTarget(h.id, to: v, fromToday: fromToday) }
         draft = [:]
         SfzScreenTime.sync(store)
+        if today { askFresh = true }
     }
 }
 
@@ -2552,6 +2571,7 @@ struct SfzConsistencyHeatmap: View {
 
     private func color(_ date: Date) -> Color {
         if date > Date() { return .clear }
+        if let start = store.gridStart, Repository.localDayKey(date) < start { return StrandPalette.hairline.opacity(0.4) }
         if let c = strictChallenge, Repository.localDayKey(date) >= c.effectiveStart {
             let st = store.challengeStatus(c, on: date)
             switch st {
@@ -2580,7 +2600,9 @@ struct SfzConsistencyHeatmap: View {
     var body: some View {
         let streaks = store.perfectStreak()
         let cols = columns
-        let recent = (0..<30).compactMap { Calendar.current.date(byAdding: .day, value: -$0, to: Date()) }.map { store.dayScore($0) }
+        let recent = (0..<30).compactMap { Calendar.current.date(byAdding: .day, value: -$0, to: Date()) }
+            .filter { d in store.gridStart.map { Repository.localDayKey(d) >= $0 } ?? true }
+            .map { store.dayScore($0) }
         let met = recent.reduce(0) { $0 + $1.met }, due = recent.reduce(0) { $0 + $1.due }
         NoopCard {
             VStack(alignment: .leading, spacing: NoopMetrics.space3) {
@@ -2610,6 +2632,12 @@ struct SfzConsistencyHeatmap: View {
                 .frame(height: 7 * 14 + 6 * 3)
                 HStack(spacing: NoopMetrics.space3) {
                     Text("\(streaks.current)-day perfect streak").font(StrandFont.caption).foregroundStyle(StrandPalette.textPrimary)
+                    if let start = store.gridStart {
+                        Button("Since \(SfzHabitStore.date(start).formatted(.dateTime.day().month(.abbreviated))) · show all") {
+                            store.gridStart = nil
+                        }
+                        .font(StrandFont.caption).buttonStyle(.plain).foregroundStyle(StrandPalette.accent)
+                    }
                     Text("Best \(streaks.best)").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
                     Spacer()
                     if strictChallenge != nil {

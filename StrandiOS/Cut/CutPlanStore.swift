@@ -568,6 +568,9 @@ final class SfzHabitStore: ObservableObject {
     @Published private(set) var running: [String: Date] { didSet { save(running, K.running) } }
     @Published var challenge: SfzChallenge? { didSet { save(challenge, K.challenge) } }
     @Published private(set) var finished: [SfzChallenge] { didSet { save(finished, K.finished) } }
+    /// The first day the consistency grid and perfect-day streak count. Set when targets change from
+    /// today and you choose to start fresh; nil counts all history.
+    @Published var gridStart: String? { didSet { d.set(gridStart, forKey: "sfz.gridStart") } }
     @Published var roundUpEnabled: Bool { didSet { d.set(roundUpEnabled, forKey: K.roundUp); changed() } }
     @Published var roundUpMinutes: Int { didSet { d.set(roundUpMinutes, forKey: K.roundUpAt); changed() } }
 
@@ -596,6 +599,7 @@ final class SfzHabitStore: ObservableObject {
         let savedChallenge: SfzChallenge? = Self.load(d, K.challenge)
         challenge = savedChallenge
         finished = Self.load(d, K.finished) ?? []
+        gridStart = d.string(forKey: "sfz.gridStart")
         roundUpEnabled = d.object(forKey: K.roundUp) as? Bool ?? false
         roundUpMinutes = d.object(forKey: K.roundUpAt) as? Int ?? (20 * 60 + 30)
         if !d.bool(forKey: K.seeded) {
@@ -1130,6 +1134,7 @@ final class SfzHabitStore: ObservableObject {
         var stillCurrent = true
         for offset in 0..<365 {
             guard let date = Calendar.current.date(byAdding: .day, value: -offset, to: Date()) else { break }
+            if let start = gridStart, Repository.localDayKey(date) < start { break }
             let s = dayScore(date)
             if s.due == 0 { continue }
             if s.met == s.due {

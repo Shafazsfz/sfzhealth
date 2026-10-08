@@ -494,6 +494,8 @@ struct SfzChallenge: Codable, Identifiable, Equatable {
     var modified = false
     var notes: [String] = []
     var endedDay: String?
+    /// Strict mode: a missed day waiting for you to choose Restart or Switch to Flexible.
+    var pendingMissDay: String?
 
     var effectiveStart: String { restartDays.last ?? startDay }
 }
@@ -914,29 +916,73 @@ final class SfzHabitStore: ObservableObject {
         return n
     }
 
-    /// Strict mode: a past day that was missed starts the challenge again the next day. Automatic
-    /// habits with no data that day are not counted as a miss, so a late sync can't restart it.
+    /// Strict mode: finds the first past day that was missed and holds it for you to choose: start
+    /// again from Day 1, or switch to Flexible and carry on. Automatic habits with no data that day are
+    /// not counted as a miss, so a late sync can't trigger it.
     func enforceStrict() {
-        guard var c = challenge, c.strict, c.endedDay == nil else { return }
-        var restarted = false
-        var guardCount = 0
-        while guardCount < 400 {
-            guardCount += 1
-            let span = Self.daysBetween(c.effectiveStart, Self.today)
-            guard span >= 1 else { break }
-            var failed: String?
-            for i in 0..<span {
-                let day = Self.dayKey(offset: i, from: c.effectiveStart)
-                let st = challengeStatus(c, on: Self.date(day))
-                if st == .missed || st == .partial { failed = day; break }
+        guard var c = challenge, c.strict, c.endedDay == nil, c.pendingMissDay == nil else { return }
+        let span = Self.daysBetween(c.effectiveStart, Self.today)
+        guard span >= 1 else { return }
+        for i in 0..<span {
+            let day = Self.dayKey(offset: i, from: c.effectiveStart)
+            let st = challengeStatus(c, on: Self.date(day))
+            if st == .missed || st == .partial {
+                c.pendingMissDay = day
+                challenge = c
+                return
             }
-            guard let f = failed else { break }
-            let restart = Self.dayKey(offset: 1, from: f)
-            c.restartDays.append(restart)
-            c.notes.append("\(Self.date(f).formatted(.dateTime.day().month(.abbreviated))): missed, back to Day 1")
-            restarted = true
         }
-        if restarted { challenge = c }
+    }
+
+    /// Answers a strict miss: restart the day after it, or switch to Flexible and keep every day so far.
+    func resolveMiss(restart: Bool) {
+        guard var c = challenge, let f = c.pendingMissDay else { return }
+        let when = Self.date(f).formatted(.dateTime.weekday(.wide).day().month(.abbreviated))
+        c.pendingMissDay = nil
+        if restart {
+            c.restartDays.append(Self.dayKey(offset: 1, from: f))
+            c.notes.append("Missed \(when): back to Day 1")
+        } else {
+            c.strict = false
+            c.notes.append("Missed \(when): switched to Flexible")
+        }
+        challenge = c
+        enforceStrict()
+    }
+
+    /// Strict to Flexible keeps everything so far. Flexible to Strict starts strict counting from today.
+    func setStrict(_ strict: Bool) {
+        guard var c = challenge, c.strict != strict else { return }
+        c.strict = strict
+        c.pendingMissDay = nil
+        if strict {
+            c.restartDays.append(Self.today)
+            c.notes.append("Switched to Strict from today")
+        } else {
+            c.notes.append("Day \(dayNumber(c)): switched to Flexible")
+        }
+        challenge = c
+    }
+
+    /// Perfect days (every due habit met) in a row, ending today if it's already perfect, else yesterday.
+    func perfectStreak() -> (current: Int, best: Int) {
+        var current = 0, best = 0, run = 0
+        var stillCurrent = true
+        for offset in 0..<365 {
+            guard let date = Calendar.current.date(byAdding: .day, value: -offset, to: Date()) else { break }
+            let s = dayScore(date)
+            if s.due == 0 { continue }
+            if s.met == s.due {
+                run += 1
+                best = max(best, run)
+                if stillCurrent { current = run }
+            } else {
+                if offset == 0 { continue }
+                stillCurrent = false
+                run = 0
+            }
+        }
+        return (current, best)
     }
 
     /// Marks the challenge complete once its last day has passed.
@@ -952,8 +998,14 @@ final class SfzHabitStore: ObservableObject {
 
     /// Starts a challenge. Template habits are reused by name when they already exist, otherwise added.
     func start(name: String, length: Int, strict: Bool, specs: [SfzChallengeTemplate.HabitSpec],
-               habitIds extra: [UUID], startTomorrow: Bool) {
+               habitIds extra: [UUID], startTomorrow: Bool, targetOverrides: [UUID: Double] = [:]) {
         let day = startTomorrow ? Self.dayKey(offset: 1, from: Self.today) : Self.today
+        for (id, value) in targetOverrides {
+            guard var h = habit(id), h.kind.hasTarget, h.target(on: day) != value else { continue }
+            h.targets.removeAll { $0.from >= day }
+            h.targets.append(SfzTargetChange(from: day, value: value))
+            update(h)
+        }
         var ids: [UUID] = extra
         for spec in specs {
             if let existing = habits.first(where: { $0.name.lowercased() == spec.name.lowercased() && $0.kind == spec.kind }) {

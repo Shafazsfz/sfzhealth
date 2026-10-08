@@ -86,21 +86,32 @@ enum SfzScreenTime {
     }
 }
 
-/// The screen-time card body: today's use (drawn by the report extension) and whether the limit held.
+/// Opens Settings at Screen Time so today's minutes can be read off; falls back to sfz's own settings.
+@MainActor
+func sfzOpenScreenTimeSettings() {
+    guard let url = URL(string: "App-prefs:SCREEN_TIME") else { return }
+    UIApplication.shared.open(url) { opened in
+        if !opened, let fallback = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(fallback)
+        }
+    }
+}
+
+/// The screen-time card body. Automatic when iOS watches the apps (paid developer team); otherwise
+/// you log the minutes from Screen Time with a tap or two.
 struct SfzScreenCardBody: View {
     let habit: SfzHabit
     let status: SfzDayStatus
+    @ObservedObject private var store = SfzHabitStore.shared
+
+    private var automatic: Bool { SfzScreenTime.isAuthorized && SfzScreenShared.hasSelection(habit.id.uuidString) }
 
     var body: some View {
         let id = habit.id.uuidString
-        let limit = habit.kind.format(habit.target(on: SfzHabitStore.today))
+        let limitValue = habit.target(on: SfzHabitStore.today)
+        let limit = habit.kind.format(limitValue)
         VStack(alignment: .leading, spacing: NoopMetrics.space2) {
-            if !SfzScreenShared.hasSelection(id) || !SfzScreenTime.isAuthorized {
-                Spacer(minLength: 0)
-                Text("Choose apps").font(StrandFont.title2).foregroundStyle(StrandPalette.accent)
-                Text("Tap to pick \(habit.name) and set a daily limit.")
-                    .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
-            } else {
+            if automatic {
                 if let f = SfzScreenTime.filter(id, days: 1) {
                     DeviceActivityReport(DeviceActivityReport.Context("sfzToday"), filter: f)
                         .frame(height: 46)
@@ -109,69 +120,82 @@ struct SfzScreenCardBody: View {
                 Text(status == .missed ? "Over \(limit): missed" : "Limit \(limit)")
                     .font(StrandFont.caption.weight(.semibold))
                     .foregroundStyle(status == .missed ? StrandPalette.statusCritical : StrandPalette.textSecondary)
+            } else {
+                let used = store.entries(habit.id).reduce(0, +)
+                let over = used > limitValue
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text(habit.kind.format(used)).font(StrandFont.title2)
+                        .foregroundStyle(over ? StrandPalette.statusCritical : StrandPalette.textPrimary)
+                    Text("/ \(limit)").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                }
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(StrandPalette.hairline)
+                        Capsule().fill(over ? StrandPalette.statusCritical : StrandPalette.metricCyan)
+                            .frame(width: used > 0 ? max(6, g.size.width * CGFloat(min(used / max(limitValue, 1), 1))) : 0)
+                    }
+                }
+                .frame(height: 6)
+                HStack(spacing: 6) {
+                    ForEach([5, 15, 30], id: \.self) { m in
+                        Button { store.log(habit.id, Double(m)) } label: {
+                            Text("+\(m)m").font(StrandFont.caption.weight(.semibold))
+                                .frame(maxWidth: .infinity).padding(.vertical, 7)
+                                .background(Capsule().fill(StrandPalette.accent.opacity(0.12)))
+                                .foregroundStyle(StrandPalette.accent)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                Text(over ? "Over the limit: missed" : "Under the limit")
+                    .font(StrandFont.caption)
+                    .foregroundStyle(over ? StrandPalette.statusCritical : StrandPalette.textTertiary)
             }
         }
     }
 }
 
-/// On the habit page: choose the apps, see the recent average before setting a limit.
+/// On the habit page: your average from the days you logged, today's total, and a shortcut to
+/// Screen Time to read the number. Automatic tracking (paid developer team) shows Apple's own panel.
 struct SfzScreenSetupSection: View {
     let habit: SfzHabit
-    @State private var picking = false
-    @State private var selection = FamilyActivitySelection()
-    @State private var denied = false
-    @State private var refresh = 0
-    @State private var authorized = SfzScreenTime.isAuthorized
+    @ObservedObject private var store = SfzHabitStore.shared
 
     var body: some View {
         let id = habit.id.uuidString
-        let chosen = SfzScreenShared.selection(id)
-        let count = (chosen?.applicationTokens.count ?? 0) + (chosen?.categoryTokens.count ?? 0) + (chosen?.webDomainTokens.count ?? 0)
-        Section {
-            if count > 0, SfzScreenTime.isAuthorized, let f = SfzScreenTime.filter(id, days: 14) {
+        if SfzScreenTime.isAuthorized && SfzScreenShared.hasSelection(id), let f = SfzScreenTime.filter(id, days: 14) {
+            Section("Your use") {
                 DeviceActivityReport(DeviceActivityReport.Context("sfzAverage"), filter: f)
                     .frame(height: 60)
-                    .id(refresh)
             }
-            if !authorized {
-                // Step 1: iOS shows its own "Allow sfz to access Screen Time?" sheet right here,
-                // confirmed with Face ID or the passcode. No trip to Settings.
-                Button {
-                    Task {
-                        denied = false
-                        authorized = await SfzScreenTime.authorize()
-                        denied = !authorized
-                        if authorized {
-                            selection = SfzScreenShared.selection(id) ?? FamilyActivitySelection()
-                            picking = true
-                        }
+        } else {
+            Section {
+                if let avg = store.loggedAverage(habit.id) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Your average: \(habit.kind.format(avg.value)) a day").font(StrandFont.headline)
+                        Text("From \(avg.count) logged day\(avg.count == 1 ? "" : "s") in the last two weeks")
+                            .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
                     }
-                } label: {
-                    Label("Allow Screen Time access", systemImage: "hourglass.badge.plus")
+                } else {
+                    Text("Log a few days to see your average before you settle on a limit.")
+                        .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
                 }
-            } else {
-                // Step 2: Apple's app list. Search Instagram and tick it.
-                Button(count > 0 ? "Change apps (\(count) chosen)" : "Choose apps") {
-                    selection = SfzScreenShared.selection(id) ?? FamilyActivitySelection()
-                    picking = true
+                Stepper(value: Binding(get: { store.entries(habit.id).reduce(0, +) },
+                                       set: { store.setTotal(habit.id, $0) }),
+                        in: 0...900, step: 5) {
+                    HStack {
+                        Text("Today so far")
+                        Spacer()
+                        Text(habit.kind.format(store.entries(habit.id).reduce(0, +)))
+                            .foregroundStyle(StrandPalette.textSecondary)
+                    }
                 }
+                Button("Open Screen Time to check") { sfzOpenScreenTimeSettings() }
+            } header: {
+                Text("Today's \(habit.name) time")
+            } footer: {
+                Text("Read the minutes in Settings → Screen Time → See All App & Website Activity → \(habit.name), and enter them here. Going over your limit marks the day missed. Days with nothing logged don't count either way.")
             }
-            if denied {
-                Text("iOS didn't allow it\(SfzScreenTime.lastError.map { ": \($0)" } ?? "."). Tap Allow again and confirm with Face ID or your passcode.")
-                    .font(StrandFont.caption).foregroundStyle(StrandPalette.statusWarning)
-            }
-        } header: {
-            Text("Apps")
-        } footer: {
-            Text(authorized
-                 ? "Apple doesn't let apps choose Instagram for you. In Apple's list, search \"\(habit.name)\" and tick it. Your average shows above before you set the limit; going over the limit marks the day missed."
-                 : "First allow Screen Time access. iOS asks right here; nothing to change in Settings.")
-        }
-        .familyActivityPicker(isPresented: $picking, selection: $selection)
-        .onChange(of: selection) { _, sel in
-            SfzScreenShared.setSelection(sel, for: id)
-            SfzScreenTime.startMonitoring(habit)
-            refresh += 1
         }
     }
 }

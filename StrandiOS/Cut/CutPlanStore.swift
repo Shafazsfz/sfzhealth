@@ -359,7 +359,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .sleep: return "Sleep (from your WHOOP)"
         case .zone: return "Active Zone Minutes (from your WHOOP)"
         case .protein: return "Protein (from your food log)"
-        case .screen: return "Screen time limit (automatic)"
+        case .screen: return "Screen time limit"
         }
     }
     /// Counter: reps. Timer: seconds. Check and gym: 1. Water: ml. Sleep: minutes. Zone: minutes. Protein: g.
@@ -698,6 +698,24 @@ final class SfzHabitStore: ObservableObject {
 
     func entries(_ id: UUID, day: String = SfzHabitStore.today) -> [Double] { logs[id.uuidString]?[day] ?? [] }
 
+    /// Replaces a day's log with one total (screen time entered from Settings → Screen Time).
+    func setTotal(_ id: UUID, _ value: Double, day: String = SfzHabitStore.today) {
+        var byDay = logs[id.uuidString] ?? [:]
+        byDay[day] = value > 0 ? [value] : nil
+        logs[id.uuidString] = byDay
+    }
+
+    /// Average a day over the days something was logged in the last `days` days, and how many there were.
+    func loggedAverage(_ id: UUID, days: Int = 14) -> (value: Double, count: Int)? {
+        var total = 0.0, n = 0
+        for offset in 1...days {
+            let day = Self.dayKey(offset: -offset, from: Self.today)
+            let e = entries(id, day: day)
+            if !e.isEmpty { total += e.reduce(0, +); n += 1 }
+        }
+        return n == 0 ? nil : (total / Double(n), n)
+    }
+
     func toggleCheck(_ id: UUID, day: String = SfzHabitStore.today) {
         if entries(id, day: day).isEmpty { log(id, 1, day: day) } else {
             var byDay = logs[id.uuidString] ?? [:]
@@ -765,12 +783,18 @@ final class SfzHabitStore: ObservableObject {
         if day < h.createdDay { return .before }
         if !h.isDue(on: date) { return .notDue }
         if h.kind == .screen {
-            // Under the limit is the goal. Over it is a miss the moment iOS reports it.
+            // Under the limit is the goal; over it is a miss straight away.
             let id = h.id.uuidString
-            guard SfzScreenShared.hasSelection(id), let since = SfzScreenShared.since(id), day >= since else {
-                return day == today ? .open : .noData
+            if SfzScreenShared.hasSelection(id), let since = SfzScreenShared.since(id), day >= since {
+                // Automatic (paid developer team): iOS reports when the limit is passed.
+                if SfzScreenShared.exceededDays(id).contains(day) { return .missed }
+                return day == today ? .open : .met
             }
-            if SfzScreenShared.exceededDays(id).contains(day) { return .missed }
+            // Logged by hand: the minutes you entered against the limit. A day with nothing logged
+            // doesn't count either way.
+            let logged = entries(h.id, day: day)
+            if logged.isEmpty { return day == today ? .open : .noData }
+            if logged.reduce(0, +) > h.target(on: day) { return .missed }
             return day == today ? .open : .met
         }
         if h.kind == .gym, gymState(h.id, day: day) == .rest {

@@ -254,7 +254,7 @@ struct SettingsView: View {
 
     var body: some View {
         ScreenScaffold(title: "Settings",
-                       subtitle: "Your numbers, your strap, and how Sfz Health works. All on \(Platform.deviceNounPhrase).",
+                       subtitle: "Your numbers, your WHOOP, and how Sfz Health works. All on \(Platform.deviceNounPhrase).",
                        // The day-of-sky liquid backdrop, matching Today / Health / Sleep / Trends / Devices:
                        // a fixed, full-bleed time-of-day sky behind the scroll content (it does not scroll).
                        // Settings' own frosted cards sit on the dark canvas below the sky band, unchanged.
@@ -321,10 +321,10 @@ struct SettingsView: View {
         // them set with no indication either way.
         .confirmationDialog("Clear the R22 flags on your strap?",
                             isPresented: $confirmingDeepDataDisable, titleVisibility: .visible) {
-            Button("Clear flags on strap") { model.ble.disableWhoop5DeepData() }
+            Button("Clear flags on WHOOP") { model.ble.disableWhoop5DeepData() }
             Button("Just stop sending", role: .cancel) { }
         } message: {
-            Text("Turning this switch off only stops Sfz Health sending the unlock. The flags it already wrote stay on the strap until something clears them. Sfz Health can write the off value to all 16 now and read each one back so you can see what the strap actually stores. Needs the strap connected and bonded.")
+            Text("Turning this switch off only stops Sfz Health sending the unlock. The flags it already wrote stay on the WHOOP until something clears them. Sfz Health can write the off value to all 16 now and read each one back so you can see what the WHOOP actually stores. Needs the WHOOP connected and bonded.")
         }
         .confirmationDialog("Mark optical experiment phase",
                             isPresented: $showOpticalPhasePicker, titleVisibility: .visible) {
@@ -333,7 +333,7 @@ struct SettingsView: View {
             }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("A marker starts the selected phase and ends the previous one. This only timestamps the local capture file; it sends nothing to the strap.")
+            Text("A marker starts the selected phase and ends the previous one. This only timestamps the local capture file; it sends nothing to the WHOOP.")
         }
         .sheet(isPresented: $showWhatsNew) {
             WhatsNewView(onClose: { showWhatsNew = false })
@@ -1407,7 +1407,7 @@ struct SettingsView: View {
     private var strapCard: some View {
         SettingsSection(
             icon: "antenna.radiowaves.left.and.right",
-            title: "Strap",
+            title: "WHOOP",
             blurb: "Sfz Health pairs directly with your WHOOP over Bluetooth: no WHOOP app, no cloud."
         ) {
             VStack(alignment: .leading, spacing: 16) {
@@ -1478,7 +1478,7 @@ struct SettingsView: View {
     /// strap reboots to apply, so the new name lands on the next connect. WHOOP 4.0 only (Harvard).
     @ViewBuilder private var strapNameControl: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Strap name").strandOverline()
+            Text("WHOOP name").strandOverline()
             Text("Current: \(live.advertisingName ?? "—")")
                 .font(StrandFont.subhead)
                 .foregroundStyle(StrandPalette.textSecondary)
@@ -1493,7 +1493,7 @@ struct SettingsView: View {
                     .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .strokeBorder(StrandPalette.hairline, lineWidth: 1))
                     .disableAutocorrection(true)
-                    .accessibilityLabel("New strap name")
+                    .accessibilityLabel("New WHOOP name")
                 NoopButton("Rename", systemImage: "pencil", kind: .primary) {
                     model.ble.renameStrap(strapNameDraft)
                 }
@@ -1504,7 +1504,7 @@ struct SettingsView: View {
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textSecondary)
             }
-            Text("Changes the Bluetooth name your WHOOP 4.0 advertises (what you see when pairing). The strap reboots to apply, so the new name appears the next time it connects. WHOOP 4.0 only.")
+            Text("Changes the Bluetooth name your WHOOP 4.0 advertises (what you see when pairing). The WHOOP reboots to apply, so the new name appears the next time it connects. WHOOP 4.0 only.")
                 .font(StrandFont.caption)
                 .foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1532,7 +1532,7 @@ struct SettingsView: View {
         // longer being attempted. The `bonded && connected` arm below is that fix, matching the Android
         // twin (`SettingsLogic.strapStatusLine`).
         if live.encryptedBond && live.connected {
-            return String(localized: "Your strap is paired and sending data. Open Live for a real-time heart rate.")
+            return String(localized: "Your WHOOP is paired and sending data. Open Live for a real-time heart rate.")
         }
         // An actionable hint outranks the generic arm: the suppression hint names the one action that
         // restores the handshake, which "not fully paired" alone does not.
@@ -1540,11 +1540,11 @@ struct SettingsView: View {
         // Live HR over the UNBONDED standard profile (#69). True whenever the handshake is suppressed or
         // simply has not landed, and the honest description either way.
         if live.bonded && live.connected {
-            return String(localized: "Live heart rate is streaming, but your strap is not fully paired. The encrypted pairing is what carries motion, skin temperature, SpO₂ and respiratory rate — without it, sleep is staged from heart rate alone. Buzz, alarms and history sync need it too.")
+            return String(localized: "Live heart rate is streaming, but your WHOOP is not fully paired. The encrypted pairing is what carries motion, skin temperature, SpO₂ and respiratory rate — without it, sleep is staged from heart rate alone. Buzz, alarms and history sync need it too.")
         }
         if live.connected { return String(localized: "Connected. Finishing the secure pairing handshake…") }
         if live.bonded { return String(localized: "Previously paired but not currently connected. Re-scan to reconnect.") }
-        return String(localized: "No strap connected. Put your WHOOP nearby and tap Re-scan to pair.")
+        return String(localized: "No WHOOP connected. Put your WHOOP nearby and tap Re-scan to pair.")
     }
 
     private func batteryTone(_ pct: Double) -> StrandTone {
@@ -1573,13 +1573,13 @@ struct SettingsView: View {
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 liveNotificationSwitch("Recovery, Strain & Sleep", isOn: $liveActivityEnabled,
-                                       detail: "Today's three scores in the Dynamic Island while the strap is connected.")
+                                       detail: "Today's three scores in the Dynamic Island while the WHOOP is connected.")
                 rowDivider
                 liveNotificationSwitch("Lift Log session", isOn: $liftLiveActivityEnabled,
                                        detail: "Your set, rest and heart rate, and the Lock Screen light-up on a double-tap.")
                 rowDivider
                 liveNotificationSwitch("Strap sync", isOn: $syncLiveActivityEnabled,
-                                       detail: "Progress while Sfz Health pulls history from the strap.")
+                                       detail: "Progress while Sfz Health pulls history from the WHOOP.")
             }
         }
     }
@@ -1763,7 +1763,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "arrow.triangle.2.circlepath",
             title: "Sync",
-            blurb: "How Sfz Health behaves while it pulls stored history from your strap."
+            blurb: "How Sfz Health behaves while it pulls stored history from your WHOOP."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.space2 + 2) {
                 Toggle(isOn: $syncKeepScreenOn) {
@@ -1773,9 +1773,9 @@ struct SettingsView: View {
                 }
                 .toggleStyle(.switch)
                 .tint(StrandPalette.accent)
-                .accessibilityHint("Stops the screen locking while your strap's history syncs")
+                .accessibilityHint("Stops the screen locking while your WHOOP's history syncs")
 
-                Text("Holds the screen awake while Sfz Health pulls stored history from your strap, so you can watch a long sync finish without the phone locking. Only applies while a sync is running and Sfz Health is open. The screen sleeps normally the rest of the time. It uses a bit more battery while the screen stays on.")
+                Text("Holds the screen awake while Sfz Health pulls stored history from your WHOOP, so you can watch a long sync finish without the phone locking. Only applies while a sync is running and Sfz Health is open. The screen sleeps normally the rest of the time. It uses a bit more battery while the screen stays on.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1806,7 +1806,7 @@ struct SettingsView: View {
                 .toggleStyle(.switch)
                 .tint(StrandPalette.accent)
                 .onChangeCompat(of: continuousHrvEnabled) { on in model.ble.setKeepRealtimeForData(on) }
-                Text("Keeps the detailed beat-to-beat heart-rate stream running all day and night, not just while a live screen is open, so Sfz Health captures much more for overnight HRV, recovery and sleep. Uses more battery: your strap streams heart rate continuously while connected.")
+                Text("Keeps the detailed beat-to-beat heart-rate stream running all day and night, not just while a live screen is open, so Sfz Health captures much more for overnight HRV, recovery and sleep. Uses more battery: your WHOOP streams heart rate continuously while connected.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1890,7 +1890,7 @@ struct SettingsView: View {
                 }
                 .toggleStyle(.switch)
                 .tint(StrandPalette.accent)
-                Text("Replaces the Today tab with the prototype redesign. Turn it off any time to return to the classic dashboard. Reads the same live data from your strap.")
+                Text("Replaces the Today tab with the prototype redesign. Turn it off any time to return to the classic dashboard. Reads the same live data from your WHOOP.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1906,7 +1906,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "shield.lefthalf.filled",
             title: "Experimental · Live Sessions",
-            blurb: "A one-tap guarded workout: the strap watches your heart rate against a band gated on today's Recovery, and only ever buzzes to correct course. Silence means you're on track."
+            blurb: "A one-tap guarded workout: the WHOOP watches your heart rate against a band gated on today's Recovery, and only ever buzzes to correct course. Silence means you're on track."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 Toggle(isOn: $liveSessionsBeta) {
@@ -1916,7 +1916,7 @@ struct SettingsView: View {
                 }
                 .toggleStyle(.switch)
                 .tint(StrandPalette.accent)
-                Text("Silence-first strap coaching during workouts.")
+                Text("Silence-first WHOOP coaching during workouts.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1957,7 +1957,7 @@ struct SettingsView: View {
                 }
                 .toggleStyle(.switch)
                 .tint(StrandPalette.accent)
-                Text("Reviews each scored wake block for real evidence of getting up (walking cadence, a change in body position) instead of just a heart-rate rise. A wake block with no locomotion and a stable posture — a hot night, a brief turn-over — is folded back into light sleep; a real get-up is left alone. Self-checks how much motion detail your strap actually recorded and stays off on a night that's too sparse to trust (older WHOOP 4.0 firmware, mainly). Off by default; takes effect on the next nights staged.")
+                Text("Reviews each scored wake block for real evidence of getting up (walking cadence, a change in body position) instead of just a heart-rate rise. A wake block with no locomotion and a stable posture — a hot night, a brief turn-over — is folded back into light sleep; a real get-up is left alone. Self-checks how much motion detail your WHOOP actually recorded and stays off on a night that's too sparse to trust (older WHOOP 4.0 firmware, mainly). Off by default; takes effect on the next nights staged.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -2011,7 +2011,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "waveform.path.ecg",
             title: "Experimental · Oura ring all-day heart rate",
-            blurb: "Oura ring only. Keeps your ring measuring heart rate through the day, standing it down only for your night. A WHOOP strap is not affected."
+            blurb: "Oura ring only. Keeps your ring measuring heart rate through the day, standing it down only for your night. A WHOOP WHOOP is not affected."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 Toggle(isOn: $ouraAllDayLiveHREnabled) {
@@ -2038,7 +2038,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "doc.text.magnifyingglass",
             title: "Diagnostics",
-            blurb: "A read-only export of the decoded sensor streams Sfz Health already stores. Works on any strap. Nothing is written to your device, and nothing is uploaded."
+            blurb: "A read-only export of the decoded sensor streams Sfz Health already stores. Works on any WHOOP. Nothing is written to your device, and nothing is uploaded."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 // MARK: Export raw sensor data (CSV) — a read-only diagnostic over the decoded streams
@@ -2431,7 +2431,7 @@ struct SettingsView: View {
                             Text("About Apple Watch data")
                                 .font(StrandFont.body)
                                 .foregroundStyle(StrandPalette.textPrimary)
-                            Text("Use Sfz Health with just an Apple Watch. What it's great at, and where it's lighter than a strap.")
+                            Text("Use Sfz Health with just an Apple Watch. What it's great at, and where it's lighter than a WHOOP.")
                                 .font(StrandFont.footnote)
                                 .foregroundStyle(StrandPalette.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -2713,7 +2713,7 @@ struct SettingsView: View {
 
             iphoneExpectationLine(String(localized: "This is a sideloaded build, installed outside the App Store. It needs re-signing periodically: roughly every 7 days on a free Apple ID, about a year on a paid developer account."))
             iphoneExpectationLine(String(localized: "After your iPhone reboots, unlock it once. Until you do, iOS keeps Sfz Health's files locked (Data Protection), so new history can't be written or synced."))
-            iphoneExpectationLine(String(localized: "Background Bluetooth has OS limits: iOS may pause Sfz Health when it's not in the foreground, so keep it open while syncing a fresh strap."))
+            iphoneExpectationLine(String(localized: "Background Bluetooth has OS limits: iOS may pause Sfz Health when it's not in the foreground, so keep it open while syncing a fresh WHOOP."))
             iphoneExpectationLine(String(localized: "On a beta version of iOS, things can break that work on the release build."))
 
             if let days = expiry {
@@ -3107,7 +3107,7 @@ struct StepsCalibrationSheet: View {
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("On the days your phone also counted steps, Sfz Health learns how much your motion maps to steps, then applies that to the strap-only days. The more matching days it has, the more it trusts the estimate.")
+                Text("On the days your phone also counted steps, Sfz Health learns how much your motion maps to steps, then applies that to the WHOOP-only days. The more matching days it has, the more it trusts the estimate.")
                     .font(StrandFont.footnote)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -3145,7 +3145,7 @@ struct StepsCalibrationSheet: View {
         if is5MG {
             return String(localized: "We're not seeing motion from your WHOOP 5.0 / MG yet. Keep Sfz Health connected and let strap history finish syncing; the experimental R22 flags are not required. Account or Apple Health imports do not contain the raw strap motion this estimate needs.")
         }
-        return String(localized: "We're not seeing any motion from your strap yet. Steps are estimated from your WHOOP's banked motion history, so your strap needs to sync that history before Sfz Health has anything to count.")
+        return String(localized: "We're not seeing any motion from your WHOOP yet. Steps are estimated from your WHOOP's banked motion history, so your WHOOP needs to sync that history before Sfz Health has anything to count.")
     }
 
     /// The "what to do" line — 5/MG points at the deep-data toggle (unless it's already on, then just sync).
@@ -3154,9 +3154,9 @@ struct StepsCalibrationSheet: View {
             return String(localized: "Open Sfz Health near the strap and let WHOOP 5/MG history finish syncing. The step estimate and calibration fill in once enough stored motion has arrived; the legacy R22 experiment is not required.")
         }
         if is5MG {
-            return String(localized: "Deep data is on — open Sfz Health near your strap and let it sync its motion history (a full first-run sync can take a while). Once a day or two of motion lands, your step estimate and the calibration below fill in.")
+            return String(localized: "Deep data is on — open Sfz Health near your WHOOP and let it sync its motion history (a full first-run sync can take a while). Once a day or two of motion lands, your step estimate and the calibration below fill in.")
         }
-        return String(localized: "Open Sfz Health near your strap and let it catch up (a full history sync can take a while on first run). Once a day or two of motion lands, your step estimate and the calibration below will start to fill in.")
+        return String(localized: "Open Sfz Health near your WHOOP and let it catch up (a full history sync can take a while on first run). Once a day or two of motion lands, your step estimate and the calibration below will start to fill in.")
     }
 
     /// The current calibration read-out: coefficient, sample days, and a Low/Medium/High confidence —
@@ -3231,7 +3231,7 @@ struct StepsCalibrationSheet: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Estimated vs your phone").strandOverline()
                 if comparison.isEmpty {
-                    Text("No days yet where both Sfz Health and your phone counted steps. Once your phone logs a few days alongside the strap, they'll appear here so you can see how close the estimate is.")
+                    Text("No days yet where both Sfz Health and your phone counted steps. Once your phone logs a few days alongside the WHOOP, they'll appear here so you can see how close the estimate is.")
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)

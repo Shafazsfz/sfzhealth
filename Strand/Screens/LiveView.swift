@@ -109,7 +109,7 @@ struct LiveView: View {
 
     var body: some View {
         ScreenScaffold(title: "Live Body Console",
-                       subtitle: "Current physiology, strap trust, and session controls in one working view.",
+                       subtitle: "Current physiology, WHOOP trust, and session controls in one working view.",
                        topBackground: liquidScaffoldSky()) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                 consoleHeader
@@ -466,7 +466,7 @@ struct LiveView: View {
                 .foregroundStyle(StrandPalette.statusWarning)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text("Can't connect: your strap's pairing was reset")
+                Text("Can't connect: your WHOOP's pairing was reset")
                     .font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
                 Text(guide)
                     .font(StrandFont.footnote).foregroundStyle(StrandPalette.textSecondary)
@@ -488,7 +488,7 @@ struct LiveView: View {
                 .foregroundStyle(StrandPalette.statusWarning)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text("Live HR works. Free the strap to unlock buzz, alarms & sync")
+                Text("Live HR works. Free the WHOOP to unlock buzz, alarms & sync")
                     .font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
                 Text(hint)
                     .font(StrandFont.footnote).foregroundStyle(StrandPalette.textSecondary)
@@ -548,7 +548,7 @@ struct LiveView: View {
     private var modelPicker: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                Text("Strap").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                Text("WHOOP").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
                 SegmentedPillControl(
                     WhoopModel.allCases,
                     selection: Binding(
@@ -953,7 +953,7 @@ private struct LiveHeartReadout: View {
 
     private var signalTrustSummary: String {
         if activeConnection && live.encryptedBond { return String(localized: "Encrypted stream: deep controls and history sync available.") }
-        if activeConnection { return String(localized: "Live heart rate is flowing; full strap controls need an encrypted bond.") }
+        if activeConnection { return String(localized: "Live heart rate is flowing; full WHOOP controls need an encrypted bond.") }
         // A ring reads its OWN phase (#2305, #2304): `live.connected` here is whichever source last
         // wrote it, and under a ring parked in the nonce handshake it read "Connected, waiting for a
         // streaming state" for an hour (#2303). The ring's phase is what the console should say.
@@ -961,7 +961,7 @@ private struct LiveHeartReadout: View {
         if live.connected { return String(localized: "Connected, waiting for a streaming state.") }
         // The actionable "Scan and connect…" CTA now lives in `offlineConnectCallout` above the fold, so
         // this caption stays a calm empty-state descriptor rather than a second, competing CTA.
-        return String(localized: "Live heart rate appears here once a strap is connected.")
+        return String(localized: "Live heart rate appears here once a WHOOP is connected.")
     }
 }
 
@@ -1080,7 +1080,7 @@ private struct LivePhysiology: View {
     }
 
     private var connectionModeDetail: String {
-        if activeConnection && live.encryptedBond { return String(localized: "Full strap stream is active.") }
+        if activeConnection && live.encryptedBond { return String(localized: "Full WHOOP stream is active.") }
         if activeConnection || ringStreaming { return String(localized: "Heart rate stream is active.") }
         if live.connected { return String(localized: "Radio connected, stream not yet trusted.") }
         return String(localized: "No live stream.")
@@ -1187,7 +1187,7 @@ private struct LiveSignalTrustRail: View {
                   value: activeBatteryPct.map { "\($0)%" } ?? String(localized: "Unknown"),
                   // "by strap" only when a strap is what reported it (#2075).
                   detail: live.charging == true ? String(localized: "Charging")
-                          : activeIsWhoop ? String(localized: "Last reported by strap")
+                          : activeIsWhoop ? String(localized: "Last reported by WHOOP")
                           : String(localized: "Last reported by the ring"),
                   icon: "battery.75percent",
                   tint: batteryTint,
@@ -1201,7 +1201,7 @@ private struct LiveSignalTrustRail: View {
             // Oura until its WEAR_EVENT is wired to `worn` (follow-up).
             .init(title: String(localized: "Wear state"),
                   value: liveLink ? (wornNow ? String(localized: "On wrist") : String(localized: "Off wrist")) : String(localized: "Unknown"),
-                  detail: liveLink ? (wornNow ? String(localized: "Eligible for live physiology") : String(localized: "Wear the strap for scoring")) : String(localized: "Connect to read wear state"),
+                  detail: liveLink ? (wornNow ? String(localized: "Eligible for live physiology") : String(localized: "Wear the WHOOP for scoring")) : String(localized: "Connect to read wear state"),
                   icon: "sensor.tag.radiowaves.forward",
                   tint: !liveLink ? StrandPalette.textTertiary : wornNow ? StrandPalette.accent : StrandPalette.statusWarning,
                   frac: !liveLink ? nil : (wornNow ? 1 : 0.25))

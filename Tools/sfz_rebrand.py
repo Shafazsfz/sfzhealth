@@ -51,6 +51,30 @@ def rebrand(text: str) -> str:
     out = re.sub(r"\bAn Strain\b", "A Strain", out)
     out = re.sub(r"\bStrain and rest\b", "Strain and sleep", out)
     out = out.replace("Recovery, Sfz Health's Recovery score,", "Sfz Health's Recovery score")
+    out = strap_to_whoop(out)
+    return out
+
+
+# Other kinds of strap that must keep the word (a chest/HR strap is a different device), and the
+# "strap log" diagnostic file name.
+_STRAP_KEEP = re.compile(r"\b(chest|heart[- ]rate|HR|rate|Polar|watch|wrist|bicep|arm|band|the official)[- ]straps?\b|"
+                         r"\bstrap log\b|\bStrap log\b|\bstraps\b|\bStraps\b", re.I)
+
+
+def strap_to_whoop(text: str) -> str:
+    """sfz: call the band what it is. "your strap" -> "your WHOOP", "Strap battery" -> "WHOOP battery"."""
+    if "strap" not in text.lower():
+        return text
+    kept = {}
+
+    def hold(m):
+        kept[f"\x00{len(kept)}\x00"] = m.group(0)
+        return f"\x00{len(kept) - 1}\x00"
+
+    out = _STRAP_KEEP.sub(hold, text)
+    out = re.sub(r"\b[Ss]trap\b", "WHOOP", out)
+    for k, v in kept.items():
+        out = out.replace(k, v)
     return out
 
 
@@ -167,7 +191,7 @@ SWIFT_SKIP_FILES = {"IntervalTimerView.swift", "Terms.swift", "ProjectInfo.swift
 SWIFT_SKIP_LINE = re.compile(r"^\s*(//|#Preview)|\blog\??\(|Logger|os_log|NSLog|print\(|appendLog|\.debug\(|"
                              r"\.info\(|\.error\(|\.notice\(|\.warning\(|strap log|forKey|UserDefaults|"
                              r"Notification\.Name|identifier|\.noop|restSeconds|\.strained|\.rundown")
-SCORE_WORDS = re.compile(r"\b(NOOP|Charge|Effort|Rest)\b")
+SCORE_WORDS = re.compile(r"\b(NOOP|Charge|Effort|Rest|[Ss]trap)\b")
 # Text immediately before a literal that marks it as something a person reads.
 UI_CONTEXT = re.compile(
     r"(?:\b(?:label|title|subtitle|overline|blurb|detail|message|caption|headline|accessibilityTitle|"
@@ -194,7 +218,8 @@ def rebrand_swift() -> int:
 
                 def fix(m):
                     lit = m.group(0)
-                    if "/" in lit or "_" in lit.replace("NOOP", "") or lit[1:-1] in (SKIP_KEYS - {"Rest"}):
+                    if "/" in lit or "_" in lit.replace("NOOP", "") or lit[1:-1] in (SKIP_KEYS - {"Rest"}) \
+                            or (" " not in lit[1:-1] and "trap" in lit and lit[1] != "S"):
                         return lit   # paths, URLs, keys, workout "Rest"
                     if re.search(r"\bNOOP\b", lit):
                         # The literal is also its catalog key, so the catalog's Recovery/Strain/Sleep

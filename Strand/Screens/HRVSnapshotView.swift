@@ -224,7 +224,7 @@ struct HRVSnapshotView: View {
         case .idle:
             return bonded
                 ? String(localized: "Sit still and breathe normally. Tap below to take a 60-second reading.")
-                : String(localized: "Connect your strap on the Live screen to take a reading.")
+                : String(localized: "Connect your WHOOP on the Live screen to take a reading.")
         case .capturing:
             return String(localized: "Sit still, breathe normally. Keep your wrist relaxed and steady.")
         case .done:
@@ -350,7 +350,7 @@ struct HRVSnapshotView: View {
         StrandCard(tint: StrandPalette.restColor) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("How this is measured").strandOverline()
-                Text("A 60-second snapshot of your beat-to-beat (R-R) intervals from the strap, cleaned (range and ectopic-beat filtering) before computing RMSSD the same way your overnight HRV is computed.")
+                Text("A 60-second snapshot of your beat-to-beat (R-R) intervals from the WHOOP, cleaned (range and ectopic-beat filtering) before computing RMSSD the same way your overnight HRV is computed.")
                     .font(StrandFont.footnote)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -369,7 +369,7 @@ struct HRVSnapshotView: View {
             Image(systemName: "applewatch.radiowaves.left.and.right")
                 .foregroundStyle(StrandPalette.statusWarning)
                 .accessibilityHidden(true)
-            Text("An HRV reading needs the live R-R stream. Open the Live screen and connect your strap, then come back.")
+            Text("An HRV reading needs the live R-R stream. Open the Live screen and connect your WHOOP, then come back.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

@@ -312,10 +312,10 @@ struct FullDayChartView: View {
     /// FullDayChartScreen.EmptyTimelineState.
     private var emptyReason: String {
         if ownedOnly, metricUnsupported, metric == .spo2 {
-            return String(localized: "This strap doesn’t send SpO₂ over Bluetooth. Import a WHOOP export or Health Connect to see it.")
+            return String(localized: "This WHOOP doesn’t send SpO₂ over Bluetooth. Import a WHOOP export or Health Connect to see it.")
         }
         if ownedOnly, metricUnsupported, metric == .respiration {
-            return String(localized: "This strap sends no raw respiration stream. Your estimated respiratory rate appears on the Health screen.")
+            return String(localized: "This WHOOP sends no raw respiration stream. Your estimated respiratory rate appears on the Health screen.")
         }
         return ownedOnly
             ? String(localized: "Nothing offloaded for this window yet.")

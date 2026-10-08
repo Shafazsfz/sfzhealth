@@ -162,7 +162,7 @@ struct TestCentreView: View {
 
     var body: some View {
         ScreenScaffold(title: "Test Centre",
-                       subtitle: "Turn on a test for the thing that's wrong, wear the strap, then tap Report. All on \(Platform.deviceNounPhrase).") {
+                       subtitle: "Turn on a test for the thing that's wrong, wear the WHOOP, then tap Report. All on \(Platform.deviceNounPhrase).") {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionSpacing) {
                 domainModesCard.staggeredAppear(index: 0)
                 diagnosticToolsCard.staggeredAppear(index: 1)
@@ -193,7 +193,7 @@ struct TestCentreView: View {
             Button("Clear", role: .destructive) { clearScheduledExports() }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("This deletes every scheduled strap-log and raw-capture file Sfz Health has saved. This can't be undone.")
+            Text("This deletes every scheduled WHOOP-log and raw-capture file Sfz Health has saved. This can't be undone.")
         }
         .alert(infoTitle, isPresented: $showInfo) {
             Button("OK", role: .cancel) { }
@@ -210,7 +210,7 @@ struct TestCentreView: View {
                 Text("TEST MODES")
                     .font(StrandFont.overline).tracking(StrandFont.overlineTracking)
                     .foregroundStyle(StrandPalette.textSecondary)
-                Text("Each test logs extra detail for one part of the app while you wear the strap, then bundles it for a bug report.")
+                Text("Each test logs extra detail for one part of the app while you wear the WHOOP, then bundles it for a bug report.")
                     .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
                 let modes = TestCentreLayout.visibleModes(is5MG: is5MG)
@@ -262,7 +262,7 @@ struct TestCentreView: View {
                     .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
 
                 Divider().overlay(StrandPalette.hairline)
-                Toggle("Broadcast heart rate from the strap", isOn: $broadcastHrEnabled)
+                Toggle("Broadcast heart rate from the WHOOP", isOn: $broadcastHrEnabled)
                     .toggleStyle(.switch).tint(StrandPalette.accent)
                     .onChangeCompat(of: broadcastHrEnabled) { model.ble.setBroadcastHr($0) }
                 Text("Writes the reversible 5/MG advertising flag for Garmin, Zwift, and compatible gym equipment.")
@@ -271,7 +271,7 @@ struct TestCentreView: View {
                 Divider().overlay(StrandPalette.hairline)
                 Toggle("Legacy R22 feature-flag experiment", isOn: $deepDataEnabled)
                     .toggleStyle(.switch).tint(StrandPalette.accent)
-                Text("The strap accepts these writes, but Sfz Health has not observed them enabling a separate live stream. This is not the Raw Data Collector.")
+                Text("The WHOOP accepts these writes, but Sfz Health has not observed them enabling a separate live stream. This is not the Raw Data Collector.")
                     .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                 if deepDataEnabled {
                     NoopButton("Send legacy R22 enable sequence", systemImage: "bolt.badge.automatic", kind: .secondary) {
@@ -1245,7 +1245,7 @@ private struct ReportReviewSheet: View {
                     // for the very thing being reported (the #812 capture_check only grades ACTIVE modes,
                     // so without this the report just looked thin with no explanation). Warn plainly, with
                     // the fix, BEFORE the user ships a report a maintainer can't act on.
-                    Text("Heads up: this test mode is off, so the report has no capture for it. For a useful report, turn the mode on, reproduce the problem while wearing the strap, then report again.")
+                    Text("Heads up: this test mode is off, so the report has no capture for it. For a useful report, turn the mode on, reproduce the problem while wearing the WHOOP, then report again.")
                         .font(StrandFont.caption)
                         .foregroundStyle(StrandPalette.statusWarning)
                         .fixedSize(horizontal: false, vertical: true)

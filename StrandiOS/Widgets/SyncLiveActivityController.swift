@@ -162,7 +162,7 @@ final class SyncLiveActivityController {
         isStarting = true
         do {
             activity = try Activity.request(
-                attributes: SyncActivityAttributes(title: String(localized: "Strap sync")),
+                attributes: SyncActivityAttributes(title: String(localized: "WHOOP sync")),
                 content: ActivityContent(state: state, staleDate: Date().addingTimeInterval(Self.staleAfter)),
                 pushType: nil)
             lastPush = Date()

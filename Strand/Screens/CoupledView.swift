@@ -559,7 +559,7 @@ struct CoupledView: View {
                                     Text("No Recovery breakdown yet")
                                         .font(StrandFont.headline)
                                         .foregroundStyle(StrandPalette.textPrimary)
-                                    Text("Wear the strap overnight to score a night first.")
+                                    Text("Wear the WHOOP overnight to score a night first.")
                                         .font(StrandFont.subhead)
                                         .foregroundStyle(StrandPalette.textSecondary)
                                         .fixedSize(horizontal: false, vertical: true)

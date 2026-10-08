@@ -288,7 +288,7 @@ private struct WelcomeStep: View {
                     .font(StrandFont.title2)
                     .foregroundStyle(StrandPalette.textSecondary)
                     .opacity(appear ? 1 : 0)
-                Text("A private window into your recovery, sleep and strain. Read straight from your strap, kept only on \(Platform.deviceNounPhrase).")
+                Text("A private window into your recovery, sleep and strain. Read straight from your WHOOP, kept only on \(Platform.deviceNounPhrase).")
                     .font(StrandFont.body)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .multilineTextAlignment(.center)
@@ -478,10 +478,10 @@ private struct BluetoothStep: View {
                     icon: "lock.fill",
                     tint: StrandPalette.statusPositive,
                     title: String(localized: "Nothing leaves your \(Platform.deviceNoun)"),
-                    message: String(localized: "Sfz Health talks to your strap directly over Bluetooth Low Energy. There's no server in the middle. The connection is local, and so is every reading it pulls in.")
+                    message: String(localized: "Sfz Health talks to your WHOOP directly over Bluetooth Low Energy. There's no server in the middle. The connection is local, and so is every reading it pulls in.")
                 )
 
-                Text("When the system prompt appears, choose Allow so Sfz Health can find your strap.")
+                Text("When the system prompt appears, choose Allow so Sfz Health can find your WHOOP.")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .multilineTextAlignment(.center)
@@ -496,7 +496,7 @@ private struct BluetoothStep: View {
 
 private struct WearStep: View {
     var body: some View {
-        StepShell(title: String(localized: "Put your strap on"),
+        StepShell(title: String(localized: "Put your WHOOP on"),
                   subtitle: String(localized: "And make sure it's charged.")) {
             VStack(spacing: 22) {
                 ZStack {
@@ -536,8 +536,8 @@ private struct ScanStep: View {
     private var selectedModel: WhoopModel { WhoopModel(rawValue: selectedModelRaw) ?? .whoop4 }
 
     var body: some View {
-        StepShell(title: String(localized: "Find your strap"),
-                  subtitle: live.bonded ? String(localized: "Bonded. You're set.") : String(localized: "Pick your strap below, then tap Scan. Sfz Health will find it.")) {
+        StepShell(title: String(localized: "Find your WHOOP"),
+                  subtitle: live.bonded ? String(localized: "Bonded. You're set.") : String(localized: "Pick your WHOOP below, then tap Scan. Sfz Health will find it.")) {
             VStack(spacing: 24) {
                 RadarSweep(active: scanning && !live.bonded, bonded: live.bonded)
                     .frame(width: 220, height: 220)
@@ -546,7 +546,7 @@ private struct ScanStep: View {
 
                 if !live.bonded {
                     VStack(spacing: 8) {
-                        Text("Which strap are you pairing?").font(StrandFont.caption)
+                        Text("Which WHOOP are you pairing?").font(StrandFont.caption)
                             .foregroundStyle(StrandPalette.textSecondary)
                         SegmentedPillControl(
                             WhoopModel.allCases,
@@ -716,9 +716,9 @@ private struct BondedStep: View {
 
     private var batteryLine: String {
         if let pct = live.batteryPct {
-            return String(localized: "Your strap is bonded · \(Int(pct))% battery.")
+            return String(localized: "Your WHOOP is bonded · \(Int(pct))% battery.")
         }
-        return String(localized: "Your strap is bonded and ready to stream.")
+        return String(localized: "Your WHOOP is bonded and ready to stream.")
     }
 }
 
@@ -996,12 +996,12 @@ private struct NotificationsStep: View {
                     icon: "applewatch.radiowaves.left.and.right",
                     tint: StrandPalette.statusPositive,
                     title: String(localized: "A buzz, not a banner"),
-                    message: String(localized: "Sfz Health taps your strap so an alert lands on your wrist instead of your screen. No need to reach for it. Everything stays on \(Platform.deviceNounPhrase).")
+                    message: String(localized: "Sfz Health taps your WHOOP so an alert lands on your wrist instead of your screen. No need to reach for it. Everything stays on \(Platform.deviceNounPhrase).")
                 )
 
                 VStack(spacing: 12) {
                     Checkline(text: String(localized: "Strain nudges and your smart alarm tap your wrist the moment they fire."))
-                    Checkline(text: String(localized: "It all stays on your strap and \(Platform.deviceNounPhrase): no account, no cloud."))
+                    Checkline(text: String(localized: "It all stays on your WHOOP and \(Platform.deviceNounPhrase): no account, no cloud."))
                 }
                 .frame(maxWidth: 460)
                 #else
@@ -1009,7 +1009,7 @@ private struct NotificationsStep: View {
                     icon: "applewatch.radiowaves.left.and.right",
                     tint: StrandPalette.statusPositive,
                     title: String(localized: "A buzz, not a banner"),
-                    message: String(localized: "When the \(Platform.deviceNoun) apps you choose send a notification, Sfz Health taps your strap: Slack, Calendar, Messages, whatever matters. Everything stays on \(Platform.deviceNounPhrase).")
+                    message: String(localized: "When the \(Platform.deviceNoun) apps you choose send a notification, Sfz Health taps your WHOOP: Slack, Calendar, Messages, whatever matters. Everything stays on \(Platform.deviceNounPhrase).")
                 )
 
                 VStack(spacing: 12) {

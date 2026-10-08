@@ -586,7 +586,7 @@ private struct BreathingContent: View {
                         value: model.bpm.map { "\($0)" } ?? "—",
                         unit: "bpm",
                         accent: StrandPalette.metricRose,
-                        caption: live.worn ? String(localized: "Live") : String(localized: "Strap not worn"))
+                        caption: live.worn ? String(localized: "Live") : String(localized: "WHOOP not worn"))
 
             readoutTile(label: String(localized: "HRV (RMSSD)"),
                         value: rmssd.map { String(format: "%.0f", $0) } ?? "—",
@@ -699,7 +699,7 @@ private struct BreathingContent: View {
         HStack(spacing: 10) {
             Image(systemName: "applewatch.radiowaves.left.and.right")
                 .foregroundStyle(StrandPalette.statusWarning)
-            Text("Connect your strap for haptic guidance. You'll feel one pulse on the inhale, two on the exhale, so you can breathe with your eyes closed.")
+            Text("Connect your WHOOP for haptic guidance. You'll feel one pulse on the inhale, two on the exhale, so you can breathe with your eyes closed.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1219,7 +1219,7 @@ private struct ResonanceModeView: View {
         HStack(spacing: 10) {
             Image(systemName: "applewatch.radiowaves.left.and.right")
                 .foregroundStyle(StrandPalette.statusWarning)
-            Text("Connect your strap for the felt cue. The sweep paces you with one buzz on the inhale, two on the exhale.")
+            Text("Connect your WHOOP for the felt cue. The sweep paces you with one buzz on the inhale, two on the exhale.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1263,7 +1263,7 @@ private struct CalmModeView: View {
                     StatePill(canRun ? "Ready" : "Strap needed",
                               tone: canRun ? .neutral : .warning, showsDot: true)
                 }
-                Text("The strap buzzes a gentle rhythm just below your current heart rate, a felt metronome to relax toward. It trails your heart down rather than yanking it, and stops on its own.")
+                Text("The WHOOP buzzes a gentle rhythm just below your current heart rate, a felt metronome to relax toward. It trails your heart down rather than yanking it, and stops on its own.")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1288,7 +1288,7 @@ private struct CalmModeView: View {
                 .disabled(!canRun)
 
                 if !controller.canBuzz {
-                    Text("Connect your strap. Calm me is a felt rhythm on the wrist, so it needs a bonded connection.")
+                    Text("Connect your WHOOP. Calm me is a felt rhythm on the wrist, so it needs a bonded connection.")
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)

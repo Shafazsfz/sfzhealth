@@ -49,7 +49,7 @@ struct AutomationsView: View {
 
     var body: some View {
         ScreenScaffold(title: "Automations",
-                       subtitle: "Make the strap do things: tap to act, walk away to lock, train by feel.",
+                       subtitle: "Make the WHOOP do things: tap to act, walk away to lock, train by feel.",
                        // PERF: the cards are direct children of the scaffold column, so the LazyVStack
                        // path (byte-identical layout) genuinely builds the off-screen cards on demand
                        // instead of constructing all eight/nine + their toggle subtrees up-front.
@@ -85,7 +85,7 @@ struct AutomationsView: View {
                  active: wristAlertsMaster) {
             VStack(spacing: 0) {
                 ToggleRow(label: String(localized: "Enable wrist alerts"),
-                          help: String(localized: "The master switch for every wrist buzz (inactivity, stress, alerts). Off keeps the strap quiet no matter what else is on."),
+                          help: String(localized: "The master switch for every wrist buzz (inactivity, stress, alerts). Off keeps the WHOOP quiet no matter what else is on."),
                           isOn: $wristAlertsMaster)
             }
         }
@@ -125,7 +125,7 @@ struct AutomationsView: View {
 
     private var doubleTapCard: some View {
         Section2(icon: "hand.tap.fill", title: String(localized: "Double-tap"),
-                 blurb: String(localized: "Double-tap the strap to trigger an action on \(Platform.deviceNounPhrase). (The strap exposes a single double-tap gesture.)"),
+                 blurb: String(localized: "Double-tap the WHOOP to trigger an action on \(Platform.deviceNounPhrase). (The WHOOP exposes a single double-tap gesture.)"),
                  active: behavior.doubleTapAction != .none) {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
@@ -194,8 +194,8 @@ struct AutomationsView: View {
                  active: wearActive) {
             VStack(spacing: 0) {
                 #if os(macOS)
-                ToggleRow(label: String(localized: "Lock the Mac when I take the strap off"),
-                          help: String(localized: "Fires the moment the strap leaves your wrist."),
+                ToggleRow(label: String(localized: "Lock the Mac when I take the WHOOP off"),
+                          help: String(localized: "Fires the moment the WHOOP leaves your wrist."),
                           isOn: $behavior.autoLockOnWristOff)
                 rowDivider
                 #endif
@@ -214,7 +214,7 @@ struct AutomationsView: View {
 
     private var coachingCard: some View {
         Section2(icon: "bolt.heart.fill", title: String(localized: "Haptic coaching"),
-                 blurb: String(localized: "Train by feel. The strap buzzes so you don't have to watch a screen."),
+                 blurb: String(localized: "Train by feel. The WHOOP buzzes so you don't have to watch a screen."),
                  active: behavior.zoneCoaching || behavior.stressCheckIn) {
             VStack(spacing: 0) {
                 ToggleRow(label: String(localized: "HR-zone coaching"),
@@ -248,7 +248,7 @@ struct AutomationsView: View {
 
     private var inactivityCard: some View {
         Section2(icon: "timer", title: String(localized: "Inactivity reminder"),
-                 blurb: String(localized: "A gentle wrist buzz when you've been sitting too long, a nudge to get up and move. Inferred from the strap's motion on each history sync, so it lags real time by a sync or two."),
+                 blurb: String(localized: "A gentle wrist buzz when you've been sitting too long, a nudge to get up and move. Inferred from the WHOOP's motion on each history sync, so it lags real time by a sync or two."),
                  active: inactivity.enabled) {
             VStack(spacing: 0) {
                 ToggleRow(label: String(localized: "Enable inactivity reminder"),
@@ -404,17 +404,17 @@ struct AutomationsView: View {
 
     private var batteryCard: some View {
         Section2(icon: "battery.25", title: String(localized: "Battery alerts"),
-                 blurb: String(localized: "Get a notification when the strap battery runs low (15%) so you can top it up before tonight, and when it finishes charging."),
+                 blurb: String(localized: "Get a notification when the WHOOP battery runs low (15%) so you can top it up before tonight, and when it finishes charging."),
                  active: behavior.batteryAlerts) {
             ToggleRow(label: String(localized: "Notify on low and full battery"),
-                      help: String(localized: "A reminder to recharge before bed when the strap drops to 15%, and a heads-up when it reaches 100%, each at most once per charge cycle."),
+                      help: String(localized: "A reminder to recharge before bed when the WHOOP drops to 15%, and a heads-up when it reaches 100%, each at most once per charge cycle."),
                       isOn: $behavior.batteryAlerts)
                 .onChangeCompat(of: behavior.batteryAlerts) { on in
                     if on { BatteryNotifier.requestAuthorization() }
                 }
             if behavior.batteryAlerts {
                 ToggleRow(label: String(localized: "Predictive runtime warning"),
-                          help: String(localized: "An early \"recharge tonight\" heads-up when the strap has about a day of estimated runtime left, at most once per discharge cycle. Turn off to keep only the 15% warning."),
+                          help: String(localized: "An early \"recharge tonight\" heads-up when the WHOOP has about a day of estimated runtime left, at most once per discharge cycle. Turn off to keep only the 15% warning."),
                           isOn: $behavior.batteryPredictiveAlerts)
             }
         }
@@ -427,7 +427,7 @@ struct AutomationsView: View {
                  blurb: String(localized: "A once-a-day nudge when your Strain reaches the low end of today's optimal strain range, worked out from your recovery."),
                  active: behavior.strainTargetNudge) {
             ToggleRow(label: String(localized: "Notify when optimal strain is reached"),
-                      help: String(localized: "Posts after your strap syncs and Sfz Health scores the day — not the exact second you cross it. At most once per day."),
+                      help: String(localized: "Posts after your WHOOP syncs and Sfz Health scores the day — not the exact second you cross it. At most once per day."),
                       isOn: $behavior.strainTargetNudge)
                 .onChangeCompat(of: behavior.strainTargetNudge) { on in
                     if on {
@@ -468,9 +468,9 @@ struct AutomationsView: View {
 
     private var wearBlurb: String {
         #if os(macOS)
-        String(localized: "React when the strap comes off or goes on. Note: macOS reserves true auto-UNLOCK for Apple Watch, so this can lock, not unlock.")
+        String(localized: "React when the WHOOP comes off or goes on. Note: macOS reserves true auto-UNLOCK for Apple Watch, so this can lock, not unlock.")
         #else
-        String(localized: "React when the strap comes off or goes on. Run a Shortcut to set a Focus, pause media, mark yourself away.")
+        String(localized: "React when the WHOOP comes off or goes on. Run a Shortcut to set a Focus, pause media, mark yourself away.")
         #endif
     }
 

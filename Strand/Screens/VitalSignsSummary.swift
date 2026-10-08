@@ -345,7 +345,7 @@ enum BodyVitalSigns {
                 // where Android resolves the selected day — so the ROW differs across platforms by design
                 // and the parity contract is the relationship between the two tiles, not the row.
                 missingCaption: spo2IsCandidate
-                    ? String(localized: "strap estimate (unverified)")
+                    ? String(localized: "WHOOP estimate (unverified)")
                     : (PuffinExperiment.spo2CandidateDisplayEnabled && spo2Row == nil
                        ? String(localized: "toggle ON · no estimate yet")
                        : (spo2rawRow != nil

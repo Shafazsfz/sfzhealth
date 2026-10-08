@@ -40,7 +40,7 @@ enum AppChangelog {
         ),
         Release(
             version: "11.8.0",
-            title: "A gym log book on your wrist, a Coach you can switch off, and a Sync Strap shortcut",
+            title: "A gym log book on your wrist, a Coach you can switch off, and a Sync WHOOP shortcut",
             date: "September 2026",
             items: [
                 "**A lift log you advance from the strap (#2098, #2099, #2232, thanks @UtkuDenizAltiok).** An on-device gym log book on iPhone and Mac: build a session, then move between sets with a double-tap on the strap instead of reaching for the phone. Android gets the groundwork this release, the new schema with its Room twin and the same set-metrics engine, but not the log book itself yet (#2327).",
@@ -58,7 +58,7 @@ enum AppChangelog {
         ),
         Release(
             version: "11.7.0",
-            title: "A stress screen that keeps up, WHOOP 5 readings in the units the strap sends, and a ring that stops repeating itself",
+            title: "A stress screen that keeps up, WHOOP 5 readings in the units the WHOOP sends, and a ring that stops repeating itself",
             date: "September 2026",
             items: [
                 "**A stress screen that keeps up (#2191, #2194, #2202, #2116).** Scoring a day of samples no longer happens on the thread that is drawing the screen, so Today and Stress stay responsive while they load. The baseline is reduced a day at a time instead of holding a month of readings at once, and the unprompted rescore now yields to whatever you are doing rather than competing with it.",
@@ -259,7 +259,7 @@ enum AppChangelog {
         ),
         Release(
             version: "9.0.0",
-            title: "Power saving that protects your strap, a Gemini-powered coach on Android, and richer metric detail",
+            title: "Power saving that protects your WHOOP, a Gemini-powered coach on Android, and richer metric detail",
             date: "July 2026",
             items: [
                 "**Power saving that looks after your strap (#477).** A new Settings → Power saving section eases how hard Sfz Health works your WHOOP when the strap's own battery is running low: it syncs less often and pauses the always-on background HRV stream, so the band lasts longer until you can charge it. You pick the strap-battery level it kicks in at; it's off by default and never runs while the strap is charging. iPhone, Mac and Android.",
@@ -272,7 +272,7 @@ enum AppChangelog {
         ),
         Release(
             version: "8.7.0",
-            title: "A sync chip on Today, clearer strap-clock warnings, and complete German",
+            title: "A sync chip on Today, clearer WHOOP-clock warnings, and complete German",
             date: "July 2026",
             items: [
                 "**See your strap syncing at a glance (#245).** The Today screen now shows a small sync chip for everyone — a spinner with a live count while your strap's history downloads, and when it last synced the rest of the time — so you can tell it's working without opening the Live screen. iPhone, Mac and Android.",
@@ -297,7 +297,7 @@ enum AppChangelog {
         ),
         Release(
             version: "8.6.1",
-            title: "Restart your strap, lighter on battery, and Health Connect on Android 13",
+            title: "Restart your WHOOP, lighter on battery, and Health Connect on Android 13",
             date: "July 2026",
             items: [
                 "**Restart your strap from Sfz Health (#166).** A new *Restart strap* option on the connected band in Devices — a clean way to reboot a misbehaving strap without the official app. Confirmation-gated, keeps your data, and shows a *Reconnecting…* state while it comes back. iPhone, Mac and Android.",
@@ -943,7 +943,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "4.5.1",
-            title: "Sleep: keep real nights when the strap comes off",
+            title: "Sleep: keep real nights when the WHOOP comes off",
             date: "June 2026",
             items: [
                 "A quick refinement to yesterday's off-wrist sleep fix. Sfz Health now only discards a sleep block when **most of it** (half or more) is off-wrist, rather than dropping it for any off-wrist gap at all. So a real night where you take the strap off shortly after waking is kept in full, while a strap left sitting still on a desk all day is still correctly ignored. *(Thanks to community contributor j0b-dev for the sharper approach.)*",
@@ -1207,7 +1207,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "3.4.0",
-            title: "Tidier Today hero, strap renaming, smarter journal",
+            title: "Tidier Today hero, WHOOP renaming, smarter journal",
             date: "June 2026",
             items: [
                 "**Today:** your three daily scores - **Charge / Effort / Rest** - now sit in one tidy row of rings, instead of leaving Rest stranded on its own line beside an empty space. Thanks @vulnix0x4 (#394).",
@@ -1223,7 +1223,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "3.3.0",
-            title: "Strap battery alerts",
+            title: "WHOOP battery alerts",
             date: "June 2026",
             items: [
                 "New: Sfz Health can now alert you when your WHOOP's battery runs **low (15% or below)** or finishes **charging (100%)** - a simple system notification so you don't get caught out before bed. It fires at most once per discharge and once per charge (a small re-arm band means a battery hovering near 15% won't nag you), and it's on by default - turn it off any time under Settings → Automations. All three platforms. Thanks @ujix (#368).",
@@ -1486,7 +1486,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.8.8",
-            title: "Better strap-log diagnostics",
+            title: "Better WHOOP-log diagnostics",
             date: "June 2026",
             items: [
                 "Improved: shared strap logs now record which historical data layout your strap uses, and the Bluetooth signal strength at connect - invisible day-to-day, but it makes diagnosing a sync issue from a shared log much faster. Thanks @ryanbr. (#241)",
@@ -1528,7 +1528,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.8.3",
-            title: "Fixed: imported data and strap sync getting stuck on iOS",
+            title: "Fixed: imported data and WHOOP sync getting stuck on iOS",
             date: "June 2026",
             items: [
                 "Fixed (iOS): after importing your data, the strap could get stuck on \"store not ready\" and never sync - imported history wouldn't appear and backfill never started. On iOS the local database was sealed behind the device's data protection while the phone was locked, so a background reconnect couldn't open it (macOS and Android were never affected). Sfz Health now stores its database at the right protection level - readable after you first unlock since boot, still encrypted at rest - and retries automatically, so sync proceeds. Thanks @NoahMcE (#222).",
@@ -1737,7 +1737,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "2.0",
-            title: "Clearer answers when your strap isn't banking history",
+            title: "Clearer answers when your WHOOP isn't banking history",
             date: "June 2026",
             items: [
                 "Improved (Mac, iOS and Android): your strap log now records what a sync SAVED, not only what failed - a \"persisted N rows (M with motion) across K night(s)\" line on every successful offload. Sfz Health previously logged only failures, so a shared log couldn't show whether history was actually banking; now it can. (#150)",
@@ -1797,7 +1797,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "1.92",
-            title: "Better diagnostics for newer strap firmware - so we can decode it",
+            title: "Better diagnostics for newer WHOOP firmware - so we can decode it",
             date: "June 2026",
             items: [
                 "Improved (Mac and Android): when your strap's historical records use a firmware layout Sfz Health can't decode yet - newer WHOOP 5.0/MG units, and some WHOOP 4.0 straps, which is why sleep, recovery and steps can be missing (see #30, #136) - the strap log now includes the full record bytes (it previously cut them off after 64) plus a few more sample records. That's exactly what we need to map the new layout, so a single fresh strap log from an affected device now carries everything required for us to add support.",
@@ -1811,14 +1811,14 @@ enum AppChangelog {
             ]),
         Release(
             version: "1.90",
-            title: "Sfz Health now tells you when your strap isn't saving history - and how to fix it",
+            title: "Sfz Health now tells you when your WHOOP isn't saving history - and how to fix it",
             date: "June 2026",
             items: [
                 "Improved (Mac and Android): when a sync completes but your strap handed over only its diagnostic output and no stored history - which means its clock has lost sync and it isn't saving data to flash - Sfz Health now says so, with the fix (fully charge the strap to 100%, then reconnect), instead of silently reporting \"synced.\" It's the single most common reason recovery, sleep and strain stop appearing on a WHOOP 4.0, and it's now told apart from a normal caught-up sync. (#77, #91, #120)",
             ]),
         Release(
             version: "1.89",
-            title: "Live heart rate lands on today's chart even when the strap's clock is off (Android)",
+            title: "Live heart rate lands on today's chart even when the WHOOP's clock is off (Android)",
             date: "June 2026",
             items: [
                 "Fixed (Android): if your WHOOP's internal clock was invalid (the same condition that can stop it banking history), live heart rate still streamed and was saved - but it got stamped with the strap's bogus clock, so it landed off-today and the Today 24-hour HR trend read empty even though live HR was working. Live readings are now anchored to your phone's clock as they arrive, so they always land on today's timeline. (#126)",
@@ -1874,7 +1874,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "1.82",
-            title: "Stop losing strap history we can't yet decode - plus a board of fixes",
+            title: "Stop losing WHOOP history we can't yet decode - plus a board of fixes",
             date: "June 2026",
             items: [
                 "Fixed (Mac and Android): Sfz Health no longer destroys strap history it can't yet decode. If a history chunk arrived with a bad checksum or a firmware record layout we haven't mapped, Sfz Health used to tell the strap \"got it\" anyway - and the strap then freed (erased) that data while the screen said \"synced\". Sfz Health now archives those raw records on-device before acknowledging, and if it can't save them it leaves them on the strap to retry, so an unrecognised firmware can no longer cost you your data. (#77, #91)",
@@ -2030,7 +2030,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "1.63",
-            title: "Mac: strap-computed nights show in Sleep",
+            title: "Mac: WHOOP-computed nights show in Sleep",
             date: "June 2026",
             items: [
                 "Fixed (Mac): nights computed from the strap alone were missing from the Sleep tab entirely - Intelligence scored them, but Sleep showed nothing (#77). The strap's on-device analysis stores its stage data in a different shape than a WHOOP import, and the Sleep tab only knew how to read the imported one. Bonus of the fix: Bluetooth-only nights now draw their REAL stage timeline in the hypnogram (imported nights still use an approximate reconstruction, since the export carries totals only). The usual honesty note applies: on-device stages are approximations from heart rate, HRV and movement - not PSG-validated. Android already handled both shapes; version bump only there.",
@@ -2087,7 +2087,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "1.55",
-            title: "Mac: recovery builds from your strap alone",
+            title: "Mac: recovery builds from your WHOOP alone",
             date: "June 2026",
             items: [
                 "New (Mac): recovery now builds from the strap's own offloaded nights, no WHOOP export needed - the same fix Android got in v1.53. The recovery baseline previously only learned from imported history, so a Bluetooth-only Mac user never crossed the \"learn your baseline\" threshold and recovery stayed blank. Sfz Health now seeds the baseline from the nights it computes on-device too, so after about four nights recovery lights up on its own. Honest-blank until then; a real import still wins per day. Also: the WHOOP 5.0/MG step counter now persists on Mac (parity with Android - surfaced later, still APPROXIMATE). Android: version bump only (it already had both).",
@@ -2101,7 +2101,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "1.53",
-            title: "Recovery builds from your strap alone (Android)",
+            title: "Recovery builds from your WHOOP alone (Android)",
             date: "June 2026",
             items: [
                 "New (Android): recovery now builds from the strap's own offloaded nights - no WHOOP export needed. Before, the recovery baseline only ever learned from imported history, so a Bluetooth-only user never crossed the \"learn your baseline\" threshold and recovery stayed blank forever. Sfz Health now seeds the baseline from the nights it computes on-device too, so after about four nights of wear recovery lights up on its own. It stays honestly blank until then, and a real WHOOP import still wins per day. The natural payoff of the v1.52 offload work. Thanks to a community contribution (#78). (macOS recovery-seeding parity is a follow-up; version bump only this release.)",
@@ -2427,7 +2427,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "1.8",
-            title: "Strap-log export on Mac + a Health Monitor fix",
+            title: "WHOOP-log export on Mac + a Health Monitor fix",
             date: "June 2026",
             items: [
                 "Mac: you can now export the strap log - Copy / Save… on the Live screen's strap log - so Mac users can attach it to a bug report too (Android has had this since 1.6).",
@@ -2485,7 +2485,7 @@ enum AppChangelog {
             ]),
         Release(
             version: "1.1",
-            title: "Scores live from the strap",
+            title: "Scores live from the WHOOP",
             date: "June 2026",
             items: [
                 "Recovery, strain and sleep now compute live on-device from the strap, not only from an import. They calibrate over your first few nights, like any recovery wearable.",
@@ -2516,7 +2516,7 @@ enum AppChangelog {
         Expectation(
             icon: "flask",
             title: String(localized: "Independent, and experimental"),
-            body: String(localized: "Sfz Health is a personal, open project: not the WHOOP app, and not affiliated with WHOOP. It reads a strap you own, on your own device. Treat it as a capable work-in-progress rather than a finished product.")),
+            body: String(localized: "Sfz Health is a personal, open project: not the WHOOP app, and not affiliated with WHOOP. It reads a WHOOP you own, on your own device. Treat it as a capable work-in-progress rather than a finished product.")),
         Expectation(
             icon: "checkmark.seal",
             title: String(localized: "WHOOP 4.0 is the supported path"),
@@ -2528,6 +2528,6 @@ enum AppChangelog {
         Expectation(
             icon: "lock.shield",
             title: String(localized: "Everything stays on your device"),
-            body: String(localized: "No account, no cloud, no sync. Sfz Health talks only to your strap and keeps everything local. Your data is yours alone.")),
+            body: String(localized: "No account, no cloud, no sync. Sfz Health talks only to your WHOOP and keeps everything local. Your data is yours alone.")),
     ]
 }

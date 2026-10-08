@@ -22,12 +22,12 @@ struct PowerSavingView: View {
 
     var body: some View {
         ScreenScaffold(title: "Power saving",
-                       subtitle: "Ease the load on your strap when its battery is running low.") {
+                       subtitle: "Ease the load on your WHOOP when its battery is running low.") {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionSpacing) {
                 NoopCard {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Power saving").strandOverline()
-                        Text("The strap keeps banking data on its own, so nothing is lost — Sfz Health just talks to it less often to help it last until you can charge it.")
+                        Text("The WHOOP keeps banking data on its own, so nothing is lost — Sfz Health just talks to it less often to help it last until you can charge it.")
                             .font(StrandFont.caption)
                             .foregroundStyle(StrandPalette.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -41,7 +41,7 @@ struct PowerSavingView: View {
                         .toggleStyle(.switch)
                         .tint(StrandPalette.accent)
                         .onChangeCompat(of: powerSavingEnabled) { _ in model.applyPowerSaving() }
-                        Text("Slows background strap-sync (every 45 min instead of 15) while your strap's battery is low. No data loss — the strap banks everything, so sync just batches into larger, less frequent pulls.")
+                        Text("Slows background WHOOP-sync (every 45 min instead of 15) while your WHOOP's battery is low. No data loss — the WHOOP banks everything, so sync just batches into larger, less frequent pulls.")
                             .font(StrandFont.caption)
                             .foregroundStyle(StrandPalette.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -49,7 +49,7 @@ struct PowerSavingView: View {
                         if powerSavingEnabled {
                             rowDivider
                             HStack {
-                                Text("Kick in at (strap battery)")
+                                Text("Kick in at (WHOOP battery)")
                                     .font(StrandFont.subhead)
                                     .foregroundStyle(StrandPalette.textPrimary)
                                 Spacer()
@@ -77,7 +77,7 @@ struct PowerSavingView: View {
                             .toggleStyle(.switch)
                             .tint(StrandPalette.accent)
                             .onChangeCompat(of: pauseHrvDisabled) { _ in model.applyPowerSaving() }
-                            Text("While your strap's battery is low, stop the always-on background HRV stream — the biggest continuous drain on the strap. A Live screen still shows heart rate, and it re-arms automatically once the strap is charged.")
+                            Text("While your WHOOP's battery is low, stop the always-on background HRV stream — the biggest continuous drain on the WHOOP. A Live screen still shows heart rate, and it re-arms automatically once the WHOOP is charged.")
                                 .font(StrandFont.caption)
                                 .foregroundStyle(StrandPalette.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -92,7 +92,7 @@ struct PowerSavingView: View {
                             .toggleStyle(.switch)
                             .tint(StrandPalette.accent)
                             .onChangeCompat(of: lowRefreshEnabled) { _ in model.applyPowerSaving() }
-                            Text("Sync in the background every hour instead of every 15 minutes, whatever the strap's charge — fewer reconnections is the biggest saving on a WHOOP 4.0. Nothing is lost: the strap banks everything and hands it over in larger batches. Pull to sync still runs straight away, and live heart rate is untouched.")
+                            Text("Sync in the background every hour instead of every 15 minutes, whatever the WHOOP's charge — fewer reconnections is the biggest saving on a WHOOP 4.0. Nothing is lost: the WHOOP banks everything and hands it over in larger batches. Pull to sync still runs straight away, and live heart rate is untouched.")
                                 .font(StrandFont.caption)
                                 .foregroundStyle(StrandPalette.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)

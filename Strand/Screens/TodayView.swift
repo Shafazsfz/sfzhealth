@@ -939,7 +939,7 @@ struct TodayView: View {
         // other candidate-fallback surface uses — never a device name, which would misrepresent an
         // unvalidated estimate as a calibrated reading in this table's Source column.
         if rawSource == spo2CandidateAttributionSource {
-            return String(localized: "strap estimate (unverified)")
+            return String(localized: "WHOOP estimate (unverified)")
         }
         if rawSource.hasSuffix("-noop") { return String(localized: "On-device") }
         if rawSource == deviceId || rawSource == Repository.whoopSource { return Self.whoopBrandName }
@@ -1502,7 +1502,7 @@ struct TodayView: View {
                     if !scoresBuildingDismissed {
                         DataPendingNote(
                             title: "Live now. Your scores are building.",
-                            message: "Your live heart rate is working from the strap, and charge, effort and rest build from it over your next few nights of wear, sharpening as it learns your baseline. Want your full history instantly? Import your WHOOP export in Data Sources and it backfills in about a minute."
+                            message: "Your live heart rate is working from the WHOOP, and charge, effort and rest build from it over your next few nights of wear, sharpening as it learns your baseline. Want your full history instantly? Import your WHOOP export in Data Sources and it backfills in about a minute."
                         )
                         // A small × dismisses the card INTO the Updates inbox (restorable from there).
                         .overlay(alignment: .topTrailing) {
@@ -1987,7 +1987,7 @@ struct TodayView: View {
                         Text("Start session")
                             .font(StrandFont.headline)
                             .foregroundStyle(StrandPalette.textPrimary)
-                        Text("Silent strap coaching against today's Recovery.")
+                        Text("Silent WHOOP coaching against today's Recovery.")
                             .font(StrandFont.caption)
                             .foregroundStyle(StrandPalette.textSecondary)
                     }
@@ -2002,7 +2002,7 @@ struct TodayView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Start a live session. Beta. Silent strap coaching against today's Recovery.")
+        .accessibilityLabel("Start a live session. Beta. Silent WHOOP coaching against today's Recovery.")
     }
 
     private var recoveryVitalsSection: some View {
@@ -3647,8 +3647,8 @@ struct TodayView: View {
                     tint: StrandPalette.metricRose
                 ) {
                     Text(selectedDayOffset == 0
-                        ? String(localized: "Your curve fills in as the strap offloads its history.")
-                        : String(localized: "Step back to a day the strap was worn."))
+                        ? String(localized: "Your curve fills in as the WHOOP offloads its history.")
+                        : String(localized: "Step back to a day the WHOOP was worn."))
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textTertiary)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -3965,7 +3965,7 @@ struct TodayView: View {
                 // the "building" hint; a past day with no Rest falls to the honest "Needs the strap" rather
                 // than a bare blank, so the tile always carries a state.
                 caption: restIsPendingSync
-                    ? String(localized: "Pending sync · strap history still offloading")
+                    ? String(localized: "Pending sync · WHOOP history still offloading")
                     : (restScore != nil ? restCaption(d)
                         : (buildingHint(.rest) ?? restCaption(d) ?? Self.needsStrapCaption)),
                 accent: restScore.map { StrandPalette.recoveryColor($0) } ?? StrandPalette.textPrimary,
@@ -4025,7 +4025,7 @@ struct TodayView: View {
                 ? String(format: "%.0f%%", locale: AppLanguage.activeLocale, candidateTail!)
                 : spo2.value
             let spo2Caption: String = spo2.value == "—" && candidateTail != nil
-                ? String(localized: "strap estimate (unverified)")
+                ? String(localized: "WHOOP estimate (unverified)")
                 : (spo2.value == "—" && spo2CandidateOn
                    ? String(localized: "toggle ON · no estimate yet")
                    : (spo2.caption ?? ""))
@@ -5243,7 +5243,7 @@ struct TodayView: View {
     /// state), never a stitched tail fragment, so every combination is one clean catalog key.
     private func synthesisDetail(_ d: DailyMetric?) -> String {
         guard let d, let rec = d.recovery else {
-            return String(localized: "No metrics yet. Import your Whoop export or wear the strap to begin.")
+            return String(localized: "No metrics yet. Import your Whoop export or wear the WHOOP to begin.")
         }
         // true = slept 7h+; false = short; nil = no banked duration.
         let sleptWell: Bool? = d.totalSleepMin.map { $0 / 60.0 >= 7 }
@@ -5314,7 +5314,7 @@ struct TodayView: View {
     /// shows instead of a bare blank when there's no value, no calibration count and nothing to carry.
     /// Matches `MetricTileState.needsStrap.title` verbatim so the tile and the explained note say the same
     /// words, both resolve from the SAME catalog key, so they stay in lockstep in every locale.
-    static let needsStrapCaption = String(localized: "Needs the strap")
+    static let needsStrapCaption = String(localized: "Needs the WHOOP")
 
     /// H10, the honest empty-state caption for a recovery-vital tile (HRV / Resting HR / SpO₂ / Respiratory)
     /// when TODAY has no value yet and there's nothing to carry over. Those vitals are measured overnight, so
@@ -5604,8 +5604,8 @@ private struct RecordingStatusLight: View {
     private var syncingAccessibilityLabel: String {
         let n = live.syncChunksThisSession
         return n > 0
-            ? String(localized: "Syncing strap history, chunk \(n)")
-            : String(localized: "Syncing strap history")
+            ? String(localized: "Syncing WHOOP history, chunk \(n)")
+            : String(localized: "Syncing WHOOP history")
     }
 }
 
@@ -5749,7 +5749,7 @@ private struct StrapBatteryRow: View {
                     }
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Strap battery \(Int(pct.rounded())) percent\(live.charging == true ? ", charging" : "")\(estimateText.map { ", \($0)" } ?? "")")
+                .accessibilityLabel("WHOOP battery \(Int(pct.rounded())) percent\(live.charging == true ? ", charging" : "")\(estimateText.map { ", \($0)" } ?? "")")
             }
         }
     }
@@ -5827,10 +5827,10 @@ enum MetricTileState: Equatable {
                 : String(localized: "Calibrating. Building your baseline. About \(n) more nights until your scores are personal.")
         case .carriedLastNight(let date, let stale):
             return stale
-                ? String(localized: "Latest sleep, \(date). This is your last scored session. Wear the strap overnight for a fresh score.")
-                : String(localized: "Last night, \(date). Tonight's lands after you sleep with the strap on.")
+                ? String(localized: "Latest sleep, \(date). This is your last scored session. Wear the WHOOP overnight for a fresh score.")
+                : String(localized: "Last night, \(date). Tonight's lands after you sleep with the WHOOP on.")
         case .needsStrap:
-            return String(localized: "Needs the strap. No data for today. Was your strap worn and connected overnight?")
+            return String(localized: "Needs the WHOOP. No data for today. Was your WHOOP worn and connected overnight?")
         }
     }
 
@@ -5908,11 +5908,11 @@ enum RecordingState: Equatable {
     var accessibilityText: String {
         switch self {
         case .recording:
-            return String(localized: "Recording. Your strap is connected and saving data.")
+            return String(localized: "Recording. Your WHOOP is connected and saving data.")
         case .lastSynced(let mins):
             return String(localized: "Last synced \(mins) minutes ago. Reconnect to pull the latest.")
         case .notRecording:
-            return String(localized: "Not recording. Strap not connected. Tap to connect.")
+            return String(localized: "Not recording. WHOOP not connected. Tap to connect.")
         case .historyExperimental:
             return String(localized: "Connected. History sync is experimental on 5.0.")
         case .connectedNoData:

@@ -183,7 +183,7 @@ struct WorkoutDetailView: View {
                             recoveryStat(String(localized: "5 min"), value: recovery.after5Minutes)
                         }
                         Divider().overlay(StrandPalette.hairline)
-                        Text("The change from your heart rate at the end of exercise. Positive values mean your heart rate fell; a dash means the strap did not record enough data around that minute.")
+                        Text("The change from your heart rate at the end of exercise. Positive values mean your heart rate fell; a dash means the WHOOP did not record enough data around that minute.")
                             .font(StrandFont.footnote)
                             .foregroundStyle(StrandPalette.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)

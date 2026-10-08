@@ -688,7 +688,7 @@ struct LiquidTodayView: View {
             .background(NoopPanelSurface(cornerRadius: 18, surfaceOpacity: cardOpacity))
         }
         .buttonStyle(LiquidPressStyle())
-        .accessibilityLabel("Start a live session. Beta. Silent strap coaching against today's Recovery.")
+        .accessibilityLabel("Start a live session. Beta. Silent WHOOP coaching against today's Recovery.")
     }
 
     private var heroCard: some View {
@@ -1049,7 +1049,7 @@ struct LiquidTodayView: View {
             // is the DEFAULT Today screen on iOS 26. The subtitle is the slot this card has.
             cardLink(.metric("spo2"),
                      title: card.title,
-                     sub: spo2Candidate != nil ? String(localized: "strap estimate (unverified)") : card.subtitle,
+                     sub: spo2Candidate != nil ? String(localized: "WHOOP estimate (unverified)") : card.subtitle,
                      // Em dash, not the en dash the stub used: the classic Blood Oxygen card and
                      // skinTempCardValue both return "—", so the stub's "–" would have left the two
                      // adjacent cards printing different glyphs for the same "no reading" state.
@@ -1416,7 +1416,7 @@ struct LiquidTodayView: View {
                 : nil
             let spo2 = spo2Real ?? spo2CandidateValue
             ktile(String(localized: "Blood Oxygen"), icon: keyMetricIcon(metric), intText(spo2), "%", StrandPalette.metricCyan, fracOver(spo2, 100), key: spo2CandidateValue != nil ? "spo2_candidate" : "spo2",
-                  caption: spo2CandidateValue != nil ? String(localized: "strap estimate (unverified)") : nil)
+                  caption: spo2CandidateValue != nil ? String(localized: "WHOOP estimate (unverified)") : nil)
         case .respiratory:
             let resp = displayDay?.respRateBpm ?? vitalsDay?.respRateBpm ?? respDay?.respRateBpm
             ktile(String(localized: "Respiratory"), icon: keyMetricIcon(metric), resp.map { String(format: "%.1f", locale: AppLanguage.activeLocale, $0) } ?? "—", "rpm", StrandPalette.accent, fracOver(resp, 24), key: "resp_rate")
@@ -1963,7 +1963,7 @@ struct LiquidTodayView: View {
                                                              nightlyHrv: repo.days.map(\.avgHrv),
                                                              today: Repository.logicalDayKey(Date())),
            stale > Baselines.staleDays {
-            return String(localized: "No new nights from your strap for \(stale) days. Check it's connected and saving data.")
+            return String(localized: "No new nights from your WHOOP for \(stale) days. Check it's connected and saving data.")
         }
         switch readiness.level {
         case .primed: return String(localized: "You're primed. A hard session should land well today.")
@@ -2495,7 +2495,7 @@ private struct LiquidLiveHR: View {
     private var subtitle: String {
         if isLive { return String(localized: "Live · beat by beat") }
         if fallback.count >= 2 { return String(localized: "5-minute average · since midnight") }
-        return live.connected ? String(localized: "Waiting for the strap") : String(localized: "Strap not connected")
+        return live.connected ? String(localized: "Waiting for the WHOOP") : String(localized: "WHOOP not connected")
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -2573,7 +2573,7 @@ private struct LiquidLiveHR: View {
             } else {
                 Text(live.connected
                      ? String(localized: "Waiting for a live heartbeat…")
-                     : String(localized: "Connect your strap to see live heart rate"))
+                     : String(localized: "Connect your WHOOP to see live heart rate"))
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -2823,7 +2823,7 @@ extension LiquidTodayView {
             guard case .calibrating = self else { return nil }
             let cov = Baselines.recentHrvCoverage(dayKeys: dayKeys, nightlyHrv: nightlyHrv, today: today)
             guard cov.missing > 0, cov.observed > 0 else { return nil }
-            return String(localized: "\(cov.missing) of the last \(cov.observed) nights recorded no HRV. Check the strap is worn overnight and syncing.")
+            return String(localized: "\(cov.missing) of the last \(cov.observed) nights recorded no HRV. Check the WHOOP is worn overnight and syncing.")
         }
 
         static func resolve(todayRecovery: Double?, priorScored: DailyMetric?,
@@ -2983,7 +2983,7 @@ private struct LiquidBatteryButton: View {
             // VoiceOver announcing a real count while the ring showed the synthetic one — i.e. the
             // harness could not be used to check the read-out it exists to exercise.
             let n = syncChunks
-            guard n > 0 else { return String(localized: "Syncing strap history") }
+            guard n > 0 else { return String(localized: "Syncing WHOOP history") }
             // #689/#815: the connect-time ring backlog, when the strap reported one. Zero is dropped by
             // `SyncChipState.resolve`, and dropped here for the same reason: "0 pages behind" beside a
             // running sync contradicts itself. Both counts inflect — the phrase is built from its own
@@ -2993,20 +2993,20 @@ private struct LiquidBatteryButton: View {
                 .flatMap { $0 > 0 ? $0 : nil }
                 .map { String(localized: "\($0) pages behind at connect") }
             if let behind {
-                return String(localized: "Syncing strap history, \(n) chunks, \(behind)")
+                return String(localized: "Syncing WHOOP history, \(n) chunks, \(behind)")
             }
-            return String(localized: "Syncing strap history, \(n) chunks")
+            return String(localized: "Syncing WHOOP history, \(n) chunks")
         }
 
         switch batteryDisplay {
         case .notActiveDevice:
             return ""          // not drawn; the label is unreachable and must not claim anything
         case .offline:
-            return String(localized: "Strap battery, strap not connected")
+            return String(localized: "WHOOP battery, WHOOP not connected")
         case .pending(let charging):
             return charging
-                ? String(localized: "Strap battery charging, no reading yet")
-                : String(localized: "Strap battery, no reading yet")
+                ? String(localized: "WHOOP battery charging, no reading yet")
+                : String(localized: "WHOOP battery, no reading yet")
         case .charge(let percent, let charging, let isRing):
             let n = Int(percent.rounded())
             // Named for the device the number belongs to: "Strap battery" over a ring's charge would be
@@ -3017,8 +3017,8 @@ private struct LiquidBatteryButton: View {
                     : String(localized: "Ring battery \(n) percent")
             }
             return charging
-                ? String(localized: "Strap battery \(n) percent, charging")
-                : String(localized: "Strap battery \(n) percent")
+                ? String(localized: "WHOOP battery \(n) percent, charging")
+                : String(localized: "WHOOP battery \(n) percent")
         }
     }
 }
@@ -3096,9 +3096,9 @@ private struct LiquidSyncStatusRow: View {
     @EnvironmentObject var live: LiveState
     var body: some View {
         if live.backfilling {
-            row(String(localized: "Strap history"), value: chunks, tone: StrandPalette.accent)
+            row(String(localized: "WHOOP history"), value: chunks, tone: StrandPalette.accent)
         } else if let ts = live.lastSyncedAt {
-            row(String(localized: "Strap history"),
+            row(String(localized: "WHOOP history"),
                 value: String(localized: "Synced \(relativeAgo(ts))"), tone: StrandPalette.textPrimary)
         }
     }
@@ -3129,7 +3129,7 @@ private struct LiquidStrapBatteryRow: View {
         // #2208: the strap's charge only when the strap is the active device.
         if live.connected, live.activeIsWhoop, let pct = live.batteryPct {
             HStack {
-                Text("Strap battery").font(StrandFont.subhead).foregroundStyle(StrandPalette.textSecondary)
+                Text("WHOOP battery").font(StrandFont.subhead).foregroundStyle(StrandPalette.textSecondary)
                 Spacer()
                 // #972: append "· Charging"; #992: append the "~X days left" runtime the v8 redesign dropped.
                 Text(batteryText(pct: pct))

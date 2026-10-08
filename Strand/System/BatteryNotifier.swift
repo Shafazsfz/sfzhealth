@@ -154,7 +154,7 @@ enum BatteryNotifier {
         }
         if result.fireFull {
             post(identifier: "battery-full",
-                 title: String(localized: "Strap fully charged"),
+                 title: String(localized: "WHOOP fully charged"),
                  body: String(localized: "Your WHOOP is at 100%."))
         }
         // #514: the strap has dropped below 100% — pull the stale "fully charged" note (delivered
@@ -181,7 +181,7 @@ enum BatteryNotifier {
         d.set(result.newAlerted, forKey: runtimeAlertedKey)
         if result.fire {
             post(identifier: "battery-runtime",
-                 title: String(localized: "Strap battery low"),
+                 title: String(localized: "WHOOP battery low"),
                  body: String(localized: "\(BatteryEstimator.label(hours: remainingHours)) left on your WHOOP — recharge tonight."))
         }
     }
@@ -238,7 +238,7 @@ enum BatteryNotifier {
         if result.fire {
             post(identifier: "battery-critical",
                  title: String(localized: "Charge your WHOOP now"),
-                 body: String(localized: "\(pct)% left. The strap stops recording near 10% — it won't capture tonight unless you charge it."),
+                 body: String(localized: "\(pct)% left. The WHOOP stops recording near 10% — it won't capture tonight unless you charge it."),
                  interruptionLevel: .timeSensitive)
         }
     }

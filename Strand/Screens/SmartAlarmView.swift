@@ -46,7 +46,7 @@ struct SmartAlarmView: View {
         // #766: retitled to "Alarms" because it now holds BOTH the strap's silent wake-alarm and the
         // evening wind-down reminder, so naming it "Wind-Down" undersold it. One surface, clearly labelled.
         ScreenScaffold(title: "Alarms",
-                       subtitle: "Your strap wake-alarm and the evening wind-down reminder, in one place.") {
+                       subtitle: "Your WHOOP wake-alarm and the evening wind-down reminder, in one place.") {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                 windowHero
                 strapAlarmCard
@@ -171,10 +171,10 @@ struct SmartAlarmView: View {
                         .foregroundStyle(StrandPalette.statusWarning)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Your strap isn't accepting the alarm")
+                        Text("Your WHOOP isn't accepting the alarm")
                             .font(StrandFont.headline)
                             .foregroundStyle(StrandPalette.textPrimary)
-                        Text("The strap keeps reporting a different time than Sfz Health sends, so its firmware alarm won't fire at your wake time — usually a strap whose clock or alarm has reset. Reset the strap in the official WHOOP app (or fully charge it and reconnect), and keep your phone's Clock alarm as your wake until it takes.")
+                        Text("The WHOOP keeps reporting a different time than Sfz Health sends, so its firmware alarm won't fire at your wake time — usually a WHOOP whose clock or alarm has reset. Reset the WHOOP in the official WHOOP app (or fully charge it and reconnect), and keep your phone's Clock alarm as your wake until it takes.")
                             .font(StrandFont.footnote)
                             .foregroundStyle(StrandPalette.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -194,10 +194,10 @@ struct SmartAlarmView: View {
                     .foregroundStyle(StrandPalette.statusWarning)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("The strap alarm is a silent buzz, not a sound")
+                    Text("The WHOOP alarm is a silent buzz, not a sound")
                         .font(StrandFont.headline)
                         .foregroundStyle(StrandPalette.textPrimary)
-                    Text("The wake-alarm above buzzes your wrist from the strap's own firmware. It can't sound a loud alarm. We also schedule a backup notification at your wake time, but a sideloaded app can't sound a guaranteed wake on this device (that needs a critical-alert permission this build doesn't have), so Focus or silent mode can still mute it. Keep your phone's built-in Clock alarm as your real backup. Sfz Health's phone-based smart wake (light-sleep detection) is available on the Android app.")
+                    Text("The wake-alarm above buzzes your wrist from the WHOOP's own firmware. It can't sound a loud alarm. We also schedule a backup notification at your wake time, but a sideloaded app can't sound a guaranteed wake on this device (that needs a critical-alert permission this build doesn't have), so Focus or silent mode can still mute it. Keep your phone's built-in Clock alarm as your real backup. Sfz Health's phone-based smart wake (light-sleep detection) is available on the Android app.")
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -220,7 +220,7 @@ struct SmartAlarmView: View {
                         Image(systemName: "alarm.fill")
                             .foregroundStyle(StrandPalette.accent)
                             .accessibilityHidden(true)
-                        Text("Strap wake-alarm")
+                        Text("WHOOP wake-alarm")
                             .font(StrandFont.title2)
                             .foregroundStyle(StrandPalette.textPrimary)
                     }
@@ -228,10 +228,10 @@ struct SmartAlarmView: View {
 
                 HStack(alignment: .center, spacing: 16) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Wake me with a strap buzz")
+                        Text("Wake me with a WHOOP buzz")
                             .font(StrandFont.body)
                             .foregroundStyle(StrandPalette.textPrimary)
-                        Text("Arms the strap to buzz at your wake time, even if Sfz Health is closed. Sends the exact alarm command the official app sends, confirmed buzzing on a real WHOOP 4.0 (community wire capture + on-device test, #535). Keep a backup alarm for anything you truly can't miss.")
+                        Text("Arms the WHOOP to buzz at your wake time, even if Sfz Health is closed. Sends the exact alarm command the official app sends, confirmed buzzing on a real WHOOP 4.0 (community wire capture + on-device test, #535). Keep a backup alarm for anything you truly can't miss.")
                             .font(StrandFont.footnote)
                             .foregroundStyle(StrandPalette.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -239,7 +239,7 @@ struct SmartAlarmView: View {
                     Spacer()
                     Toggle("", isOn: $behavior.smartAlarmEnabled)
                         .labelsHidden().toggleStyle(.switch).tint(StrandPalette.accent)
-                        .accessibilityLabel("Wake me with a strap buzz")
+                        .accessibilityLabel("Wake me with a WHOOP buzz")
                 }
                 .frame(minHeight: 42)
 
@@ -253,7 +253,7 @@ struct SmartAlarmView: View {
                             // Distinct from the wind-down picker's label below. Both were "Wake time",
                             // so VoiceOver announced the alarm and the reminder's timing input by the
                             // same name, on the same screen, with different values.
-                            .accessibilityLabel("Strap alarm wake time")
+                            .accessibilityLabel("WHOOP alarm wake time")
                     }
                     .frame(minHeight: 42)
                     // The per-day overrides that re-time THIS alarm (#1864) are edited under the
@@ -292,7 +292,7 @@ struct SmartAlarmView: View {
                             .foregroundStyle(StrandPalette.textTertiary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     } else {
-                        Text("Armed on the strap itself, so it can buzz at your wake time even if your phone is asleep or Sfz Health is closed. Sends the exact alarm command the official app sends, confirmed buzzing on a real WHOOP 4.0 (community wire capture + on-device test, #535). Keep a backup alarm for anything you truly can't miss.")
+                        Text("Armed on the WHOOP itself, so it can buzz at your wake time even if your phone is asleep or Sfz Health is closed. Sends the exact alarm command the official app sends, confirmed buzzing on a real WHOOP 4.0 (community wire capture + on-device test, #535). Keep a backup alarm for anything you truly can't miss.")
                             .font(StrandFont.footnote)
                             .foregroundStyle(StrandPalette.textTertiary)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -310,7 +310,7 @@ struct SmartAlarmView: View {
                         Button {
                             model.ble.getStrapAlarm()
                         } label: {
-                            Text("Check what the strap has stored")
+                            Text("Check what the WHOOP has stored")
                         }
                         .buttonStyle(NoopButtonStyle(.secondary, fullWidth: true))
                         Text("The answer from the strap appears in your strap log and debug export, with the raw bytes it replied with.")
@@ -400,7 +400,7 @@ struct SmartAlarmView: View {
                     // Answers "so what actually wakes me?" in the one place the question gets asked,
                     // beside the time that does not. Only shown when there IS a strap alarm to name.
                     if let next = nextStrapAlarmLabel {
-                        Text("Your strap alarm is what wakes you, next on \(next).")
+                        Text("Your WHOOP alarm is what wakes you, next on \(next).")
                             .font(StrandFont.footnote)
                             .foregroundStyle(StrandPalette.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -426,7 +426,7 @@ struct SmartAlarmView: View {
                 // copy stayed written as though they only moved the nudge, and the section still sits
                 // under the wind-down card. A day set here re-times the buzz on your wrist. Saying so
                 // is the difference between a lie-in and an alarm that goes off on Saturday evening.
-                Text("Set a wake time for specific days (a lie-in at the weekend, say). These times move your strap alarm AND the evening reminder on those days.")
+                Text("Set a wake time for specific days (a lie-in at the weekend, say). These times move your WHOOP alarm AND the evening reminder on those days.")
                     .font(StrandFont.footnote)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -585,7 +585,7 @@ struct SmartAlarmView: View {
         }
         let alarm = timeLabel(behavior.smartAlarmMinutes)
         let usual = timeLabel(wakeMinutes)
-        return String(localized: "Days you leave alone keep your strap alarm at \(alarm), and time the reminder from \(usual).")
+        return String(localized: "Days you leave alone keep your WHOOP alarm at \(alarm), and time the reminder from \(usual).")
     }
 
     /// One weekday's override row: the day name, the effective wake time (override or default), a picker to

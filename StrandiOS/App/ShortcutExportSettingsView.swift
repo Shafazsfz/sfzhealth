@@ -11,7 +11,7 @@ struct ShortcutExportSettingsView: View {
 
     var body: some View {
         ScreenScaffold(title: "Shortcuts Export",
-                       subtitle: "Strap data into Apple Health without HealthKit, for sideloaded installs.") {
+                       subtitle: "WHOOP data into Apple Health without HealthKit, for sideloaded installs.") {
             exportCard
         }
     }

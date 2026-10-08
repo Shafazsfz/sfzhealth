@@ -1120,7 +1120,7 @@ struct SleepView: View {
     private var stageIncompleteNote: some View {
         HStack(alignment: .top, spacing: 8) {
             SourceBadge("May be incomplete", tint: StrandPalette.statusWarning)
-            Text("Your strap recorded little movement overnight (common on WHOOP 4.0), so this night may be under-detected and the sleep total can read short. Make sure the strap fully synced; the numbers are kept as-is.")
+            Text("Your WHOOP recorded little movement overnight (common on WHOOP 4.0), so this night may be under-detected and the sleep total can read short. Make sure the WHOOP fully synced; the numbers are kept as-is.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -2736,19 +2736,19 @@ private struct SleepFreshnessNote: View {
             SyncingHistoryNote(chunks: live.syncChunksThisSession)
         case .calculating:
             DataPendingNote(title: "Calculating last night's sleep…",
-                            message: "Your strap history is in. Sfz Health is detecting and staging the night now.",
+                            message: "Your WHOOP history is in. Sfz Health is detecting and staging the night now.",
                             symbol: "waveform.path.ecg")
         case .syncFailed:
             DataPendingNote(title: "Last night's sleep hasn't synced",
-                            message: "The history sync stopped before it finished. Keep the strap nearby and try Sync again.",
+                            message: "The history sync stopped before it finished. Keep the WHOOP nearby and try Sync again.",
                             symbol: "exclamationmark.arrow.triangle.2.circlepath")
         case .awaitingSync:
             DataPendingNote(title: "Waiting for last night's sleep",
-                            message: "Connect the strap and sync its history. Sfz Health will calculate the night when the overnight data arrives.",
+                            message: "Connect the WHOOP and sync its history. Sfz Health will calculate the night when the overnight data arrives.",
                             symbol: "arrow.triangle.2.circlepath")
         case .notDetected:
             DataPendingNote(title: "Last night's sleep wasn't detected",
-                            message: "Sync finished, but Sfz Health couldn't confidently identify a sleep window. Keep the strap connected and try Sync again; the older night below is still your latest detected sleep.",
+                            message: "Sync finished, but Sfz Health couldn't confidently identify a sleep window. Keep the WHOOP connected and try Sync again; the older night below is still your latest detected sleep.",
                             symbol: "moon.zzz")
         case nil:
             EmptyView()

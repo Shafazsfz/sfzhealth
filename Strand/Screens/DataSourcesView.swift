@@ -129,7 +129,7 @@ struct DataSourcesView: View {
             Button("Cancel", role: .cancel) { }
             Button("Remove", role: .destructive) { deleteAppleHealthData() }
         } message: {
-            Text("This permanently deletes everything imported from Apple Health: heart rate, HRV, sleep, steps, workouts and more. Your live strap data is untouched. This can't be undone.")
+            Text("This permanently deletes everything imported from Apple Health: heart rate, HRV, sleep, steps, workouts and more. Your live WHOOP data is untouched. This can't be undone.")
         }
     }
 
@@ -820,7 +820,7 @@ struct DataSourcesView: View {
         return card(title: String(localized: "Broadcast HR from this phone"), icon: "dot.radiowaves.up.forward",
              tint: DomainTheme.effort.color,
              status: status ?? StatePill("Off", tone: .neutral, showsDot: false),
-             subtitle: String(localized: "Re-share your live strap heart rate over Bluetooth as a standard heart-rate sensor, so a gym treadmill, bike, Zwift, Peloton or any fitness app nearby can read it. Local Bluetooth only. Nothing leaves \(Platform.deviceNounPhrase). Off by default.")) {
+             subtitle: String(localized: "Re-share your live WHOOP heart rate over Bluetooth as a standard heart-rate sensor, so a gym treadmill, bike, Zwift, Peloton or any fitness app nearby can read it. Local Bluetooth only. Nothing leaves \(Platform.deviceNounPhrase). Off by default.")) {
             Toggle(isOn: $broadcastHrEnabled) {
                 Text("Broadcast HR from this phone")
                     .font(StrandFont.subhead)
@@ -832,7 +832,7 @@ struct DataSourcesView: View {
             .onChangeCompat(of: broadcastHrEnabled) { on in
                 if on { hrBroadcaster.start() } else { hrBroadcaster.stop() }
             }
-            Text("Acts as a standard Bluetooth heart-rate strap. Pair Sfz Health from your treadmill, bike or app to see your strap's heart rate there.")
+            Text("Acts as a standard Bluetooth heart-rate strap. Pair Sfz Health from your treadmill, bike or app to see your WHOOP's heart rate there.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -864,7 +864,7 @@ struct DataSourcesView: View {
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textTertiary)
                 } else {
-                    Text("No live heart rate yet. Open Live to pair your strap.")
+                    Text("No live heart rate yet. Open Live to pair your WHOOP.")
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textTertiary)
                 }
@@ -879,9 +879,9 @@ struct DataSourcesView: View {
     private var generationExplainer: some View {
         VStack(alignment: .leading, spacing: 6) {
             generationRow(title: "WHOOP 4.0",
-                          detail: String(localized: "Broadcasts the strap's own live heart rate over Bluetooth."))
+                          detail: String(localized: "Broadcasts the WHOOP's own live heart rate over Bluetooth."))
             generationRow(title: "WHOOP 5.0 & MG",
-                          detail: String(localized: "Broadcasts the live heart rate Sfz Health derives from the strap once connected."))
+                          detail: String(localized: "Broadcasts the live heart rate Sfz Health derives from the WHOOP once connected."))
         }
         .padding(.top, 2)
         .padding(.horizontal, 10).padding(.vertical, 8)
@@ -929,23 +929,23 @@ struct DataSourcesView: View {
         } else {
             tone = .critical; label = "Not connected. Open Live to pair."
         }
-        return card(title: String(localized: "WHOOP Strap (Live BLE)"), icon: "antenna.radiowaves.left.and.right",
+        return card(title: String(localized: "WHOOP WHOOP (Live BLE)"), icon: "antenna.radiowaves.left.and.right",
              tint: StrandPalette.accent,
              status: StatePill(label, tone: tone, pulsing: live.connected && !live.bonded),
-             subtitle: String(localized: "Pairs directly with your strap over Bluetooth: no WHOOP app, no cloud.")) {
+             subtitle: String(localized: "Pairs directly with your WHOOP over Bluetooth: no WHOOP app, no cloud.")) {
             Toggle(isOn: $strapBroadcastHrEnabled) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Broadcast heart rate from the strap")
+                    Text("Broadcast heart rate from the WHOOP")
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textPrimary)
-                    Text("Broadcasts the strap's own live heart rate over Bluetooth.")
+                    Text("Broadcasts the WHOOP's own live heart rate over Bluetooth.")
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textTertiary)
                 }
             }
             .toggleStyle(.switch)
             .tint(StrandPalette.accent)
-            .accessibilityLabel("Broadcast heart rate from the strap")
+            .accessibilityLabel("Broadcast heart rate from the WHOOP")
             .onChangeCompat(of: strapBroadcastHrEnabled) { model.ble.setBroadcastHr($0) }
         }
     }

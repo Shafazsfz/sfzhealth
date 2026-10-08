@@ -237,7 +237,7 @@ struct LiveSessionView: View {
     private var guardianLine: String {
         switch runner.output?.status {
         case .stale, .none:
-            return String(localized: "No live reading. Coaching is paused until the strap comes back.")
+            return String(localized: "No live reading. Coaching is paused until the WHOOP comes back.")
         case .warmup:
             return String(localized: "Warming up. Cues stay quiet for the first minute.")
         case .active:

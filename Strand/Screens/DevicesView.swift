@@ -121,7 +121,7 @@ private struct DevicesContent: View {
                 .foregroundStyle(StrandPalette.statusWarning)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text("Can't connect: your strap's pairing was reset")
+                Text("Can't connect: your WHOOP's pairing was reset")
                     .font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
                 Text(guide)
                     .font(StrandFont.footnote).foregroundStyle(StrandPalette.textSecondary)
@@ -298,7 +298,7 @@ private struct DevicesContent: View {
                 switchTarget = nil
             }
         } message: { device in
-            Text("Make \(device.displayName) your active strap? From now on it provides your live data. \(currentActiveName)'s history stays exactly as it is. Only new days come from \(device.displayName).")
+            Text("Make \(device.displayName) your active WHOOP? From now on it provides your live data. \(currentActiveName)'s history stays exactly as it is. Only new days come from \(device.displayName).")
         }
         // Rename
         .alert("Rename device",
@@ -358,7 +358,7 @@ private struct DevicesContent: View {
             Button("Send probe (read-only)") { model.probeExtendedBatteryInfo(); batteryProbeTarget = nil }
             Button("Cancel", role: .cancel) { batteryProbeTarget = nil }
         } message: { _ in
-            Text("Two independent protocol tables disagree on the extended-battery opcode (98 vs 87). This sends the curated read-only 98 and shows the strap's full raw reply. A battery-style payload confirms 98 on your firmware; a short stub means it stays ambiguous. Nothing is written to the strap.")
+            Text("Two independent protocol tables disagree on the extended-battery opcode (98 vs 87). This sends the curated read-only 98 and shows the WHOOP's full raw reply. A battery-style payload confirms 98 on your firmware; a short stub means it stays ambiguous. Nothing is written to the WHOOP.")
         }
         // #592 probe result: the strap's reply (or a "waiting…" state), readable + copyable in place.
         .sheet(isPresented: Binding(get: { live.extendedBatteryProbe != nil },
@@ -415,7 +415,7 @@ private struct DevicesContent: View {
             }
             Button("Leave none active", role: .cancel) { }
         } message: {
-            Text("You removed your active strap. Choose which paired band provides your live data, or leave none active and pair one later.")
+            Text("You removed your active WHOOP. Choose which paired band provides your live data, or leave none active and pair one later.")
         }
     }
 
@@ -607,7 +607,7 @@ private struct DevicesContent: View {
     // MARK: Logic
 
     private var currentActiveName: String {
-        registry.devices.first(where: { $0.status == .active })?.displayName ?? String(localized: "Your current strap")
+        registry.devices.first(where: { $0.status == .active })?.displayName ?? String(localized: "Your current WHOOP")
     }
 
     /// Archive the device, then — if it was the active one and other non-archived devices remain —
@@ -648,21 +648,21 @@ private struct DeviceSyncStatusCard: View {
                     ? String(localized: "Syncing… \(chunks) chunks")
                     : String(localized: "Syncing…"),
                 tint: StrandPalette.accent,
-                accessibility: String(localized: "Syncing strap history, \(chunks) chunks")
+                accessibility: String(localized: "Syncing WHOOP history, \(chunks) chunks")
             )
         case .synced(let agoText):
             statusCard(
                 systemImage: "checkmark.circle.fill",
                 detail: String(localized: "Synced \(agoText) ago"),
                 tint: StrandPalette.statusPositive,
-                accessibility: String(localized: "Strap history synced \(agoText) ago")
+                accessibility: String(localized: "WHOOP history synced \(agoText) ago")
             )
         case .experimentalLive:
             statusCard(
                 systemImage: "checkmark.circle.fill",
-                detail: String(localized: "Connected; strap history sync is experimental on this strap"),
+                detail: String(localized: "Connected; WHOOP history sync is experimental on this WHOOP"),
                 tint: StrandPalette.textSecondary,
-                accessibility: String(localized: "Connected; strap history sync is experimental on this strap")
+                accessibility: String(localized: "Connected; WHOOP history sync is experimental on this WHOOP")
             )
         case .hidden:
             EmptyView()
@@ -683,7 +683,7 @@ private struct DeviceSyncStatusCard: View {
                     .frame(width: 24)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: NoopMetrics.space1) {
-                    Text("Strap history")
+                    Text("WHOOP history")
                         .font(StrandFont.headline)
                         .foregroundStyle(StrandPalette.textPrimary)
                     Text(detail)
@@ -1028,7 +1028,7 @@ private struct DeviceCard: View {
                 // Restart the strap — only for the live-connected WHOOP (the reboot travels over the active
                 // BLE link). Confirmation-gated by the parent. (#166)
                 if isLiveConnected, SourceCoordinator.isWhoop(device), let onReboot {
-                    Button { onReboot() } label: { Label("Restart strap…", systemImage: "arrow.clockwise") }
+                    Button { onReboot() } label: { Label("Restart WHOOP…", systemImage: "arrow.clockwise") }
                 }
                 // Stop a sync that is part-way through. Present only while this strap is actually
                 // offloading; the parent owns that condition.
@@ -1241,7 +1241,7 @@ struct DeviceCapabilityProfile {
                 displayModel: "WHOOP 5.0 / MG",
                 captures: String(localized: "Heart rate · HRV · Skin temp* · Resp rate* · Steps* · Sleep · Strain · Battery"),
                 powers: whoopPowers,
-                footnote: String(localized: "* on-device estimate: skin temp is a nightly ±°C deviation, steps are a raw motion count (#78). No SpO₂ % off the strap; import a WHOOP CSV for a real %."))
+                footnote: String(localized: "* on-device estimate: skin temp is a nightly ±°C deviation, steps are a raw motion count (#78). No SpO₂ % off the WHOOP; import a WHOOP CSV for a real %."))
         }
         // WHOOP 4.0 — NOOP's primary band; no steps over BLE.
         if model.contains("4") {
@@ -1249,14 +1249,14 @@ struct DeviceCapabilityProfile {
                 displayModel: "WHOOP 4.0",
                 captures: String(localized: "Heart rate · HRV · Skin temp* · Resp rate* · Sleep · Strain · Battery"),
                 powers: whoopPowers,
-                footnote: String(localized: "* on-device estimate: skin temp is a nightly ±°C deviation (firmware-dependent); no steps over BLE on a 4.0. No SpO₂ % off the strap; import a WHOOP CSV for a real %."))
+                footnote: String(localized: "* on-device estimate: skin temp is a nightly ±°C deviation (firmware-dependent); no steps over BLE on a 4.0. No SpO₂ % off the WHOOP; import a WHOOP CSV for a real %."))
         }
         // Legacy / unknown WHOOP (the seeded device, model just "WHOOP") — show only the common-to-all set.
         return DeviceCapabilityProfile(
             displayModel: "WHOOP",
             captures: String(localized: "Heart rate · HRV · Skin temp* · Resp rate* · Sleep · Strain · Battery"),
             powers: whoopPowers,
-            footnote: String(localized: "Exact model unknown. Shows what every WHOOP can do. * on-device estimate · no SpO₂ % off the strap (import a WHOOP CSV for that)."))
+            footnote: String(localized: "Exact model unknown. Shows what every WHOOP can do. * on-device estimate · no SpO₂ % off the WHOOP (import a WHOOP CSV for that)."))
     }
 }
 
@@ -1308,7 +1308,7 @@ private struct ExtendedBatteryProbeResultView: View {
                 .font(StrandFont.title2)
                 .foregroundStyle(StrandPalette.textPrimary)
             if waiting {
-                Text("Waiting for the strap's reply…")
+                Text("Waiting for the WHOOP's reply…")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
             } else {
@@ -1365,7 +1365,7 @@ private struct ForgetDeviceSheet: ViewModifier {
                     target = nil
                 }
             } message: { _ in
-                Text("Sfz Health removes this device from your list and deletes its recorded data here. You can re-pair the strap to pull its recent history back.")
+                Text("Sfz Health removes this device from your list and deletes its recorded data here. You can re-pair the WHOOP to pull its recent history back.")
             }
     }
 }
@@ -1413,7 +1413,7 @@ private struct BodyLocationProbeResultView: View {
                 .font(StrandFont.title2)
                 .foregroundStyle(StrandPalette.textPrimary)
             if waiting {
-                Text("Waiting for the strap's reply…")
+                Text("Waiting for the WHOOP's reply…")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
             } else {
@@ -1535,7 +1535,7 @@ private struct FeatureFlagProbeResultView: View {
             if waiting {
                 // Reuses the #592/#690 waiting copy — the walk sends one 118 per reply, so at any moment
                 // it is waiting on exactly one strap reply, and the catalog keeps a single translation.
-                Text("Waiting for the strap's reply…")
+                Text("Waiting for the WHOOP's reply…")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
             } else {
@@ -1577,11 +1577,11 @@ private struct EcgWristSheet: View {
             Text("Which wrist do you wear it on?")
                 .font(StrandFont.title2)
                 .foregroundStyle(StrandPalette.textPrimary)
-            Text("This one is different from the other ECG controls: it is a setting written to the strap, and it stays there after you disconnect until you change it again.")
+            Text("This one is different from the other ECG controls: it is a setting written to the WHOOP, and it stays there after you disconnect until you change it again.")
                 .font(StrandFont.subhead)
                 .foregroundStyle(StrandPalette.statusWarning)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("Which value means “left” and which means “right” comes from WHOOP's own app and the strap firmware, not from a strap Sfz Health has tested. You can send it again with the other choice at any time, and it changes nothing about your recorded data.")
+            Text("Which value means “left” and which means “right” comes from WHOOP's own app and the WHOOP firmware, not from a WHOOP Sfz Health has tested. You can send it again with the other choice at any time, and it changes nothing about your recorded data.")
                 .font(StrandFont.caption)
                 .foregroundStyle(StrandPalette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1616,7 +1616,7 @@ private struct EcgProbeResultView: View {
                 .foregroundStyle(StrandPalette.statusWarning)
                 .fixedSize(horizontal: false, vertical: true)
             if waiting {
-                Text("Listening for the strap's reply…")
+                Text("Listening for the WHOOP's reply…")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
             } else {
@@ -1690,7 +1690,7 @@ private struct DeviceConfigProbeResultView: View {
             if waiting {
                 // Reuses the #592/#690/#761 waiting copy — the plan sends one read per reply, so at any
                 // moment it is waiting on exactly one strap reply, and the catalog keeps one translation.
-                Text("Waiting for the strap's reply…")
+                Text("Waiting for the WHOOP's reply…")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
             } else {

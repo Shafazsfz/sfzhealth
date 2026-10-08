@@ -25,7 +25,7 @@ struct HealthView: View {
 
     var body: some View {
         ScreenScaffold(title: "Health Monitor",
-                       subtitle: "Live vitals, streamed from the strap.",
+                       subtitle: "Live vitals, streamed from the WHOOP.",
                        // PERF (scroll): lazy column — byte-identical layout (LazyVStack == eager VStack
                        // alignment/spacing/header); builds the trailing vitals/skin-temp/age sections on
                        // demand instead of all up-front.
@@ -142,7 +142,7 @@ private struct SyncStatusSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: NoopMetrics.gap) {
-            SectionHeader("Sync", overline: "Strap history",
+            SectionHeader("Sync", overline: "WHOOP history",
                           trailing: live.connected ? (live.bonded ? String(localized: "Connected") : String(localized: "Pairing…")) : String(localized: "Offline"))
 
             NoopCard(tint: StrandPalette.chargeColor) {
@@ -199,19 +199,19 @@ private struct SyncStatusSection: View {
 
     private var helperText: String {
         if live.backfilling {
-            return String(localized: "Pulling your strap's stored history. This drains oldest-first; a deep backlog now continues automatically across passes instead of waiting between syncs.")
+            return String(localized: "Pulling your WHOOP's stored history. This drains oldest-first; a deep backlog now continues automatically across passes instead of waiting between syncs.")
         }
         if !live.connected {
-            return String(localized: "Connect your strap to sync its stored history. Until then, only imported data shows here.")
+            return String(localized: "Connect your WHOOP to sync its stored history. Until then, only imported data shows here.")
         }
         // historyReady, not `bonded`. This branch already said the right thing and simply never fired on
         // the strap that needed it: `bonded` is set by the live-HR path, so a 5/MG that never completed a
         // handshake fell through to the "syncs right away" line, under a Sync-now button that had just
         // been disabled. Same condition as the button and the pill, so all three agree.
         if !live.historyReady {
-            return String(localized: "Finishing the pairing handshake. Sync now becomes available once the strap is paired.")
+            return String(localized: "Finishing the pairing handshake. Sync now becomes available once the WHOOP is paired.")
         }
-        return String(localized: "Syncs your strap's stored history right away, instead of waiting for the next automatic sync.")
+        return String(localized: "Syncs your WHOOP's stored history right away, instead of waiting for the next automatic sync.")
     }
 }
 
@@ -313,7 +313,7 @@ private struct HeartRateSection: View {
             ChartCard(
                 title: "Heart Rate",
                 subtitle: hrIsDerived ? String(localized: "Estimated from R-R interval")
-                    : (hasLiveHR ? String(localized: "Streaming live") : String(localized: "Awaiting strap")),
+                    : (hasLiveHR ? String(localized: "Streaming live") : String(localized: "Awaiting WHOOP")),
                 trailing: hasLiveHR ? "\(displayHR!) bpm" : "—",
                 tint: StrandPalette.metricRose
             ) {

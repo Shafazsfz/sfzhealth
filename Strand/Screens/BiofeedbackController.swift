@@ -270,7 +270,7 @@ final class BiofeedbackController: ObservableObject {
         stop()
         guard canBuzz, let h0 = model.bpm, h0 >= 55, h0 <= 120 else {
             // Haptic-first: needs a bonded strap + a resting-band HR. Don't fake it.
-            calmOutcome = String(localized: "Couldn't start. Needs a connected strap and a resting heart rate.")
+            calmOutcome = String(localized: "Couldn't start. Needs a connected WHOOP and a resting heart rate.")
             calmDidNotFall = false
             return
         }

@@ -483,7 +483,7 @@ struct AddDeviceWizard: View {
             ]
         case .hrStrap:
             return [
-                String(localized: "Wake your strap. Put it on, or dampen the contacts."),
+                String(localized: "Wake your WHOOP. Put it on, or dampen the contacts."),
                 String(localized: "Make sure it isn't connected to another app (a bike computer, the brand's own app…)."),
                 String(localized: "Sfz Health will look for it nearby."),
             ]

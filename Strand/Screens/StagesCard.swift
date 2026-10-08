@@ -293,7 +293,7 @@ struct StageDetailView: View {
     private var stageIncompleteNote: some View {
         HStack(alignment: .top, spacing: 8) {
             SourceBadge("May be incomplete", tint: StrandPalette.statusWarning)
-            Text("Your strap recorded little movement overnight (common on WHOOP 4.0), so this night may be under-detected and the sleep total can read short. Make sure the strap fully synced; the numbers are kept as-is.")
+            Text("Your WHOOP recorded little movement overnight (common on WHOOP 4.0), so this night may be under-detected and the sleep total can read short. Make sure the WHOOP fully synced; the numbers are kept as-is.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)

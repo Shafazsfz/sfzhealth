@@ -25,7 +25,7 @@ struct SleepDebtLedgerCard: View {
             SectionHeader("Sleep-debt ledger", overline: "Last 14 nights")
             NoopCard(tint: StrandPalette.restColor) {
                 if ledger.nightCount == 0 {
-                    Text("No nights with sleep data yet. Your ledger fills in as you wear the strap to bed.")
+                    Text("No nights with sleep data yet. Your ledger fills in as you wear the WHOOP to bed.")
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textTertiary)
                         .frame(maxWidth: .infinity, alignment: .leading)

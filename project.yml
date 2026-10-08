@@ -107,7 +107,7 @@ targets:
         CFBundleVersion: "198"
         LSMinimumSystemVersion: "13.0"
         LSApplicationCategoryType: public.app-category.healthcare-fitness
-        NSBluetoothAlwaysUsageDescription: "Sfz Health connects directly to your WHOOP strap over Bluetooth to read heart rate, R-R intervals, battery, and sensor data locally on your Mac. Nothing leaves your device."
+        NSBluetoothAlwaysUsageDescription: "Sfz Health connects directly to your WHOOP over Bluetooth to read heart rate, R-R intervals, battery, and sensor data locally on your Mac. Nothing leaves your device."
         NSLocationWhenInUseUsageDescription: "Sfz Health records your route during an outdoor workout to show distance, pace, and a map. The route stays on your device. Nothing leaves it."
         # The AI Coach's "Custom (OpenAI-compatible)" provider talks to a LOCAL LLM server over plain
         # HTTP on loopback (Ollama / LM Studio / llama.cpp at http://localhost:…). ATS blocks cleartext
@@ -299,10 +299,10 @@ targets:
           # the re-score task, which is submitted only when a re-score is OWED, and a missing strap owes
           # none, so that task would never run in the one case the warning exists for.
           - $(PRODUCT_BUNDLE_IDENTIFIER).stalebattery
-        NSBluetoothAlwaysUsageDescription: "Sfz Health connects directly to your WHOOP strap over Bluetooth to read heart rate, R-R intervals, battery, and sensor data locally on your iPhone. Nothing leaves your device."
+        NSBluetoothAlwaysUsageDescription: "Sfz Health connects directly to your WHOOP over Bluetooth to read heart rate, R-R intervals, battery, and sensor data locally on your iPhone. Nothing leaves your device."
         NSLocationWhenInUseUsageDescription: "Sfz Health records your route during an outdoor workout to show distance, pace, and a map, and keeps recording while the screen is off. The route stays on your device. Nothing leaves it."
         NSHealthShareUsageDescription: "Sfz Health reads your own Apple Health data on-device to compute recovery, strain, and sleep. Nothing leaves your device."
-        NSHealthUpdateUsageDescription: "Sfz Health writes the metrics it computes from your strap back into Apple Health, on-device and only when you allow it."
+        NSHealthUpdateUsageDescription: "Sfz Health writes the metrics it computes from your WHOOP, plus the food and mindful minutes you log, into Apple Health, on-device and only when you allow it."
         NSMotionUsageDescription: "Sfz Health reads your iPhone's step count for a walking or running workout to show steps in the activity summary. It stays on your device. Nothing leaves it."
         # K4: Coach voice input. Speech is transcribed ON-DEVICE ONLY (requiresOnDeviceRecognition);
         # the mic button is disabled where the locale doesn't support that, never falls back to

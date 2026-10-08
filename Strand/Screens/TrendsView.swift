@@ -315,6 +315,10 @@ struct TrendsView: View {
                         // The Charge / Effort / Rest trio, presented in NOOP's pip language.
                         weekInReview(charge: metrics.recovery, effort: metrics.strain, rest: metrics.rest)
                             .staggeredAppear(index: 1)
+                        #if os(iOS)
+                        SfzKeyMetricsGrid()
+                            .staggeredAppear(index: 2)
+                        #endif
                         rangeBar(recovery: metrics.recovery)
                             .staggeredAppear(index: 2)
                         heroRecovery(recovery: metrics.recovery)
@@ -895,5 +899,435 @@ private func previewRepo() -> Repository {
         .environmentObject(LiveState())
         .frame(width: 960, height: 960)
         .preferredColorScheme(.dark)
+}
+#endif
+
+#if os(iOS)
+// MARK: - sfz: Key metrics (Google Health style)
+
+/// The cards a wearer can show in the Key metrics grid, in display order.
+enum SfzKeyMetric: String, CaseIterable, Identifiable {
+    case weight, energy, intake, carbs, fat, protein, steps, exerciseDays, zoneMinutes, water,
+         sleep, hrv, restingHr, breathing, spo2, skinTemp
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .weight: return "Weight"
+        case .energy: return "Energy burned"
+        case .intake: return "Calorie intake"
+        case .carbs: return "Carbs"
+        case .fat: return "Fat"
+        case .protein: return "Protein"
+        case .steps: return "Steps"
+        case .exerciseDays: return "Exercise days"
+        case .zoneMinutes: return "Active Zone Minutes"
+        case .water: return "Water"
+        case .sleep: return "Sleep duration"
+        case .hrv: return "Heart rate variability"
+        case .restingHr: return "Resting heart rate"
+        case .breathing: return "Breathing rate"
+        case .spo2: return "Blood oxygen"
+        case .skinTemp: return "Skin temperature"
+        }
+    }
+    enum Chart { case bars, line, week, months }
+    var chart: Chart {
+        switch self {
+        case .weight: return .months
+        case .exerciseDays: return .week
+        case .hrv, .restingHr, .breathing, .spo2, .skinTemp: return .line
+        default: return .bars
+        }
+    }
+    var tint: Color {
+        switch self {
+        case .weight, .intake, .carbs, .fat, .protein: return StrandPalette.metricAmber
+        case .energy, .zoneMinutes, .exerciseDays: return StrandPalette.effortColor
+        case .steps, .water, .spo2: return StrandPalette.metricCyan
+        case .sleep: return StrandPalette.restColor
+        case .hrv, .breathing: return StrandPalette.metricPurple
+        case .restingHr: return StrandPalette.metricRose
+        case .skinTemp: return StrandPalette.metricAmber
+        }
+    }
+}
+
+/// One card's content: the headline, the seven daily values (oldest first, nil for no data), the footnote,
+/// and for weight the dated readings over three months.
+struct SfzKeyMetricData: Equatable {
+    var headline: String = "No data"
+    var unit: String = ""
+    var days: [Double?] = Array(repeating: nil, count: 7)
+    var note: String?
+    var dated: [(Date, Double)] = []
+    static func == (a: SfzKeyMetricData, b: SfzKeyMetricData) -> Bool {
+        a.headline == b.headline && a.unit == b.unit && a.days == b.days && a.note == b.note
+            && a.dated.map { $0.1 } == b.dated.map { $0.1 }
+    }
+}
+
+/// Google Health's "Key metrics": a two-column grid of small cards, each with today's value and the
+/// last seven days (weight: the last three months). Edit chooses which cards show.
+struct SfzKeyMetricsGrid: View {
+    @EnvironmentObject var repo: Repository
+    @EnvironmentObject var profile: ProfileStore
+    @ObservedObject private var plan = CutPlanStore.shared
+    @AppStorage("sfz.keyMetrics.hidden") private var hiddenRaw = ""
+    @State private var data: [SfzKeyMetric: SfzKeyMetricData] = [:]
+    @State private var editing = false
+
+    static let stepGoal = 10_000
+
+    private var hidden: Set<String> { Set(hiddenRaw.split(separator: ",").map(String.init)) }
+    private var shown: [SfzKeyMetric] { SfzKeyMetric.allCases.filter { !hidden.contains($0.rawValue) } }
+
+    /// The last seven local days, oldest first, ending today.
+    static var lastSeven: [Date] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        return (0..<7).reversed().compactMap { cal.date(byAdding: .day, value: -$0, to: today) }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: NoopMetrics.space3) {
+            HStack {
+                Text("Key metrics").font(StrandFont.headline).foregroundStyle(StrandPalette.textPrimary)
+                Spacer()
+                Button { editing = true } label: {
+                    Label("Edit", systemImage: "pencil")
+                        .font(StrandFont.caption)
+                        .padding(.horizontal, NoopMetrics.space3).padding(.vertical, NoopMetrics.space1)
+                        .background(Capsule().fill(StrandPalette.accent.opacity(0.12)))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(StrandPalette.accent)
+            }
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: NoopMetrics.space3),
+                                GridItem(.flexible(), spacing: NoopMetrics.space3)],
+                      spacing: NoopMetrics.space3) {
+                ForEach(shown) { m in
+                    SfzKeyMetricCard(metric: m, data: data[m] ?? SfzKeyMetricData())
+                }
+            }
+        }
+        .task(id: "\(repo.refreshSeq)-\(plan.food.values.reduce(0) { $0 + $1.count })-\(plan.weighIns.count)") { await load() }
+        .sheet(isPresented: $editing) { editSheet }
+    }
+
+    private var editSheet: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(SfzKeyMetric.allCases) { m in
+                        Toggle(m.title, isOn: Binding(
+                            get: { !hidden.contains(m.rawValue) },
+                            set: { on in
+                                var h = hidden
+                                if on { h.remove(m.rawValue) } else { h.insert(m.rawValue) }
+                                hiddenRaw = SfzKeyMetric.allCases.map(\.rawValue).filter { h.contains($0) }
+                                    .joined(separator: ",")
+                            }))
+                        .tint(StrandPalette.accent)
+                    }
+                } footer: {
+                    Text("Choose which cards show on Trends.")
+                }
+            }
+            .navigationTitle("Key metrics")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { editing = false } } }
+        }
+    }
+
+    // MARK: Loading
+
+    private static func fmt(_ v: Double, _ digits: Int = 0) -> String {
+        v.formatted(.number.precision(.fractionLength(digits)).grouping(.automatic))
+    }
+
+    private func load() async {
+        let days = Self.lastSeven
+        let keys = days.map { Repository.localDayKey($0) }
+        let todayKey = keys.last ?? ""
+        let byDay = Dictionary(repo.days.map { ($0.day, $0) }, uniquingKeysWith: { _, b in b })
+        let rows = keys.map { byDay[$0] }
+        let male = profile.sex != "female"
+        var out: [SfzKeyMetric: SfzKeyMetricData] = [:]
+
+        func latest(_ series: [Double?]) -> Double? { series.last(where: { $0 != nil }) ?? nil }
+        func avg(_ series: [Double?]) -> Double? {
+            let v = series.compactMap { $0 }
+            return v.isEmpty ? nil : v.reduce(0, +) / Double(v.count)
+        }
+
+        // Food
+        let kcal = keys.map { k -> Double? in plan.entries(day: k).isEmpty ? nil : Double(plan.logged(day: k)) }
+        func grams(_ path: KeyPath<CutPlanStore.FoodEntry, Double?>) -> [Double?] {
+            keys.map { k in
+                let v = plan.entries(day: k).compactMap { $0[keyPath: path] }
+                return v.isEmpty ? nil : v.reduce(0, +)
+            }
+        }
+        let budget = plan.budget(weightKg: profile.weightKg, heightCm: profile.heightCm, age: profile.age,
+                                 male: male, activeKcal: 0, eaten: plan.eaten(day: todayKey))
+        out[.intake] = SfzKeyMetricData(
+            headline: kcal.last.flatMap { $0 }.map { Self.fmt($0) } ?? "No data", unit: kcal.last.flatMap { $0 } == nil ? "" : "cal",
+            days: kcal, note: "\(Self.fmt(max(0, budget.remaining))) cal left")
+        let macros: [(SfzKeyMetric, KeyPath<CutPlanStore.FoodEntry, Double?>)] =
+            [(.carbs, \.carbs), (.fat, \.fat), (.protein, \.protein)]
+        for (m, path) in macros {
+            let g = grams(path)
+            var d = SfzKeyMetricData(headline: g.last.flatMap { $0 }.map { Self.fmt($0) } ?? "No data",
+                                     unit: g.last.flatMap { $0 } == nil ? "" : "g", days: g)
+            if m == .protein {
+                d.note = "\(Self.fmt(max(0, plan.proteinTarget - (g.last.flatMap { $0 } ?? 0)))) g left"
+            }
+            out[m] = d
+        }
+
+        // Energy burned: sedentary maintenance (today, so far) plus active calories from the WHOOP.
+        let maintenance = budget.maintenance
+        let dayFraction = Date().timeIntervalSince(Calendar.current.startOfDay(for: Date())) / 86_400
+        let energy = keys.enumerated().map { i, k -> Double? in
+            let active = rows[i]?.activeKcalEst ?? plan.activeByDay[k]
+            guard active != nil || k == todayKey else { return nil }
+            return (k == todayKey ? maintenance * dayFraction : maintenance) + max(0, active ?? 0)
+        }
+        let burnTarget = maintenance + budget.workoutTarget
+        out[.energy] = SfzKeyMetricData(
+            headline: energy.last.flatMap { $0 }.map { Self.fmt($0) } ?? "No data", unit: "cal", days: energy,
+            note: "\(Self.fmt(max(0, burnTarget - (energy.last.flatMap { $0 } ?? 0)))) cal left")
+
+        // Steps
+        var steps = rows.map { $0?.steps.map(Double.init) }
+        if let t = repo.today, t.day == todayKey, let s = t.steps { steps[6] = Double(s) }
+        let stepsToday = steps.last.flatMap { $0 }
+        out[.steps] = SfzKeyMetricData(
+            headline: stepsToday.map { Self.fmt($0) } ?? "No data", days: steps,
+            note: "\(Self.fmt(Double(max(0, Self.stepGoal - Int(stepsToday ?? 0))))) steps left")
+
+        // Exercise days and Active Zone Minutes this week (Monday first).
+        let workouts = await CutTodayView.thisWeeksWorkouts(repo: repo)
+        let doneDays = Set(workouts.map { Repository.localDayKey(Date(timeIntervalSince1970: TimeInterval($0.startTs))) })
+        var cal = Calendar.current
+        cal.firstWeekday = 2
+        let monday = cal.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+        let weekKeys = (0..<7).compactMap { cal.date(byAdding: .day, value: $0, to: monday) }.map { Repository.localDayKey($0) }
+        out[.exerciseDays] = SfzKeyMetricData(
+            headline: "\(doneDays.count) of \(plan.exerciseDaysTarget)",
+            days: weekKeys.map { k -> Double? in k > todayKey ? nil : (doneDays.contains(k) ? 1.0 : 0.0) },
+            note: "\(max(0, plan.exerciseDaysTarget - doneDays.count)) days left")
+
+        let fallbackRest = Double(repo.today?.restingHr ?? repo.days.last(where: { $0.restingHr != nil })?.restingHr ?? 60)
+        var zone: [Double?] = []
+        for (i, day) in days.enumerated() {
+            guard let next = Calendar.current.date(byAdding: .day, value: 1, to: day) else { zone.append(nil); continue }
+            let b = await repo.hrBuckets(from: Int(day.timeIntervalSince1970), to: Int(next.timeIntervalSince1970) - 1,
+                                         bucketSeconds: 60)
+            let rest = rows[i]?.restingHr.map(Double.init) ?? fallbackRest
+            zone.append(b.isEmpty ? nil : Double(CutTodayView.zonePoints(b, rest: rest, hrMax: Double(profile.hrMax))))
+        }
+        let weekZone = await CutTodayView.activeZoneMinutes(repo: repo, hrMax: profile.hrMax)
+        out[.zoneMinutes] = SfzKeyMetricData(
+            headline: zone.last.flatMap { $0 }.map { Self.fmt($0) } ?? "0", unit: "min", days: zone,
+            note: "\(weekZone) of \(plan.weeklyCardioTarget) this week")
+
+        // Water
+        let water = await repo.hydrationHistory(days: 7)
+        let waterByDay = Dictionary(water.map { ($0.day, $0.value) }, uniquingKeysWith: { _, b in b })
+        let w = keys.map { k -> Double? in (waterByDay[k] ?? 0) > 0 ? waterByDay[k] : nil }
+        let goal = repo.hydrationGoalML(profileSex: profile.sex)
+        out[.water] = SfzKeyMetricData(
+            headline: w.last.flatMap { $0 }.map { Self.fmt($0) } ?? "No data", unit: w.last.flatMap { $0 } == nil ? "" : "ml",
+            days: w, note: "Goal \(Self.fmt(Double(goal))) ml")
+
+        // Sleep
+        let sleep = rows.map { $0?.totalSleepMin }
+        func hm(_ m: Double) -> String { "\(Int(m) / 60)h \(Int(m) % 60)m" }
+        out[.sleep] = SfzKeyMetricData(headline: latest(sleep).map(hm) ?? "No data", days: sleep,
+                                       note: avg(sleep).map { "Avg \(hm($0))" })
+
+        // Vitals: the latest night, the line over the week and its average.
+        func vital(_ m: SfzKeyMetric, _ s: [Double?], unit: String, digits: Int = 0, signed: Bool = false) {
+            let v = latest(s)
+            let text = v.map { (signed && $0 > 0 ? "+" : "") + Self.fmt($0, digits) }
+            out[m] = SfzKeyMetricData(headline: text ?? "No data", unit: v == nil ? "" : unit, days: s,
+                                      note: avg(s).map { "7-day avg \((signed && $0 > 0 ? "+" : "") + Self.fmt($0, digits)) \(unit)" })
+        }
+        vital(.hrv, rows.map { $0?.avgHrv }, unit: "ms")
+        vital(.restingHr, rows.map { $0?.restingHr.map(Double.init) }, unit: "bpm")
+        vital(.breathing, rows.map { $0?.respRateBpm }, unit: "brpm", digits: 1)
+        vital(.spo2, rows.map { $0?.spo2Pct }, unit: "%", digits: 1)
+        vital(.skinTemp, rows.map { r in r?.skinTempDevC.flatMap { abs($0) < 5 ? $0 : nil } }, unit: "°C", digits: 1, signed: true)
+
+        // Weight: weigh-ins over the last three months, else the current estimate.
+        let since = Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date()
+        var dated = plan.weighIns.filter { $0.at >= since }.map { ($0.at, $0.kg) }
+        if dated.isEmpty, profile.weightKg > 0 { dated = [(Date(), profile.weightKg)] }
+        out[.weight] = SfzKeyMetricData(
+            headline: dated.last.map { Self.fmt($0.1, 1) } ?? "No data", unit: dated.isEmpty ? "" : "kg",
+            note: plan.configured ? "Goal \(Self.fmt(plan.goalKg, 1)) kg" : nil, dated: dated)
+
+        data = out
+    }
+}
+
+/// One Key metrics card.
+struct SfzKeyMetricCard: View {
+    let metric: SfzKeyMetric
+    let data: SfzKeyMetricData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            Text(metric.title).font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                .lineLimit(1).minimumScaleFactor(0.8)
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
+                Text(data.headline).font(StrandFont.title2).foregroundStyle(StrandPalette.textPrimary)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                if !data.unit.isEmpty {
+                    Text(data.unit).font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                }
+            }
+            Spacer(minLength: 0)
+            chart.frame(height: 64)
+            if let note = data.note {
+                Text(note).font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    .padding(.horizontal, NoopMetrics.space2).padding(.vertical, 2)
+                    .background(Capsule().fill(StrandPalette.hairline))
+            }
+        }
+        .padding(NoopMetrics.space3)
+        .frame(maxWidth: .infinity, minHeight: 176, alignment: .topLeading)
+        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(StrandPalette.surfaceRaised))
+        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder private var chart: some View {
+        switch metric.chart {
+        case .bars: bars(SfzKeyMetricsGrid.lastSeven)
+        case .line: line
+        case .week: weekStrip
+        case .months: months
+        }
+    }
+
+    /// Weekday initials under a chart, today's in a small capsule.
+    private func labels(_ dates: [Date]) -> some View {
+        let today = Calendar.current.startOfDay(for: Date())
+        return HStack(spacing: 0) {
+            ForEach(Array(dates.enumerated()), id: \.offset) { _, d in
+                let isToday = Calendar.current.isDate(d, inSameDayAs: today)
+                Text(d.formatted(.dateTime.weekday(.narrow)))
+                    .font(.system(size: 10, weight: isToday ? .semibold : .regular, design: .rounded))
+                    .foregroundStyle(isToday ? StrandPalette.textPrimary : StrandPalette.textTertiary)
+                    .frame(width: 16, height: 16)
+                    .background(Circle().fill(isToday ? StrandPalette.hairline : .clear))
+                    .frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    private func bars(_ dates: [Date]) -> some View {
+        let maxV = max(data.days.compactMap { $0 }.max() ?? 0, 1)
+        return VStack(spacing: 4) {
+            GeometryReader { g in
+                HStack(alignment: .bottom, spacing: 0) {
+                    ForEach(0..<7, id: \.self) { i in
+                        let w = min(g.size.width / 7 * 0.72, 18)
+                        Group {
+                            if let v = data.days[i], v > 0 {
+                                Capsule().fill(metric.tint)
+                                    .frame(width: w, height: max(w, g.size.height * CGFloat(v / maxV)))
+                            } else {
+                                Capsule().fill(StrandPalette.hairline).frame(width: w, height: 3)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    }
+                }
+            }
+            labels(dates)
+        }
+    }
+
+    private var line: some View {
+        let vals = data.days.compactMap { $0 }
+        let lo = vals.min() ?? 0, hi = vals.max() ?? 1
+        let span = max(hi - lo, 0.0001)
+        return VStack(spacing: 4) {
+            GeometryReader { g in
+                let step = g.size.width / 7
+                let point: (Int, Double) -> CGPoint = { i, v in
+                    CGPoint(x: step * (CGFloat(i) + 0.5),
+                            y: vals.count < 2 || hi == lo ? g.size.height / 2
+                                : g.size.height * (1 - CGFloat((v - lo) / span)) * 0.8 + g.size.height * 0.1)
+                }
+                Path { p in
+                    var started = false
+                    for i in 0..<7 {
+                        guard let v = data.days[i] else { started = false; continue }
+                        if started { p.addLine(to: point(i, v)) } else { p.move(to: point(i, v)); started = true }
+                    }
+                }
+                .stroke(metric.tint, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                ForEach(0..<7, id: \.self) { i in
+                    if let v = data.days[i] {
+                        Circle().fill(metric.tint).frame(width: 6, height: 6).position(point(i, v))
+                    }
+                }
+            }
+            labels(SfzKeyMetricsGrid.lastSeven)
+        }
+    }
+
+    /// Exercise days: this week Monday to Sunday, a filled bar for each day with a workout.
+    private var weekStrip: some View {
+        var cal = Calendar.current
+        cal.firstWeekday = 2
+        let monday = cal.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+        let dates = (0..<7).compactMap { cal.date(byAdding: .day, value: $0, to: monday) }
+        return VStack(spacing: 4) {
+            HStack(spacing: 0) {
+                ForEach(0..<7, id: \.self) { i in
+                    Capsule()
+                        .fill(data.days[i] == 1 ? metric.tint : metric.tint.opacity(0.18))
+                        .frame(width: 14)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            labels(dates)
+        }
+    }
+
+    /// Weight: readings as dots across the last three months, month names underneath.
+    private var months: some View {
+        let cal = Calendar.current
+        let end = Date()
+        let start = cal.date(byAdding: .month, value: -3, to: end) ?? end
+        let total = end.timeIntervalSince(start)
+        let vals = data.dated.map { $0.1 }
+        let lo = (vals.min() ?? 0) - 1, hi = (vals.max() ?? 1) + 1
+        let monthStarts = (0...2).compactMap { off -> Date? in
+            let d = cal.date(byAdding: .month, value: -off, to: end) ?? end
+            return cal.dateInterval(of: .month, for: d)?.start
+        }.reversed()
+        return VStack(spacing: 4) {
+            GeometryReader { g in
+                ForEach(Array(data.dated.enumerated()), id: \.offset) { _, r in
+                    Circle().fill(metric.tint).frame(width: 6, height: 6)
+                        .position(x: g.size.width * CGFloat(max(0, min(1, r.0.timeIntervalSince(start) / total))),
+                                  y: g.size.height * (1 - CGFloat((r.1 - lo) / max(hi - lo, 0.1))))
+                }
+            }
+            HStack(spacing: 0) {
+                ForEach(Array(monthStarts), id: \.self) { m in
+                    Text(m.formatted(.dateTime.month(.abbreviated)))
+                        .font(.system(size: 10, design: .rounded)).foregroundStyle(StrandPalette.textTertiary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+        }
+    }
 }
 #endif

@@ -344,10 +344,10 @@ enum SfzHealthWriter {
 
 /// What a habit measures and how it is logged.
 enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
-    case counter, timer, check, gym, steps, water, sleep, zone, protein, screen, calories
+    case counter, timer, check, gym, steps, water, sleep, zone, protein, screen, calories, burn
     var id: String { rawValue }
     /// Filled from the WHOOP, the iPhone or other logs; never tapped.
-    var isAuto: Bool { [.steps, .water, .sleep, .zone, .protein, .screen, .calories].contains(self) }
+    var isAuto: Bool { [.steps, .water, .sleep, .zone, .protein, .screen, .calories, .burn].contains(self) }
     var label: String {
         switch self {
         case .counter: return "Counter"
@@ -361,6 +361,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .protein: return "Protein (from your food log)"
         case .screen: return "Screen time limit"
         case .calories: return "Calories within your daily target (from Goal)"
+        case .burn: return "Workout calories burned (from your WHOOP and Goal)"
         }
     }
     /// Counter: reps. Timer: seconds. Check and gym: 1. Water: ml. Sleep: minutes. Zone: minutes. Protein: g.
@@ -375,7 +376,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return 30
         case .protein: return 120
         case .screen: return 30
-        case .calories: return 1
+        case .calories, .burn: return 1
         }
     }
     var defaultIcon: String {
@@ -390,7 +391,8 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return "heart"
         case .protein: return "fork.knife"
         case .screen: return "hourglass"
-        case .calories: return "flame"
+        case .calories: return "fork.knife.circle"
+        case .burn: return "flame"
         }
     }
     /// Target stepper: range and step, in stored units.
@@ -405,7 +407,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return 5...300
         case .protein: return 20...400
         case .screen: return 5...600
-        case .calories: return 1...1
+        case .calories, .burn: return 1...1
         }
     }
     var targetStep: Double {
@@ -419,11 +421,11 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .zone: return 5
         case .protein: return 5
         case .screen: return 5
-        case .calories: return 1
+        case .calories, .burn: return 1
         }
     }
     /// Calories take their target from the Goal plan (today's food allowance), not from the habit.
-    var hasTarget: Bool { self != .check && self != .gym && self != .calories }
+    var hasTarget: Bool { self != .check && self != .gym && self != .calories && self != .burn }
 
     /// A value in this kind's stored units, as people read it: "50", "1:30", "3.0 L", "7h 30m".
     func format(_ v: Double) -> String {
@@ -441,7 +443,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
             return Int(v.rounded()).formatted()
         case .zone: return "\(Int(v.rounded())) min"
         case .protein: return "\(Int(v.rounded())) g"
-        case .calories: return "\(Int(v.rounded()).formatted()) kcal"
+        case .calories, .burn: return "\(Int(v.rounded()).formatted()) kcal"
         case .screen:
             let m = Int(v.rounded())
             return m >= 60 ? "\(m / 60)h \(m % 60)m" : "\(m) min"
@@ -530,7 +532,7 @@ struct SfzChallengeTemplate: Identifiable {
                              length: 75, strict: true, habits: [
             HabitSpec(name: "Workout 45 min", icon: "figure.strengthtraining.traditional", kind: .check, target: 1),
             HabitSpec(name: "Outdoor workout 45 min", icon: "figure.run", kind: .check, target: 1),
-            HabitSpec(name: "Calories under target", icon: "flame", kind: .calories, target: 1),
+            HabitSpec(name: "Calories under target", icon: "fork.knife.circle", kind: .calories, target: 1),
             HabitSpec(name: "No alcohol", icon: "wineglass", kind: .check, target: 1),
             HabitSpec(name: "Water", icon: "drop", kind: .water, target: 3800),
             HabitSpec(name: "Read 10 pages", icon: "book", kind: .check, target: 1),
@@ -616,6 +618,13 @@ final class SfzHabitStore: ObservableObject {
             }
             if changedList { save(habits, K.habits) }
         }
+        if !d.bool(forKey: "sfz.habitsAddedBurn") {
+            d.set(true, forKey: "sfz.habitsAddedBurn")
+            if let spec = Self.starters.first(where: { $0.kind == .burn }), !habits.contains(where: { $0.kind == .burn }) {
+                habits.append(Self.make(spec))
+                save(habits, K.habits)
+            }
+        }
         if !d.bool(forKey: K.screenRemoved) {
             d.set(true, forKey: K.screenRemoved)
             if habits.contains(where: { $0.kind == .screen }) {
@@ -636,7 +645,8 @@ final class SfzHabitStore: ObservableObject {
         .init(name: "Water", icon: "drop", kind: .water, target: 3000),
         .init(name: "No sugar", icon: "nosign", kind: .check, target: 1),
         .init(name: "Reading", icon: "book", kind: .check, target: 1),
-        .init(name: "Calories under target", icon: "flame", kind: .calories, target: 1),
+        .init(name: "Calories under target", icon: "fork.knife.circle", kind: .calories, target: 1),
+        .init(name: "Burn target", icon: "flame", kind: .burn, target: 1),
         .init(name: "Skin care", icon: "face.smiling", kind: .check, target: 1),
     ]
 
@@ -661,7 +671,8 @@ final class SfzHabitStore: ObservableObject {
         .init(name: "Floss", icon: "mouth", kind: .check, target: 1),
         .init(name: "No smoking", icon: "nosign", kind: .check, target: 1),
         .init(name: "Progress photo", icon: "camera", kind: .check, target: 1),
-        .init(name: "Calories under target", icon: "flame", kind: .calories, target: 1),
+        .init(name: "Calories under target", icon: "fork.knife.circle", kind: .calories, target: 1),
+        .init(name: "Burn target", icon: "flame", kind: .burn, target: 1),
         .init(name: "Skin care (morning)", icon: "sun.horizon", kind: .check, target: 1),
         .init(name: "Skin care (night)", icon: "moon.stars", kind: .check, target: 1),
         .init(name: "Sunscreen", icon: "sun.max.trianglebadge.exclamationmark", kind: .check, target: 1),
@@ -792,6 +803,23 @@ final class SfzHabitStore: ObservableObject {
         gym[id.uuidString] = byDay
     }
 
+    func setRaw(_ key: String, _ values: [String: Double]) {
+        guard (auto[key] ?? [:]) != values else { return }
+        var merged = auto[key] ?? [:]
+        for (k, v) in values { merged[k] = v }
+        auto[key] = merged
+    }
+
+    /// Takes a habit out of the running challenge, keeping it on the Goal page.
+    /// In a strict challenge that marks it Modified.
+    func removeFromChallenge(_ id: UUID) {
+        guard var c = challenge, c.habitIds.contains(id) else { return }
+        c.habitIds.removeAll { $0 == id }
+        if c.strict { c.modified = true }
+        c.notes.append("Day \(dayNumber(c)): \(habit(id)?.name ?? "habit") taken out of the challenge")
+        challenge = c
+    }
+
     /// The day's food allowance from the Goal plan, kept beside the calories eaten.
     func setCalorieTargets(_ values: [String: Double]) {
         guard (auto["caloriesTarget"] ?? [:]) != values else { return }
@@ -857,6 +885,15 @@ final class SfzHabitStore: ObservableObject {
             let allowance = auto["caloriesTarget"]?[day] ?? .infinity
             if day == today { return eaten > allowance ? .partial : .open }
             return eaten <= allowance ? .met : .missed
+        }
+        if h.kind == .burn {
+            // Workout calories against the plan's workout burn target for that day.
+            let burned = auto[SfzHabitKind.burn.rawValue]?[day]
+            let target = auto["burnTarget"]?[day] ?? 0
+            if let b = burned, b >= target { return .met }
+            guard let b = burned else { return day == today ? .open : .noData }
+            if day == today { return b > 0 ? .partial : .open }
+            return b > 0 ? .partial : .missed
         }
         if h.kind == .screen {
             // Under the limit is the goal; over it is a miss straight away.

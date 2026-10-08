@@ -1188,6 +1188,20 @@ enum SfzHabitAuto {
             store.setCalorieTargets(allowance)
             store.setAuto(.calories, eaten)
         }
+        if kinds.contains(.burn) {
+            // Active calories (today: measured so far) against the plan's workout burn target.
+            var burned: [String: Double] = [:], target: [String: Double] = [:]
+            for k in keys {
+                let active = k == todayKey ? activeToday : (plan.activeByDay[k] ?? byDay[k]?.activeKcalEst)
+                guard let a = active else { continue }
+                let b = plan.budget(weightKg: profile.weightKg, heightCm: profile.heightCm, age: profile.age,
+                                    male: profile.sex != "female", activeKcal: a, eaten: plan.eaten(day: k))
+                burned[k] = a
+                target[k] = b.workoutTarget
+            }
+            store.setRaw("burnTarget", target)
+            store.setAuto(.burn, burned)
+        }
         if kinds.contains(.protein) {
             var v: [String: Double] = [:]
             for k in keys where !plan.entries(day: k).isEmpty { v[k] = plan.protein(day: k) }
@@ -1390,6 +1404,7 @@ struct SfzHabitCard: View {
         case .gym: gymRow
         case .screen: SfzScreenCardBody(habit: habit, status: status)
         case .calories: caloriesValue
+        case .burn: burnValue
         default: autoValue
         }
     }
@@ -1515,6 +1530,26 @@ struct SfzHabitCard: View {
             }
         }
         .sheet(isPresented: $pickingParts) { SfzGymPartsSheet(habitId: habit.id) }
+    }
+
+    /// Linked to Today's plan: active calories burned against the workout burn target.
+    private var burnValue: some View {
+        let burned = store.value(habit, day: today) ?? 0
+        let target = store.auto["burnTarget"]?[today]
+        let done = target.map { burned >= $0 } ?? false
+        return VStack(alignment: .leading, spacing: NoopMetrics.space2) {
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
+                Text("\(Int(burned.rounded()).formatted())").font(StrandFont.title2)
+                    .foregroundStyle(StrandPalette.textPrimary)
+                Text(target.map { "/ \(Int($0.rounded()).formatted()) kcal" } ?? "kcal")
+                    .font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
+            }
+            bar(target.map { burned / max($0, 1) } ?? 0)
+            Spacer(minLength: 0)
+            Text(done ? "Burn target reached" : "Burned so far, from your WHOOP")
+                .font(StrandFont.caption)
+                .foregroundStyle(done ? StrandPalette.chargeColor : StrandPalette.textTertiary)
+        }
     }
 
     /// Linked to the calorie card: today's food against today's allowance.
@@ -1739,11 +1774,20 @@ struct SfzHabitDetail: View {
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || name == h.name)
             }
 
-            if let c = store.challenge, c.endedDay == nil, !c.habitIds.contains(h.id) {
-                Section {
-                    Button("Add to \(c.name)") { store.addToChallenge(h.id) }
-                } footer: {
-                    Text("It counts toward the challenge from tomorrow.")
+            if let c = store.challenge, c.endedDay == nil {
+                if c.habitIds.contains(h.id) {
+                    Section {
+                        Button("Take out of \(c.name)", role: .destructive) { store.removeFromChallenge(h.id) }
+                    } footer: {
+                        Text(c.strict ? "It stays on your Goal page. In a strict challenge this marks it Modified."
+                                      : "It stays on your Goal page; the challenge stops counting it.")
+                    }
+                } else {
+                    Section {
+                        Button("Add to \(c.name)") { store.addToChallenge(h.id) }
+                    } footer: {
+                        Text("It counts toward the challenge from tomorrow.")
+                    }
                 }
             }
 
@@ -2499,8 +2543,31 @@ struct SfzConsistencyHeatmap: View {
         }
     }
 
+    /// In a strict challenge the grid is all or nothing: green when every habit was met, red when anything
+    /// was missed. Otherwise the green deepens with how much of the day was done.
+    private var strictChallenge: SfzChallenge? {
+        guard let c = store.challenge, c.strict, c.endedDay == nil else { return nil }
+        return c
+    }
+
     private func color(_ date: Date) -> Color {
         if date > Date() { return .clear }
+        if let c = strictChallenge, Repository.localDayKey(date) >= c.effectiveStart {
+            let st = store.challengeStatus(c, on: date)
+            switch st {
+            case .met: return StrandPalette.chargeColor
+            case .missed: return StrandPalette.statusCritical.opacity(0.75)
+            case .partial: return Calendar.current.isDateInToday(date) ? StrandPalette.hairline : StrandPalette.statusCritical.opacity(0.75)
+            case .rest: return StrandPalette.restColor.opacity(0.6)
+            default: return StrandPalette.hairline
+            }
+        }
+        if let c = strictChallenge, Repository.localDayKey(date) >= c.startDay {
+            // Before the last restart: the days that led to it, all or nothing too.
+            let s = store.dayScore(date, ids: c.habitIds)
+            if s.due == 0 { return StrandPalette.hairline }
+            return s.met == s.due ? StrandPalette.chargeColor : StrandPalette.statusCritical.opacity(0.75)
+        }
         let s = store.dayScore(date)
         if s.due == 0 { return StrandPalette.hairline }
         if Calendar.current.isDateInToday(date) && s.met < s.due {
@@ -2545,12 +2612,21 @@ struct SfzConsistencyHeatmap: View {
                     Text("\(streaks.current)-day perfect streak").font(StrandFont.caption).foregroundStyle(StrandPalette.textPrimary)
                     Text("Best \(streaks.best)").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
                     Spacer()
-                    HStack(spacing: 3) {
-                        Text("Less").font(.system(size: 9, design: .rounded)).foregroundStyle(StrandPalette.textTertiary)
-                        ForEach([0.3, 0.55, 0.8, 1.0], id: \.self) { o in
-                            RoundedRectangle(cornerRadius: 2).fill(StrandPalette.chargeColor.opacity(o)).frame(width: 9, height: 9)
+                    if strictChallenge != nil {
+                        HStack(spacing: 3) {
+                            RoundedRectangle(cornerRadius: 2).fill(StrandPalette.chargeColor).frame(width: 9, height: 9)
+                            Text("All done").font(.system(size: 9, design: .rounded)).foregroundStyle(StrandPalette.textTertiary)
+                            RoundedRectangle(cornerRadius: 2).fill(StrandPalette.statusCritical.opacity(0.75)).frame(width: 9, height: 9)
+                            Text("Missed").font(.system(size: 9, design: .rounded)).foregroundStyle(StrandPalette.textTertiary)
                         }
-                        Text("More").font(.system(size: 9, design: .rounded)).foregroundStyle(StrandPalette.textTertiary)
+                    } else {
+                        HStack(spacing: 3) {
+                            Text("Less").font(.system(size: 9, design: .rounded)).foregroundStyle(StrandPalette.textTertiary)
+                            ForEach([0.3, 0.55, 0.8, 1.0], id: \.self) { o in
+                                RoundedRectangle(cornerRadius: 2).fill(StrandPalette.chargeColor.opacity(o)).frame(width: 9, height: 9)
+                            }
+                            Text("More").font(.system(size: 9, design: .rounded)).foregroundStyle(StrandPalette.textTertiary)
+                        }
                     }
                 }
             }

@@ -42,6 +42,12 @@ final class NotificationPresenter: NSObject, UNUserNotificationCenterDelegate {
         if response.notification.request.content.categoryIdentifier == CoachBriefScheduler.notificationCategoryId {
             onCoachBriefTapped?()
         }
+        #if os(iOS)
+        if response.notification.request.content.categoryIdentifier == "SFZ_WEAR" {
+            let action = response.actionIdentifier
+            Task { @MainActor in SfzWearReminder.shared.handle(action: action) }
+        }
+        #endif
         completionHandler()
     }
 }

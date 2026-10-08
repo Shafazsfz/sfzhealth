@@ -1225,7 +1225,7 @@ enum SfzHabitReminders {
         center.getPendingNotificationRequests { pending in
             let old = pending.map(\.identifier).filter { $0.hasPrefix(prefix) }
             center.removePendingNotificationRequests(withIdentifiers: old)
-            for it in items.prefix(60) {
+            for it in items.prefix(40) {
                 let content = UNMutableNotificationContent()
                 content.title = it.title
                 content.body = it.body

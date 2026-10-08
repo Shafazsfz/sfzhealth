@@ -271,6 +271,7 @@ struct SettingsView: View {
                 #if os(iOS)
                 liveNotificationsCard.staggeredAppear(index: 3)
                 heartRateAlertsCard.staggeredAppear(index: 3)
+                SfzWearReminderSettingsCard().staggeredAppear(index: 3)
                 #endif
                 streakCard.staggeredAppear(index: 4)
                 featuresCard.staggeredAppear(index: 5)

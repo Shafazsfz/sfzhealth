@@ -307,6 +307,14 @@ final class AppModel: ObservableObject {
         // Physical-input + wear hooks (fired live by FrameRouter).
         live.onDoubleTap = { [weak self] in self?.handleDoubleTap() }
         live.onWristChange = { [weak self] worn in self?.handleWristChange(worn) }
+        #if os(iOS)
+        // sfz: wear reminders follow wear, connection and charging.
+        live.$worn.combineLatest(live.$connected, live.$charging)
+            .sink { worn, connected, charging in
+                Task { @MainActor in SfzWearReminder.shared.update(worn: worn, connected: connected, charging: charging ?? false) }
+            }
+            .store(in: &hrCancellables)
+        #endif
         // Re-arm the next day's firmware alarm the moment the strap reports it fired (if/when the
         // firmware pushes STRAP_DRIVEN_ALARM_EXECUTED). Gated on enabled inside applySmartAlarm.
         live.onSmartAlarmFired = { [weak self] in

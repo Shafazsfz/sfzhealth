@@ -46,6 +46,7 @@ struct RootTabView: View {
     /// Selected tab — bound so tab switches can crossfade (README §Motion: ~240ms opacity swap
     /// between tab roots, calm easing). Defaults to Today.
     @State private var selectedTab: Int = 0
+    @ObservedObject private var wearReminder = SfzWearReminder.shared
     /// One `NavigationPath` per tab, indexed by tab tag. Re-tapping the already-active tab pops
     /// that tab's stack to its root (#135) by clearing its path — an animated pop that leaves the
     /// root view alive, so an at-root re-tap keeps scroll position and never re-runs `.task`
@@ -145,6 +146,8 @@ struct RootTabView: View {
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("sfz.openGoal"))) { _ in
             selectedTab = 3
         }
+        // sfz: a tapped wear reminder asks when to remind next.
+        .sheet(isPresented: $wearReminder.showPrompt) { SfzWearPromptSheet() }
         // Switching Coach off while STANDING on it leaves `selectedTab` pointing at a tag no tab claims
         // any more, which renders as an empty tab rather than as an error. Send that wearer to Today, and
         // only in that case, so a flip made from anywhere else does not move them.

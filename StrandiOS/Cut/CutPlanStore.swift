@@ -344,10 +344,10 @@ enum SfzHealthWriter {
 
 /// What a habit measures and how it is logged.
 enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
-    case counter, timer, check, gym, steps, water, sleep, zone, protein
+    case counter, timer, check, gym, steps, water, sleep, zone, protein, screen
     var id: String { rawValue }
     /// Filled from the WHOOP, the iPhone or other logs; never tapped.
-    var isAuto: Bool { [.steps, .water, .sleep, .zone, .protein].contains(self) }
+    var isAuto: Bool { [.steps, .water, .sleep, .zone, .protein, .screen].contains(self) }
     var label: String {
         switch self {
         case .counter: return "Counter"
@@ -359,6 +359,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .sleep: return "Sleep (from your WHOOP)"
         case .zone: return "Active Zone Minutes (from your WHOOP)"
         case .protein: return "Protein (from your food log)"
+        case .screen: return "Screen time limit (automatic)"
         }
     }
     /// Counter: reps. Timer: seconds. Check and gym: 1. Water: ml. Sleep: minutes. Zone: minutes. Protein: g.
@@ -372,6 +373,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .sleep: return 480
         case .zone: return 30
         case .protein: return 120
+        case .screen: return 30
         }
     }
     var defaultIcon: String {
@@ -385,6 +387,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .sleep: return "bed.double"
         case .zone: return "heart"
         case .protein: return "fork.knife"
+        case .screen: return "hourglass"
         }
     }
     /// Target stepper: range and step, in stored units.
@@ -398,6 +401,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .sleep: return 240...720
         case .zone: return 5...300
         case .protein: return 20...400
+        case .screen: return 5...600
         }
     }
     var targetStep: Double {
@@ -410,6 +414,7 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
         case .sleep: return 15
         case .zone: return 5
         case .protein: return 5
+        case .screen: return 5
         }
     }
     var hasTarget: Bool { self != .check && self != .gym }
@@ -430,6 +435,9 @@ enum SfzHabitKind: String, Codable, CaseIterable, Identifiable {
             return Int(v.rounded()).formatted()
         case .zone: return "\(Int(v.rounded())) min"
         case .protein: return "\(Int(v.rounded())) g"
+        case .screen:
+            let m = Int(v.rounded())
+            return m >= 60 ? "\(m / 60)h \(m % 60)m" : "\(m) min"
         case .counter: return "\(Int(v.rounded()))"
         case .check, .gym: return v >= 1 ? "Done" : "Not yet"
         }
@@ -592,6 +600,7 @@ final class SfzHabitStore: ObservableObject {
         .init(name: "Water", icon: "drop", kind: .water, target: 3000),
         .init(name: "No sugar", icon: "nosign", kind: .check, target: 1),
         .init(name: "Reading", icon: "book", kind: .check, target: 1),
+        .init(name: "Instagram", icon: "hourglass", kind: .screen, target: 30),
     ]
 
     /// Presets offered under Add habit.
@@ -615,6 +624,7 @@ final class SfzHabitStore: ObservableObject {
         .init(name: "Floss", icon: "mouth", kind: .check, target: 1),
         .init(name: "No smoking", icon: "nosign", kind: .check, target: 1),
         .init(name: "Progress photo", icon: "camera", kind: .check, target: 1),
+        .init(name: "Screen time", icon: "iphone", kind: .screen, target: 120),
     ]
 
     static func make(_ spec: SfzChallengeTemplate.HabitSpec, from day: String = SfzHabitStore.today) -> SfzHabit {
@@ -754,6 +764,15 @@ final class SfzHabitStore: ObservableObject {
         if day > today { return .future }
         if day < h.createdDay { return .before }
         if !h.isDue(on: date) { return .notDue }
+        if h.kind == .screen {
+            // Under the limit is the goal. Over it is a miss the moment iOS reports it.
+            let id = h.id.uuidString
+            guard SfzScreenShared.hasSelection(id), let since = SfzScreenShared.since(id), day >= since else {
+                return day == today ? .open : .noData
+            }
+            if SfzScreenShared.exceededDays(id).contains(day) { return .missed }
+            return day == today ? .open : .met
+        }
         if h.kind == .gym, gymState(h.id, day: day) == .rest {
             return restsBefore(h, upTo: date) <= h.restPerWeek ? .rest : .missed
         }
@@ -921,8 +940,7 @@ final class SfzHabitStore: ObservableObject {
     /// not counted as a miss, so a late sync can't trigger it.
     func enforceStrict() {
         guard var c = challenge, c.strict, c.endedDay == nil, c.pendingMissDay == nil else { return }
-        let span = Self.daysBetween(c.effectiveStart, Self.today)
-        guard span >= 1 else { return }
+        let span = max(0, Self.daysBetween(c.effectiveStart, Self.today))
         for i in 0..<span {
             let day = Self.dayKey(offset: i, from: c.effectiveStart)
             let st = challengeStatus(c, on: Self.date(day))
@@ -931,6 +949,11 @@ final class SfzHabitStore: ObservableObject {
                 challenge = c
                 return
             }
+        }
+        // Today can already be missed when a screen-time limit is passed.
+        if challengeStatus(c, on: Date()) == .missed {
+            c.pendingMissDay = Self.today
+            challenge = c
         }
     }
 

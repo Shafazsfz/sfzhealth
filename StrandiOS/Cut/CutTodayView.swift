@@ -1146,6 +1146,7 @@ enum SfzHabitAuto {
                 }
             }
         }
+        SfzScreenTime.sync(store)
         store.enforceStrict()
         store.checkFinished()
         SfzHabitReminders.schedule(store)
@@ -1315,6 +1316,7 @@ struct SfzHabitCard: View {
         case .timer: timer
         case .check: check
         case .gym: gymRow
+        case .screen: SfzScreenCardBody(habit: habit, status: status)
         default: autoValue
         }
     }
@@ -1492,10 +1494,12 @@ struct SfzHabitDetail: View {
 
     private func saveTarget() {
         store.setTarget(habitId, to: draftTarget, fromToday: applyToday)
+        SfzScreenTime.sync(store)
     }
 
     @ViewBuilder private func form(_ h: SfzHabit) -> some View {
         Form {
+            if h.kind == .screen { SfzScreenSetupSection(habit: h) }
             Section("Today") { todayRows(h) }
 
             Section("Progress") {
@@ -1523,7 +1527,7 @@ struct SfzHabitDetail: View {
                     }
                     .disabled(draftTarget == h.target(on: applyToday ? today : SfzHabitStore.dayKey(offset: 1, from: today)))
                 } header: {
-                    Text("Target")
+                    Text(h.kind == .screen ? "Daily limit" : "Target")
                 } footer: {
                     Text("Changes start tomorrow unless you choose today. Past days keep the target they had.")
                 }
@@ -1674,6 +1678,9 @@ struct SfzHabitDetail: View {
         case .check:
             Toggle("Done today", isOn: Binding(get: { !store.entries(h.id).isEmpty }, set: { _ in store.toggleCheck(h.id) }))
                 .tint(StrandPalette.chargeColor)
+        case .screen:
+            Text(store.status(h, on: Date()) == .missed ? "Over the limit today: missed" : "Under the limit so far today")
+                .foregroundStyle(store.status(h, on: Date()) == .missed ? StrandPalette.statusCritical : StrandPalette.chargeColor)
         case .gym:
             Picker("Today", selection: Binding(get: { store.gymState(h.id).map(\.rawValue) ?? "" },
                                                set: { store.setGym(h.id, SfzGymState(rawValue: $0)) })) {
@@ -2297,6 +2304,19 @@ struct SfzTargetsSheet: View {
                             HStack { Text("Exercise days"); Spacer(); Text("\(plan.exerciseDaysTarget) days").foregroundStyle(StrandPalette.textSecondary) }
                         }
                     }
+                    Section {
+                        Stepper(value: $plan.proteinPerKg, in: 1.0...3.0, step: 0.1) {
+                            HStack {
+                                Text("Protein")
+                                Spacer()
+                                Text("\(Int(plan.proteinTarget.rounded())) g a day").foregroundStyle(StrandPalette.textSecondary)
+                            }
+                        }
+                    } header: {
+                        Text("Food")
+                    } footer: {
+                        Text(String(format: "%.1f g for each kg of your goal weight. Shown on the Goal page under Protein.", plan.proteinPerKg))
+                    }
                 }
                 Section {
                     Button("Save \(changes.count) change\(changes.count == 1 ? "" : "s")") {
@@ -2337,6 +2357,7 @@ struct SfzTargetsSheet: View {
     private func save() {
         for (h, v) in changes { store.setTarget(h.id, to: v, fromToday: fromToday) }
         draft = [:]
+        SfzScreenTime.sync(store)
     }
 }
 

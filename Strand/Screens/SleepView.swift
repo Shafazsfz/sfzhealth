@@ -183,6 +183,9 @@ struct SleepView: View {
                             .padding(.top, -24)
                             .staggeredAppear(index: 0)
                         alarmsEntry
+                        SfzSleepScheduleCard(lastStart: resolved.night.session.effectiveStartTs,
+                                             lastEnd: resolved.night.session.endTs,
+                                             history: repo.sleeps)
                         // #sleep-layout: the analytical cards render in the user's saved order minus the
                         // hidden set, below the pinned Rest hero. Reordered via the Arrange sheet.
                         ForEach(Array(sleepVisibleSections.enumerated()), id: \.element) { idx, section in
@@ -3088,3 +3091,129 @@ private extension Repository {
     }
 }
 #endif
+
+
+// MARK: - sfz: Sleep schedule
+
+/// Last night's bedtime and wake time against the usual range, like Google Health's "Sleep schedule".
+/// The usual time is the median of up to 14 earlier nights; within 45 minutes of it counts as in range.
+/// Below, the last seven nights as bars from bedtime to wake time.
+struct SfzSleepScheduleCard: View {
+    let lastStart: Int
+    let lastEnd: Int
+    let history: [CachedSleepSession]
+
+    static let window = 45
+    static let minNights = 3
+
+    /// Minutes after 18:00 local, so a bedtime either side of midnight sorts correctly.
+    static func bedMinutes(_ ts: Int) -> Int {
+        let c = Calendar.current.dateComponents([.hour, .minute], from: Date(timeIntervalSince1970: TimeInterval(ts)))
+        return ((c.hour ?? 0) * 60 + (c.minute ?? 0) - 18 * 60 + 1440) % 1440
+    }
+
+    /// Minutes after midnight local.
+    static func wakeMinutes(_ ts: Int) -> Int {
+        let c = Calendar.current.dateComponents([.hour, .minute], from: Date(timeIntervalSince1970: TimeInterval(ts)))
+        return (c.hour ?? 0) * 60 + (c.minute ?? 0)
+    }
+
+    static func median(_ v: [Int]) -> Int? {
+        guard !v.isEmpty else { return nil }
+        let s = v.sorted()
+        return s.count % 2 == 1 ? s[s.count / 2] : (s[s.count / 2 - 1] + s[s.count / 2]) / 2
+    }
+
+    /// Earlier main nights, newest first, at most 14, at least 3 hours long.
+    private var earlier: [CachedSleepSession] {
+        Array(history.filter { $0.endTs < lastEnd - 6 * 3600 && $0.endTs - $0.effectiveStartTs >= 3 * 3600 }
+            .sorted { $0.endTs > $1.endTs }.prefix(14))
+    }
+
+    private func clock(_ ts: Int) -> String {
+        Date(timeIntervalSince1970: TimeInterval(ts)).formatted(date: .omitted, time: .shortened)
+    }
+
+    /// A clock string for minutes after an origin hour.
+    private func clock(minutes: Int, originHour: Int) -> String {
+        let m = ((minutes + originHour * 60) % 1440 + 1440) % 1440
+        var c = DateComponents(); c.hour = m / 60; c.minute = m % 60
+        return (Calendar.current.date(from: c) ?? Date()).formatted(date: .omitted, time: .shortened)
+    }
+
+    private func verdict(_ value: Int, usual: Int?) -> (String, Bool) {
+        guard let usual else { return ("", true) }
+        let d = value - usual
+        if abs(d) <= Self.window { return ("in range", true) }
+        return (d > 0 ? "\(abs(d)) min later than usual" : "\(abs(d)) min earlier than usual", false)
+    }
+
+    var body: some View {
+        let nights = earlier
+        let usualBed = nights.count >= Self.minNights ? Self.median(nights.map { Self.bedMinutes($0.effectiveStartTs) }) : nil
+        let usualWake = nights.count >= Self.minNights ? Self.median(nights.map { Self.wakeMinutes($0.endTs) }) : nil
+        let bed = verdict(Self.bedMinutes(lastStart), usual: usualBed)
+        let wake = verdict(Self.wakeMinutes(lastEnd), usual: usualWake)
+        let inRange = bed.1 && wake.1
+        return NoopCard {
+            VStack(alignment: .leading, spacing: NoopMetrics.space3) {
+                HStack {
+                    Text("SLEEP SCHEDULE").font(StrandFont.overline).tracking(1.6)
+                        .foregroundStyle(StrandPalette.textSecondary)
+                    Spacer()
+                    if usualBed != nil {
+                        Text(inRange ? "In range" : "Out of range")
+                            .font(StrandFont.caption)
+                            .foregroundStyle(inRange ? StrandPalette.statusPositive : StrandPalette.statusWarning)
+                    }
+                }
+                Text("\(clock(lastStart)) – \(clock(lastEnd))")
+                    .font(StrandFont.title2).foregroundStyle(StrandPalette.textPrimary)
+                if let usualBed, let usualWake {
+                    Text("Usual \(clock(minutes: usualBed, originHour: 18)) – \(clock(minutes: usualWake, originHour: 0))")
+                        .font(StrandFont.subhead).foregroundStyle(StrandPalette.textSecondary)
+                    Text("Bedtime \(bed.0) · wake \(wake.0)")
+                        .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+                } else {
+                    Text("Your usual range appears after \(Self.minNights) nights (\(nights.count) so far).")
+                        .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+                }
+                weekBars
+            }
+        }
+    }
+
+    /// The last seven nights, oldest left, each a bar from bedtime to wake time on a shared clock axis.
+    private var weekBars: some View {
+        let recent = Array(history.filter { $0.endTs <= lastEnd && $0.endTs - $0.effectiveStartTs >= 3 * 3600 }
+            .sorted { $0.endTs > $1.endTs }.prefix(7).reversed())
+        // Axis in minutes after 18:00: bedtime as is, wake time shifted by the 6 hours from 18:00 to midnight.
+        let spans = recent.map { (Self.bedMinutes($0.effectiveStartTs), Self.wakeMinutes($0.endTs) + 360) }
+        let lo = (spans.map { $0.0 }.min() ?? 0) - 30
+        let hi = (spans.map { $0.1 }.max() ?? 1440) + 30
+        return Group {
+            if spans.count >= 2 {
+                HStack(alignment: .top, spacing: NoopMetrics.space2) {
+                    ForEach(Array(recent.enumerated()), id: \.offset) { i, s in
+                        VStack(spacing: NoopMetrics.space1) {
+                            GeometryReader { g in
+                                let h = g.size.height
+                                let scale = h / CGFloat(max(1, hi - lo))
+                                let top = CGFloat(spans[i].0 - lo) * scale
+                                let len = CGFloat(max(1, spans[i].1 - spans[i].0)) * scale
+                                Capsule().fill(StrandPalette.restColor)
+                                    .frame(width: 8, height: max(8, len))
+                                    .offset(y: top)
+                                    .frame(maxWidth: .infinity, alignment: .top)
+                            }
+                            .frame(height: 72)
+                            Text(Date(timeIntervalSince1970: TimeInterval(s.endTs)).formatted(.dateTime.weekday(.narrow)))
+                                .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
+                        }
+                    }
+                }
+                .accessibilityHidden(true)
+            }
+        }
+    }
+}

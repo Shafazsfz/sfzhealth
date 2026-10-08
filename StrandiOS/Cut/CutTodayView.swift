@@ -17,6 +17,7 @@ struct CutTodayView: View {
     @State private var steps: Double?
     /// sfz: this week's workouts (Monday onwards) for the "This week" card.
     @State private var weekRows: [WorkoutRow] = []
+    @State private var zoneMinutes: Int = 0
     @State private var showAddFood = false
     @State private var showWeight = false
     @State private var showPlan = false
@@ -311,6 +312,39 @@ struct CutTodayView: View {
         return await repo.workoutRows(days: 8).filter { $0.startTs >= lo }
     }
 
+    /// Active Zone Minutes since Monday, the way Google Health counts them, from the WHOOP's all-day heart
+    /// rate rather than from logged workouts alone. Each minute's mean bpm is placed on the heart-rate
+    /// reserve for that day: 40-59% (fat burn) earns 1, 60% and above (cardio, peak) earns 2. A day with no
+    /// resting heart rate yet falls back to the latest one, then to 60 bpm.
+    static func activeZoneMinutes(repo: Repository, hrMax: Int) async -> Int {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let fallbackRest = Double(repo.today?.restingHr ?? repo.days.last(where: { $0.restingHr != nil })?.restingHr ?? 60)
+        var total = 0
+        var day = cal.startOfDay(for: weekStart)
+        while day <= today {
+            guard let next = cal.date(byAdding: .day, value: 1, to: day) else { break }
+            let key = Repository.localDayKey(day)
+            let rest = repo.days.last(where: { $0.day == key })?.restingHr.map(Double.init) ?? fallbackRest
+            total += zonePoints(await repo.hrBuckets(from: Int(day.timeIntervalSince1970),
+                                                    to: Int(next.timeIntervalSince1970) - 1, bucketSeconds: 60),
+                                rest: rest, hrMax: Double(hrMax))
+            day = next
+        }
+        return total
+    }
+
+    /// Zone points for one day's one-minute means. Pure, so the thresholds are easy to check.
+    static func zonePoints(_ minutes: [HRBucket], rest: Double, hrMax: Double) -> Int {
+        let reserve = hrMax - rest
+        guard reserve > 10 else { return 0 }
+        let fatBurn = rest + 0.40 * reserve
+        let cardio = rest + 0.60 * reserve
+        return minutes.reduce(0) { sum, m in
+            m.bpm >= cardio ? sum + 2 : (m.bpm >= fatBurn ? sum + 1 : sum)
+        }
+    }
+
     /// Minutes of workouts this week; a row without a stored duration counts its start-to-end span.
     static func cardioMinutes(_ rows: [WorkoutRow]) -> Int {
         Int(rows.reduce(0.0) { $0 + max(0, $1.durationS ?? Double($1.endTs - $1.startTs)) } / 60)
@@ -322,16 +356,16 @@ struct CutTodayView: View {
     }
 
     private var weekCard: some View {
-        let minutes = Self.cardioMinutes(weekRows)
+        let minutes = zoneMinutes
         let days = Self.exerciseDays(weekRows)
         return NoopCard {
             VStack(alignment: .leading, spacing: NoopMetrics.space4) {
                 Text("THIS WEEK").font(StrandFont.overline).tracking(1.6).foregroundStyle(StrandPalette.textSecondary)
-                weekRow("Cardio minutes", value: minutes, target: plan.weeklyCardioTarget, unit: "min",
+                weekRow("Active Zone Minutes", value: minutes, target: plan.weeklyCardioTarget, unit: "min",
                         tint: StrandPalette.effortColor)
                 weekRow("Exercise days", value: days, target: plan.exerciseDaysTarget, unit: "days",
                         tint: StrandPalette.chargeColor)
-                Text("Counts workouts recorded or detected since Monday.")
+                Text("Zone minutes come from your WHOOP's heart rate all day: 1 per minute in fat burn, 2 in cardio or peak. Exercise days count workouts since Monday.")
                     .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
             }
         }
@@ -636,6 +670,7 @@ struct CutTodayView: View {
         await backfillActive()
 
         weekRows = await Self.thisWeeksWorkouts(repo: repo)
+        zoneMinutes = await Self.activeZoneMinutes(repo: repo, hrMax: profile.hrMax)
 
         let key = dayKey
         let apple = await repo.appleDailyRows(days: 3).filter { $0.day == key }.compactMap { $0.steps }.max()
@@ -833,7 +868,7 @@ private struct CutPlanSheet: View {
                 }
                 Section("This week") {
                     Stepper(value: $plan.weeklyCardioTarget, in: 30...600, step: 10) {
-                        row("Cardio minutes", "\(plan.weeklyCardioTarget) min")
+                        row("Active Zone Minutes", "\(plan.weeklyCardioTarget) min")
                     }
                     Stepper(value: $plan.exerciseDaysTarget, in: 1...7) {
                         row("Exercise days", "\(plan.exerciseDaysTarget) days")

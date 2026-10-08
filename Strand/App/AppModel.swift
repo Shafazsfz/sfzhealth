@@ -769,6 +769,7 @@ final class AppModel: ObservableObject {
         }
         await refreshV5Signals()
         #if os(iOS)
+        await SfzHeartRateAlerts.check(repo: repo)
         // #980: a strap backfill routinely completes while the app is BACKGROUNDED (it runs as a
         // bluetooth-central, so it stays alive to receive the offload). The only other widget-publish
         // sites are gated on scenePhase == .active, so a background sync would rescore today's data but
@@ -2700,5 +2701,108 @@ final class AppModel: ObservableObject {
             xiaomiImportFailed = failed
         }
         activeImportSource = nil
+    }
+}
+
+
+// MARK: - sfz: high / low heart rate alerts
+
+/// Heart rate alerts in the style of Google Health: a notification when the WHOOP's heart rate stays above
+/// the high limit, or below the low limit, for ten minutes in a row outside a workout. Checked over the
+/// one-minute means each time new history lands from the WHOOP, so it works without live heart rate.
+/// Off by default; at most one alert of each kind an hour.
+enum SfzHeartRateAlerts {
+    static let enabledKey = "sfz.hrAlert.enabled"
+    static let highKey = "sfz.hrAlert.high"
+    static let lowKey = "sfz.hrAlert.low"
+    static let defaultHigh = 120
+    static let defaultLow = 40
+    static let sustainedMinutes = 10
+    private static let checkedKey = "sfz.hrAlert.checkedThrough"
+    private static let lastHighKey = "sfz.hrAlert.lastHighTs"
+    private static let lastLowKey = "sfz.hrAlert.lastLowTs"
+
+    struct Run: Equatable { let start: Int; let end: Int; let minutes: Int; let peak: Int }
+
+    /// Runs of at least `sustainedMinutes` back-to-back minutes that all pass `test`, skipping minutes
+    /// inside `excluded` windows. Pure, so the rule is easy to check on its own.
+    static func runs(_ minutes: [HRBucket], excluded: [(Int, Int)], test: (Double) -> Bool,
+                     extreme: (Double, Double) -> Double) -> [Run] {
+        var out: [Run] = []
+        var start: Int?
+        var last = 0
+        var count = 0
+        var peak = 0.0
+        func close() {
+            if let s = start, count >= sustainedMinutes {
+                out.append(Run(start: s, end: last + 60, minutes: count, peak: Int(peak.rounded())))
+            }
+            start = nil; count = 0
+        }
+        for m in minutes {
+            let inWorkout = excluded.contains { m.ts + 59 >= $0.0 && m.ts <= $0.1 }
+            guard !inWorkout, test(m.bpm) else { close(); continue }
+            if start != nil, m.ts - last > 90 { close() }
+            if start == nil { start = m.ts; peak = m.bpm } else { peak = extreme(peak, m.bpm) }
+            last = m.ts
+            count += 1
+        }
+        close()
+        return out
+    }
+
+    @MainActor
+    static func check(repo: Repository, now: Date = Date()) async {
+        let d = UserDefaults.standard
+        guard d.bool(forKey: enabledKey) else { return }
+        let high = Double(d.object(forKey: highKey) as? Int ?? defaultHigh)
+        let low = Double(d.object(forKey: lowKey) as? Int ?? defaultLow)
+        let nowTs = Int(now.timeIntervalSince1970)
+        // First run after switching on: only look at the last hour, not the whole day before.
+        let checked = d.object(forKey: checkedKey) as? Int ?? (nowTs - 3600)
+        // Look back far enough to catch a run that straddled the last check, but never more than a day.
+        let from = max(nowTs - 86_400, checked - sustainedMinutes * 60 - 120)
+        let minutes = await repo.hrBuckets(from: from, to: nowTs, bucketSeconds: 60)
+        guard let newest = minutes.last?.ts else { return }
+        let workouts = await repo.workoutRows(days: 2).map { ($0.startTs, $0.endTs) }
+        let highRuns = runs(minutes, excluded: workouts, test: { $0 > high }, extreme: { max($0, $1) })
+        let lowRuns = runs(minutes, excluded: workouts, test: { $0 < low }, extreme: { min($0, $1) })
+        if let r = highRuns.last(where: { $0.end > checked }), r.end - d.integer(forKey: lastHighKey) > 3600 {
+            d.set(r.end, forKey: lastHighKey)
+            post(id: "sfz-hr-high", title: String(localized: "High heart rate"),
+                 body: String(localized: "Your heart rate was above \(Int(high)) bpm for \(r.minutes) min outside a workout, up to \(r.peak) bpm, ending \(time(r.end))."))
+        }
+        if let r = lowRuns.last(where: { $0.end > checked }), r.end - d.integer(forKey: lastLowKey) > 3600 {
+            d.set(r.end, forKey: lastLowKey)
+            post(id: "sfz-hr-low", title: String(localized: "Low heart rate"),
+                 body: String(localized: "Your heart rate was below \(Int(low)) bpm for \(r.minutes) min, down to \(r.peak) bpm, ending \(time(r.end))."))
+        }
+        d.set(newest + 60, forKey: checkedKey)
+    }
+
+    private static func time(_ ts: Int) -> String {
+        Date(timeIntervalSince1970: TimeInterval(ts)).formatted(date: .omitted, time: .shortened)
+    }
+
+    private static func post(id: String, title: String, body: String) {
+        #if os(iOS)
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional
+            else { return }
+            let content = UNMutableNotificationContent()
+            content.title = title
+            content.body = body
+            content.sound = .default
+            center.add(UNNotificationRequest(identifier: id, content: content, trigger: nil))
+        }
+        #endif
+    }
+
+    /// Asks for notification permission the first time alerts are switched on.
+    static func requestPermission() {
+        #if os(iOS)
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        #endif
     }
 }

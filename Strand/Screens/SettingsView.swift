@@ -119,6 +119,9 @@ struct SettingsView: View {
     @AppStorage(UnitPrefs.hrvWindowKey) private var hrvWindowRaw = HrvWindow.whole.rawValue
     // Live-HR Live Activity (Lock Screen + Dynamic Island), iOS only (#336). Default on.
     @AppStorage(UnitPrefs.liveActivityKey) private var liveActivityEnabled = false   // sfz: off by default
+    @AppStorage(SfzHeartRateAlerts.enabledKey) private var hrAlertsEnabled = false
+    @AppStorage(SfzHeartRateAlerts.highKey) private var hrAlertHigh = SfzHeartRateAlerts.defaultHigh
+    @AppStorage(SfzHeartRateAlerts.lowKey) private var hrAlertLow = SfzHeartRateAlerts.defaultLow
     // Strap-sync Live Activity, iOS only. Separate from the live-HR one on purpose. Default on.
     @AppStorage(UnitPrefs.syncLiveActivityKey) private var syncLiveActivityEnabled = true
     @AppStorage(UnitPrefs.liftLiveActivityKey) private var liftLiveActivityEnabled = true
@@ -267,6 +270,7 @@ struct SettingsView: View {
                 strapCard.staggeredAppear(index: 3)
                 #if os(iOS)
                 liveNotificationsCard.staggeredAppear(index: 3)
+                heartRateAlertsCard.staggeredAppear(index: 3)
                 #endif
                 streakCard.staggeredAppear(index: 4)
                 featuresCard.staggeredAppear(index: 5)
@@ -1581,6 +1585,41 @@ struct SettingsView: View {
                 liveNotificationSwitch("Strap sync", isOn: $syncLiveActivityEnabled,
                                        detail: "Progress while Sfz Health pulls history from the WHOOP.")
             }
+        }
+    }
+
+    /// sfz: high / low heart rate alerts, like Google Health's.
+    private var heartRateAlertsCard: some View {
+        SettingsSection(
+            icon: "heart.text.square",
+            title: "Heart rate alerts",
+            blurb: "A notification when your WHOOP's heart rate stays above or below a limit for 10 minutes outside a workout. Checked whenever new data syncs."
+        ) {
+            VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
+                liveNotificationSwitch("Heart rate alerts", isOn: $hrAlertsEnabled,
+                                       detail: "At most one alert of each kind an hour.")
+                if hrAlertsEnabled {
+                    rowDivider
+                    Stepper(value: $hrAlertHigh, in: 90...180, step: 5) {
+                        HStack {
+                            Text("High limit").font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
+                            Spacer()
+                            Text("\(hrAlertHigh) bpm").font(StrandFont.bodyNumber).foregroundStyle(StrandPalette.textSecondary)
+                        }
+                    }
+                    rowDivider
+                    Stepper(value: $hrAlertLow, in: 30...60, step: 5) {
+                        HStack {
+                            Text("Low limit").font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
+                            Spacer()
+                            Text("\(hrAlertLow) bpm").font(StrandFont.bodyNumber).foregroundStyle(StrandPalette.textSecondary)
+                        }
+                    }
+                }
+            }
+        }
+        .onChange(of: hrAlertsEnabled) { _, on in
+            if on { SfzHeartRateAlerts.requestPermission() }
         }
     }
 

@@ -726,9 +726,9 @@ final class Backfiller {
                 loggedUnmappedVersions.insert(v)
                 switch support {
                 case .unmapped:
-                    log?("Historical records use firmware layout v\(v), which NOOP doesn't decode yet: those records carry no heart rate or motion, so any night made only of them can't be staged from the strap. A strap emitting a mix of layouts still stages the nights it can. Please report this (issue #1992).")
+                    log?("Historical records use firmware layout v\(v), which Sfz Health doesn't decode yet: those records carry no heart rate or motion, so any night made only of them can't be staged from the strap. A strap emitting a mix of layouts still stages the nights it can. Please report this (issue #1992).")
                 case .decodesWithoutNamedSignal:
-                    log?("Historical records use firmware layout v\(v). NOOP decodes it, but these records carry no per-second heart rate and no motion (they hold raw sensor channels nothing scores yet), so any night made only of them can't be staged from the strap. A strap emitting a mix of layouts still stages the nights it can. Please report this (issue #1992).")
+                    log?("Historical records use firmware layout v\(v). Sfz Health decodes it, but these records carry no per-second heart rate and no motion (they hold raw sensor channels nothing scores yet), so any night made only of them can't be staged from the strap. A strap emitting a mix of layouts still stages the nights it can. Please report this (issue #1992).")
                 case .supported:
                     break
                 }
@@ -763,7 +763,7 @@ final class Backfiller {
             // it appears; the bad `rawTs` is the future/past base the RTC jumped to.
             let nowForRtc = Int(Date().timeIntervalSince1970)
             for ev in decoded.droppedRtcEvents {
-                log?("Backfill: strap reported \(ev.kind) with an implausible own-timestamp \(BadClockDiagnostics.isoDay(ev.rawTs)) (\(BadClockDiagnostics.hoursOffset(ev.rawTs, now: nowForRtc)) vs now) — the strap's RTC reset to a wrong base (#324/#928); this is the ground-truth cause of the future-dated banking, not a NOOP decode bug.")
+                log?("Backfill: strap reported \(ev.kind) with an implausible own-timestamp \(BadClockDiagnostics.isoDay(ev.rawTs)) (\(BadClockDiagnostics.hoursOffset(ev.rawTs, now: nowForRtc)) vs now) — the strap's RTC reset to a wrong base (#324/#928); this is the ground-truth cause of the future-dated banking, not a Sfz Health decode bug.")
             }
             // #891: packet types this chunk carried that the decoder has no case for. Logged the first
             // time each type appears so a long offload stays readable. This is the only place such a

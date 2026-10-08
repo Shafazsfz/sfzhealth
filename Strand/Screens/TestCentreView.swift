@@ -390,7 +390,7 @@ struct TestCentreView: View {
                     Toggle(isOn: $polarDebugLogging) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Polar debug logging").font(StrandFont.body)
-                            Text("\(identity). Logs this to the strap log on each connect, so a Polar bug report shows the model NOOP resolved your strap to.")
+                            Text("\(identity). Logs this to the strap log on each connect, so a Polar bug report shows the model Sfz Health resolved your strap to.")
                                 .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -426,7 +426,7 @@ struct TestCentreView: View {
                 Toggle(isOn: $ouraNotifyMaskFull) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Oura notification mask ff (experimental)").font(StrandFont.body)
-                        Text("Sends the official app\u{2019}s SetNotification mask (1c 01 ff) instead of NOOP\u{2019}s 3f at the next connect. The ring packs ~10 packets per notification for the official app and one for NOOP (9\u{00D7} slower drains); this is the first candidate switch. Off by default; the next connect after turning it off is back on 3f. Watch the strap log for \u{201C}-> notify_all(ff)\u{201D} and compare notification sizes in the raw capture.")
+                        Text("Sends the official app\u{2019}s SetNotification mask (1c 01 ff) instead of Sfz Health\u{2019}s 3f at the next connect. The ring packs ~10 packets per notification for the official app and one for Sfz Health (9\u{00D7} slower drains); this is the first candidate switch. Off by default; the next connect after turning it off is back on 3f. Watch the strap log for \u{201C}-> notify_all(ff)\u{201D} and compare notification sizes in the raw capture.")
                             .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -522,7 +522,7 @@ struct TestCentreView: View {
     private var ouraEnableFeatureBlock: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Oura feature enable (experimental)").font(StrandFont.body)
-            Text("Enables or disables SpO2, real-steps, exercise HR, or the CVA PPG sampler directly via SetFeatureMode, then re-reads the feature's status. Unvalidated on NOOP's own hardware (OURA_PROTOCOL.md \u{00A7}7.5) — a third-party report is what these buttons exist to test. Daytime HR and resting HR are deliberately not offered here: daytime HR has its own dedicated live-HR path, and resting HR has no app-level toggle at all.")
+            Text("Enables or disables SpO2, real-steps, exercise HR, or the CVA PPG sampler directly via SetFeatureMode, then re-reads the feature's status. Unvalidated on Sfz Health's own hardware (OURA_PROTOCOL.md \u{00A7}7.5) — a third-party report is what these buttons exist to test. Daytime HR and resting HR are deliberately not offered here: daytime HR has its own dedicated live-HR path, and resting HR has no app-level toggle at all.")
                 .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -544,7 +544,7 @@ struct TestCentreView: View {
                 }
             }
         } message: { pending in
-            Text("Sends \(pending.framePreview) to the ring. Unvalidated on NOOP's own hardware (OURA_PROTOCOL.md \u{00A7}7.5). Watch the strap log for the follow-up feature-status read.")
+            Text("Sends \(pending.framePreview) to the ring. Unvalidated on Sfz Health's own hardware (OURA_PROTOCOL.md \u{00A7}7.5). Watch the strap log for the follow-up feature-status read.")
         }
     }
 
@@ -721,7 +721,7 @@ struct TestCentreView: View {
                         .font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
                 }
                 .toggleStyle(.switch).tint(StrandPalette.accent)
-                Text("When NOOP reconstructs heart rate from the WHOOP 5/MG v26 optical waveform (the seconds the strap stored no HR), refine the autocorrelation peak with a parabolic sub-lag fit so the estimate is not quantized to roughly 16 bpm steps near a high HR. It only fills seconds the strap never reported; it never overrides a stored HR. 5/MG only, off by default.")
+                Text("When Sfz Health reconstructs heart rate from the WHOOP 5/MG v26 optical waveform (the seconds the strap stored no HR), refine the autocorrelation peak with a parabolic sub-lag fit so the estimate is not quantized to roughly 16 bpm steps near a high HR. It only fills seconds the strap never reported; it never overrides a stored HR. 5/MG only, off by default.")
                     .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
 

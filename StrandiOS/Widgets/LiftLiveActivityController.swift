@@ -97,7 +97,7 @@ final class LiftLiveActivityController {
             return alert ? .noBanner : nil
         }
         if adopted != nil {
-            log("Lift Log: Lock Screen banner picked up again after NOOP restarted")
+            log("Lift Log: Lock Screen banner picked up again after Sfz Health restarted")
             waitingForForeground = false
         }
 
@@ -140,7 +140,7 @@ final class LiftLiveActivityController {
             guard UIApplication.shared.applicationState == .active else {
                 if !waitingForForeground {
                     waitingForForeground = true
-                    log("Lift Log: no Lock Screen banner — iOS starts one only while NOOP is open, so it "
+                    log("Lift Log: no Lock Screen banner — iOS starts one only while Sfz Health is open, so it "
                         + "comes back the next time Sfz Health is opened")
                 }
                 return alert ? .noBanner : nil

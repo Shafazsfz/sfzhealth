@@ -571,7 +571,7 @@ struct TrendsReportSheet: View {
     private func export(_ report: RangeReport) {
         guard !exporting else { return }
         exporting = true
-        let name = "NOOP-trends-\(report.start)_to_\(report.end).pdf"
+        let name = "SfzHealth-trends-\(report.start)_to_\(report.end).pdf"
         TrendsReportRenderer.exportPDF(page: page(for: report), suggestedName: name)
         exporting = false
         #if os(macOS)

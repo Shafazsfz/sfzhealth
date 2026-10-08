@@ -26,8 +26,7 @@ CATALOGS = [
 ]
 
 # Strings that must keep NOOP's name (licence attribution, links, legal identity).
-KEEP_IF_CONTAINS = ("I am not a WHOOP employee", "I own the WHOOP device", "I understand NOOP is unofficial",
-                    "To the fullest extent the law allows", "NoopApp", "github.com", "Copyright", "PolyForm", "noop.fans", "r/NoopBand")
+KEEP_IF_CONTAINS = ("NoopApp", "github.com", "Copyright", "PolyForm", "noop.fans", "r/NoopBand")
 
 # Keys where "Rest" means a workout pause or resting heart rate, not the sleep score.
 # Bare "Rest" is also Today's advice word (push / maintain / rest); score uses are renamed in Swift.
@@ -227,7 +226,58 @@ SPECIFIC_EDITS = [
      [('case .charge: return "Charge"', 'case .charge: return "Recovery"'),
       ('case .effort: return "Effort"', 'case .effort: return "Strain"'),
       ('case .rest:   return "Rest"', 'case .rest:   return "Sleep"')]),
+    ("Strand/System/DebugDataDiagnostics.swift", [('"NOOP\'s own folder (#52 fallback)"', '"Sfz Health\'s own folder (#52 fallback)"')]),
+    ("Strand/System/ProjectInfo.swift", [('static let appName = "NOOP"', 'static let appName = "Sfz Health"')]),
+    ("Packages/StrandAnalytics/Sources/StrandAnalytics/FusionTypes.swift",
+     [('case .noopComputed:  return "NOOP"', 'case .noopComputed:  return "Sfz Health"')]),
 ]
+
+
+NOOP_DIRS = SWIFT_DIRS + ["Packages/StrandAnalytics/Sources"]
+NOOP_SKIP_FILES = {"RootView.swift"}   # macOS-only sidebar, not part of the iPhone app
+
+
+def _is_identifier(inner: str) -> bool:
+    """A literal that is a key, path, URL or file name rather than a sentence."""
+    if "://" in inner:
+        return True
+    return " " not in inner and any(c in inner for c in "/_.")
+
+
+def noop_everywhere() -> int:
+    """Every remaining NOOP the user could read (notifications, logs, file names, legal text, the
+    What's New notes) becomes Sfz Health. Keys, paths and URLs are left alone."""
+    changed = 0
+    for root in NOOP_DIRS:
+        for path in sorted(Path(root).rglob("*.swift")):
+            if path.name in NOOP_SKIP_FILES or "Tests" in path.parts:
+                continue
+            text = path.read_text(encoding="utf-8")
+            if "NOOP" not in text:
+                continue
+            lines = text.split("\n")
+            for i, line in enumerate(lines):
+                if "NOOP" not in line or line.lstrip().startswith("//"):
+                    continue
+
+                def fix(m):
+                    lit = m.group(0)
+                    inner = lit[1:-1]
+                    if not re.search(r"\bNOOP\b", inner):
+                        return lit
+                    if _is_identifier(inner) and not inner.startswith("NOOP-"):
+                        return lit   # keys/paths; "NOOP-…" export file names are still renamed
+                    new = re.sub(r"\bNOOP\b", "Sfz Health", lit)
+                    new = new.replace("Sfz Health-", "SfzHealth-")   # file names: no space
+                    return new
+
+                lines[i] = SWIFT_LIT.sub(fix, line)
+            new_text = "\n".join(lines)
+            if new_text != text:
+                path.write_text(new_text, encoding="utf-8")
+                changed += 1
+    print(f"NOOP everywhere: {changed} files")
+    return 0
 
 
 def specific_edits() -> int:
@@ -242,6 +292,34 @@ def specific_edits() -> int:
         if new != text:
             path.write_text(new, encoding="utf-8")
             print(f"{file}: labels renamed")
+    return 0
+
+
+def plist_names() -> int:
+    """Names iOS itself shows: app / widget / Watch display names and every permission prompt."""
+    plists = [Path(p) for p in ("StrandiOS/Resources/Info.plist", "StrandiOSWidgets/Info.plist",
+                                "NOOPWatch/Info.plist", "NOOPWatchComplications/Info.plist",
+                                "Strand/Resources/Info.plist")]
+    for path in plists:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        new = text.replace("<string>NOOP</string>", "<string>sfz</string>")
+        new = re.sub(r"<string>([^<]*)\bNOOP\b", lambda m: "<string>" + m.group(1) + "Sfz Health", new)
+        new = re.sub(r"<string>([^<]*)\bNOOP\b", lambda m: "<string>" + m.group(1) + "Sfz Health", new)
+        if new != text:
+            path.write_text(new, encoding="utf-8")
+            print(f"{path}: names updated")
+    yml = Path("project.yml")
+    if yml.exists():
+        out = []
+        for line in yml.read_text(encoding="utf-8").split("\n"):
+            if re.match(r"\s*CFBundle(Display)?Name:\s*NOOP\s*$", line):
+                line = re.sub(r"NOOP\s*$", "sfz", line)
+            elif "UsageDescription:" in line:
+                line = re.sub(r"\bNOOP\b", "Sfz Health", line)
+            out.append(line)
+        yml.write_text("\n".join(out), encoding="utf-8")
     return 0
 
 
@@ -272,6 +350,8 @@ def english_only() -> int:
 
 if __name__ == "__main__":
     rebrand_swift()
+    noop_everywhere()
     specific_edits()
+    plist_names()
     main()
     sys.exit(english_only())

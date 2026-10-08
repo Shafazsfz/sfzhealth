@@ -113,13 +113,13 @@ enum AppChangelog {
             date: "September 2026",
             items: [
                 "**Pick the clock you read times in (#1821).** Settings → Appearance now offers System, 12-hour or 24-hour. It defaults to System, so nothing changes unless you ask — and System now means your phone's own 24-hour switch, which Sfz Health was previously ignoring in favour of your region's default. A reader in a 24-hour country who prefers 12-hour had no way to say so.",
-                "**Sleep from a strap that records no motion (#1801).** A WHOOP 5/MG that never pairs banks no movement data, and sleep detection is built on stillness — so those nights scored as nothing at all. NOOP can now find a night from heart rate alone and stage it. It is display-only by design: an HR-only night never feeds your resting heart rate or HRV baselines, because it has not earned that.",
+                "**Sleep from a strap that records no motion (#1801).** A WHOOP 5/MG that never pairs banks no movement data, and sleep detection is built on stillness — so those nights scored as nothing at all. Sfz Health can now find a night from heart rate alone and stage it. It is display-only by design: an HR-only night never feeds your resting heart rate or HRV baselines, because it has not earned that.",
                 "**A charged strap is no longer told to charge (#1818).** The 1970/71 clock warning offered one remedy regardless of battery, so people at 100% were sent round a loop they had already run. It now says something true for a strap that is already charged, and asks for the log that can actually explain it.",
                 "**The coach can see your sleep stages (#1816).** It was answering that it had no access to them, because deep, REM and light minutes were never in what it was given. They are now, along with sleep efficiency.",
                 "**Back up a database larger than Sfz Health would restore (#1807).** Export warns when an archive is past the 2 GiB restore ceiling instead of writing it silently, and a restore can be allowed through rather than refused outright.",
                 "**Home-screen widget corrections (#1795, thanks @Sneheth; #1799).** The heart-rate and HRV values sat under each other's icons on Apple. Both platforms' widgets now also read properly aloud, with the value spoken rather than the raw number.",
                 "**Live workout no longer stacks two timers (#1814), and the steps card stops asking for the half you already gave it (#1815).**",
-                "**A strap log that reports rather than assumes (#1809, thanks @supremesynergy; #1823).** Every disconnect now records how long the link held and whether the strap sent anything at all, and the clock exchange quotes what the strap actually answered. NOOP used to write \"clock synced\" the moment it queued the write, before any reply existed — so a log could insist the clock was set while the screen said 1970/71.",
+                "**A strap log that reports rather than assumes (#1809, thanks @supremesynergy; #1823).** Every disconnect now records how long the link held and whether the strap sent anything at all, and the clock exchange quotes what the strap actually answered. Sfz Health used to write \"clock synced\" the moment it queued the write, before any reply existed — so a log could insist the clock was set while the screen said 1970/71.",
                 "**Oura rings with no name, and Android's heart-rate logging (#1797, thanks @pipiche38; #1796, thanks @kvnloo).**",
             ]
         ),
@@ -267,7 +267,7 @@ enum AppChangelog {
                 "**Richer metric detail (#430, #432, #433, #435).** Key Metrics gains a Detailed-tiles option with tap-to-open trend detail, and every metric's detail timeline gets selectable windows — 1 day, 2 days, up to 3 months, a year, or All — matched across iPhone, Mac and Android.",
                 "**Keep Sfz Health running overnight on Android (#386).** An opt-in toggle that guides you through exempting Sfz Health from your phone maker's aggressive background-kill, so an overnight re-score isn't silently stopped. Sfz Health also now catches up a killed overnight score the moment you open it.",
                 "**More accurate sleep.** Elevated heart rate on a motionless wrist no longer scores as awake (#462), split nights report the whole night's Asleep total and hypnogram (#345), and a sleep-staging tune that was over-calling \"awake\" for healthy sleepers in the field is reverted (#431).",
-                "**WHOOP 5.0 / MG motion, decoded (#423).** For research, NOOP now decodes the strap's 100 Hz 6-axis motion buffer and can capture the high-rate sensor buffers behind the scenes — the groundwork for real activity detection on the 5.0/MG. Thanks vishk23 and tanarchytan.",
+                "**WHOOP 5.0 / MG motion, decoded (#423).** For research, Sfz Health now decodes the strap's 100 Hz 6-axis motion buffer and can capture the high-rate sensor buffers behind the scenes — the groundwork for real activity detection on the 5.0/MG. Thanks vishk23 and tanarchytan.",
             ]
         ),
         Release(
@@ -688,7 +688,7 @@ enum AppChangelog {
             title: "A big one: smarter sleep, naps, more devices, and a load of fixes",
             date: "June 2026",
             items: [
-                "**Sleep got smarter and more honest.** A night split by a wake-up is now counted in full instead of just one fragment. A bad-clock strap can no longer pass off a 12-hour block as one night. A still morning right after you wake is no longer mistaken for a second sleep. And when the deep/REM split can't be trusted on a quiet night, NOOP says so instead of guessing. Your own hand-edits to a night also win over an imported value now.",
+                "**Sleep got smarter and more honest.** A night split by a wake-up is now counted in full instead of just one fragment. A bad-clock strap can no longer pass off a 12-hour block as one night. A still morning right after you wake is no longer mistaken for a second sleep. And when the deep/REM split can't be trusted on a quiet night, Sfz Health says so instead of guessing. Your own hand-edits to a night also win over an imported value now.",
                 "**Naps, spotted on your device.** Opt in and Sfz Health notices a likely nap from your motion and offers it for a one-tap add. Nothing is logged automatically, and it never touches your real sleep scores. Thanks @cbarrado.",
                 "**WHOOP 4.0 sleep on older firmware.** Straps on an older offload layout that used to bank nothing now hand over the motion Sfz Health needs to stage sleep. Thanks airtonzanon for the captures.",
                 "**More at a glance.** A new 2x2 Android home-screen widget shows Charge, Effort and Rest together, plus optional morning-recap and post-workout notifications, both off by default and no AI involved.",
@@ -708,7 +708,7 @@ enum AppChangelog {
             title: "Sleep, properly sorted, and an app that explains itself",
             date: "June 2026",
             items: [
-                "**Your night is your night.** We rebuilt how NOOP decides which sleep is your main one. It now scores every sleep block on how much you actually slept and how close it was to your usual hours (which NOOP learns from your own history), so a long sleep that started at an odd time is no longer filed away as a nap, and the Sleep tab and your recovery scores always land on the same night. This was a from-scratch rework, not a patch, grounded in real strap logs and the sleep-staging research.",
+                "**Your night is your night.** We rebuilt how Sfz Health decides which sleep is your main one. It now scores every sleep block on how much you actually slept and how close it was to your usual hours (which Sfz Health learns from your own history), so a long sleep that started at an odd time is no longer filed away as a nap, and the Sleep tab and your recovery scores always land on the same night. This was a from-scratch rework, not a patch, grounded in real strap logs and the sleep-staging research.",
                 "**The app explains itself now.** Tap the info on a sleep block to see exactly why it's your main sleep or a nap. Your Recovery, Strain and Sleep tiles tell you when they're still calibrating (and how many nights are left), when they're showing last night's number, or when they simply need the strap, instead of a bare dash. A Recording chip shows when the strap is actually connected and saving data. And a small badge on each number shows whether Sfz Health worked it out on your device or imported it from WHOOP or Apple Health.",
                 "**New: a \"How Sfz Health works\" page.** Tucked in Settings, a short plain-English read on how your sleep is sorted, how your scores build over your first couple of weeks, what \"recording\" means, and where your numbers come from.",
                 "**Help us get your sleep exactly right.** If your sleep still looks off after this, please open an issue on GitHub with a strap log and the dates it's wrong. That is the single fastest way for us to pin your case. There's a full write-up of the research behind this rework if you want the detail.",
@@ -737,7 +737,7 @@ enum AppChangelog {
                 "**Charge settles in days, not weeks.** Your recovery baseline used to take 2 to 3 weeks to learn, and one high early reading could hold Charge down the whole time. It finds your real baseline fast now. And there's a new **Recalibrate Charge baseline** button under **Settings → Recovery** if you ever want to reset it and re-learn from tonight. Your data isn't deleted.",
                 "**No more \"New data added\" spam.** The Updates inbox used to repeat that every time Sfz Health re-scored your recent days in the background, even on an old import with nothing new. Now it tells you once, only when a genuinely newer day lands. (#521)",
                 "**A real sport picker on workouts.** Add, edit or start a session and pick from a named list (Padel included), with free text still there for anything that isn't on it. (#519)",
-                "**New: a daily auto-export of your strap log (iPhone & Mac).** Turn it on under **Settings → Diagnostics**, pick a time, and NOOP saves a timestamped copy once a day, so a log is waiting for a bug report without you remembering to grab it. Off by default, stays on your device. On Mac it runs while NOOP is open; on iPhone it fires when iOS next wakes the app near your time, not to the exact minute. Android already had this. (#510)",
+                "**New: a daily auto-export of your strap log (iPhone & Mac).** Turn it on under **Settings → Diagnostics**, pick a time, and Sfz Health saves a timestamped copy once a day, so a log is waiting for a bug report without you remembering to grab it. Off by default, stays on your device. On Mac it runs while Sfz Health is open; on iPhone it fires when iOS next wakes the app near your time, not to the exact minute. Android already had this. (#510)",
                 "**Android: double-tap your strap to do something.** Pick from Nothing, Buzz back, Mark a moment, Log a sleep mark, or Buzz the time, with a Test button. Same as iPhone and Mac now.",
                 "**Android: clearer help when a WHOOP 5/MG won't pair.** Instead of looping silently it now shows the steps to fix it (close the official WHOOP app, hold the band until the lights flash blue, Forget This Device). (#78)",
                 "Plus the home-screen widgets and the iOS Live Activity say Charge instead of Recovery now, workout durations stop clipping on the Today tiles (Android, #332), and updating through AltStore no longer fails partway.",
@@ -747,15 +747,15 @@ enum AppChangelog {
             title: "Updates check GitHub again",
             date: "June 2026",
             items: [
-                "**NOOP is back on GitHub** - and so is **Check for updates**. The in-app update check and the **Settings → About** \"project home\" link now point at github.com/NoopApp/noop again, where releases live (noop.fans stays as a mirror). It's still on-device and only runs when you tap - nothing about you is ever sent.",
+                "**Sfz Health is back on GitHub** - and so is **Check for updates**. The in-app update check and the **Settings → About** \"project home\" link now point at github.com/NoopApp/noop again, where releases live (noop.fans stays as a mirror). It's still on-device and only runs when you tap - nothing about you is ever sent.",
             ]),
         Release(
             version: "5.2.5",
             title: "WHOOP 5/MG re-pairing fix",
             date: "June 2026",
             items: [
-                "**Fixed: removing a WHOOP from Devices now actually releases it.** Before, NOOP kept reconnecting to a removed strap and held it connected - so a 5/MG could never enter pairing mode, which blocked re-pairing a strap that got stuck. Remove now stops reconnecting, drops the link and frees the strap. (iPhone & Mac.) (#78)",
-                "**Clearer help when a 5/MG won't bond.** If the strap keeps refusing the secure pairing, NOOP now tells you exactly how to free and re-pair it (close the WHOOP app, pairing mode, forget in Bluetooth) rather than a misleading \"transient\" message. (#78)",
+                "**Fixed: removing a WHOOP from Devices now actually releases it.** Before, Sfz Health kept reconnecting to a removed strap and held it connected - so a 5/MG could never enter pairing mode, which blocked re-pairing a strap that got stuck. Remove now stops reconnecting, drops the link and frees the strap. (iPhone & Mac.) (#78)",
+                "**Clearer help when a 5/MG won't bond.** If the strap keeps refusing the secure pairing, Sfz Health now tells you exactly how to free and re-pair it (close the WHOOP app, pairing mode, forget in Bluetooth) rather than a misleading \"transient\" message. (#78)",
             ]),
         Release(
             version: "5.2.4",
@@ -769,7 +769,7 @@ enum AppChangelog {
             title: "WHOOP 5/MG connection fix",
             date: "June 2026",
             items: [
-                "**Fixed (WHOOP 5/MG): opening \"Add a WHOOP\" could drop a working strap and get stuck on \"connecting\".** If your 5/MG was connected and streaming, presenting the scan tore down the live connection - and the strap could then loop on \"connecting\" instead of re-bonding (with haptics going quiet). NOOP now keeps a live same-family connection while it scans for nearby straps. (iPhone & Mac.) (#74)",
+                "**Fixed (WHOOP 5/MG): opening \"Add a WHOOP\" could drop a working strap and get stuck on \"connecting\".** If your 5/MG was connected and streaming, presenting the scan tore down the live connection - and the strap could then loop on \"connecting\" instead of re-bonding (with haptics going quiet). Sfz Health now keeps a live same-family connection while it scans for nearby straps. (iPhone & Mac.) (#74)",
                 "**Clearer guidance when a reconnect briefly hiccups.** If a strap Sfz Health *just* bonded to momentarily refuses on a reconnect, it no longer wrongly tells you it's \"still paired to the WHOOP app\" - it recovers quietly instead. (#74)",
             ]),
         Release(
@@ -793,7 +793,7 @@ enum AppChangelog {
             title: "Connection & sleep fixes - a focused tune-up",
             date: "June 2026",
             items: [
-                "**Fixed (WHOOP 5/MG): pairing could get stuck and the buzz go silent.** If your strap had been re-paired or reset, NOOP could latch onto an old Bluetooth identity, fail to finish the secure bond and loop forever - which also stopped haptics. NOOP now notices a strap that *is* bonding fine and switches to it. (iPhone, Mac & Android.)",
+                "**Fixed (WHOOP 5/MG): pairing could get stuck and the buzz go silent.** If your strap had been re-paired or reset, Sfz Health could latch onto an old Bluetooth identity, fail to finish the secure bond and loop forever - which also stopped haptics. Sfz Health now notices a strap that *is* bonding fine and switches to it. (iPhone, Mac & Android.)",
                 "**Fixed (WHOOP 4.0 on some Androids): stuck on \"finishing the secure handshake\".** On phones whose Bluetooth double-fires the connection setup (seen on OnePlus), pairing could wedge with no way out - Sfz Health now bounces and retries automatically instead of hanging.",
                 "**Fixed (Android): the Sleep tab could get stuck on a single night.** The date arrows now step by day, so newer nights show up and the arrows behave.",
                 "**Fixed (Mac): the Breathe session opened from Stress had no close button** - added a **Done** button so you're never trapped.",
@@ -836,9 +836,9 @@ enum AppChangelog {
             title: "v5 - the raw-signal release: Sfz Health reads the signal, on your device, free",
             date: "June 2026",
             items: [
-                "**The big idea.** Everyone else shows you a score their cloud computed, behind a subscription. NOOP reads your strap's raw signals - beat-to-beat timing, red/IR PPG, motion, skin temperature - and does all the maths on your own device, free and offline. And it's the only one that can actually breathe you back down. Seven new things below, plus a tidier home: everything now lives under five places - **Today · What Moves You · Health · Devices & Sources · Settings**.",
+                "**The big idea.** Everyone else shows you a score their cloud computed, behind a subscription. Sfz Health reads your strap's raw signals - beat-to-beat timing, red/IR PPG, motion, skin temperature - and does all the maths on your own device, free and offline. And it's the only one that can actually breathe you back down. Seven new things below, plus a tidier home: everything now lives under five places - **Today · What Moves You · Health · Devices & Sources · Settings**.",
                 "**Haptic biofeedback - the strap that breathes you down.** Your wrist motor can now pace your breathing with the screen off. Find your personal calm pace (open **Breathe → Resonance → Find your resonance pace**, pick the ~13-min or ~7-min sweep), then breathe to the buzz. Mid-stress, tap **Calm me · 3 min** for a felt metronome just below your heart rate. Optional passive check-ins: **Settings → Automations → Stress check-ins (haptic)** (off by default).",
-                "**What Moves You.** A ranked, lag-aware read of what actually moves *your* recovery - from your own journal and outcomes, not population averages. Log alcohol or late caffeine with an amount and NOOP fits a personal dose-response curve, then in the evening tells you what one more drink tends to cost tomorrow's Charge. Open **What Moves You** (the wand in the sidebar / Insights).",
+                "**What Moves You.** A ranked, lag-aware read of what actually moves *your* recovery - from your own journal and outcomes, not population averages. Log alcohol or late caffeine with an amount and Sfz Health fits a personal dose-response curve, then in the evening tells you what one more drink tends to cost tomorrow's Charge. Open **What Moves You** (the wand in the sidebar / Insights).",
                 "**Skin-temperature suite.** Three features off the one signal WHOOP already streams: cycle-phase **awareness** (opt-in, on-device, never contraception or a fertility predictor), a **Body clock** jet-lag/shift helper, and a smarter illness **Heads-up** that cross-checks your journal so a night out doesn't cry wolf. Find them in **Health → Skin temperature**; turn cycle awareness on there, illness watch under **Settings → Automations**.",
                 "**Your Data, Fused.** If you wear more than one band, Sfz Health now shows one honest record - best source wins per metric, with the source named on every number and conflicts flagged, never silently averaged. Open **Your Data, Fused** from **Health** or Data Sources. A single WHOOP just shows a clean plain record.",
                 "**Lab Book - your own private logbook.** Type in your bloods, blood pressure, scan values or doctor's-visit notes (or import a CSV), see each marker's trend, and line a marker up against a wearable signal with **Compare with a signal**. It's a notebook, not a medical service - Sfz Health stores and lines up the numbers *you* enter, never tests, reads or diagnoses them, and it all stays on your device. Open **Health → Lab Book**.",
@@ -900,7 +900,7 @@ enum AppChangelog {
             title: "Sfz Health has a new home",
             date: "June 2026",
             items: [
-                "**NOOP now lives at noop.fans.** After the project's GitHub was taken offline, NOOP moved to its own independent home - code, releases, the wiki and issues. **Settings → About** now links straight there, and **Check for updates** reads from the new home (if GitHub ever comes back it'll be kept as a mirror). Nothing on your device changed and everything keeps working - this just points the app at where the project lives now. Keeping it online costs real money, so if NOOP is useful to you, please consider a donation. #KeepNOOPAlive",
+                "**Sfz Health now lives at noop.fans.** After the project's GitHub was taken offline, Sfz Health moved to its own independent home - code, releases, the wiki and issues. **Settings → About** now links straight there, and **Check for updates** reads from the new home (if GitHub ever comes back it'll be kept as a mirror). Nothing on your device changed and everything keeps working - this just points the app at where the project lives now. Keeping it online costs real money, so if Sfz Health is useful to you, please consider a donation. #KeepNOOPAlive",
             ]),
         Release(
             version: "4.6.0",
@@ -932,7 +932,7 @@ enum AppChangelog {
             date: "June 2026",
             items: [
                 "**WHOOP 4.0: a real night is no longer dropped.** The off-wrist guard added in 4.5.0 could mistake a 4.0's sparse, motion-reconstructed sleep heart-rate for time off the wrist and skip the whole night. It now only treats heart-rate gaps as \"off-wrist\" when your heart-rate is dense enough for a gap to actually mean something - so 4.0 nights track again, while the strap-on-a-desk case it was meant to catch still works. *(Thanks Mindfulpaths for catching it - #507.)*",
-                "**WHOOP 5/MG: steps are accurate now.** The strap's step counter is a *running total*, not a per-reading count - adding it up the old way could over-report steps many times over. NOOP now reads the full counter and adds only the real increases, so your daily step number is sane. It also reads a simple still / walking / running activity signal from the same data, with no cloud. *(Thanks j0b-dev for the analysis - #276 / #316.)*",
+                "**WHOOP 5/MG: steps are accurate now.** The strap's step counter is a *running total*, not a per-reading count - adding it up the old way could over-report steps many times over. Sfz Health now reads the full counter and adds only the real increases, so your daily step number is sane. It also reads a simple still / walking / running activity signal from the same data, with no cloud. *(Thanks j0b-dev for the analysis - #276 / #316.)*",
             ]),
         Release(
             version: "4.5.2",
@@ -953,7 +953,7 @@ enum AppChangelog {
             title: "WHOOP 5/MG deep-sync decode + sleep & workout fixes",
             date: "June 2026",
             items: [
-                "**More of your WHOOP 5/MG history now syncs.** Some nights were stored by the strap in newer record layouts (internally \"v20/v21\") that NOOP didn't recognise yet, so they were skipped and showed up as empty. Those now decode - so more of your 5/MG history comes through. We also pull richer detail from the existing records (higher-precision heart rate, step cadence, an extra skin-temperature channel) and corrected the skin-temperature scale so worn readings land where they should. *(Thanks to community contributor j0b-dev for the captured-frame analysis behind this.)*",
+                "**More of your WHOOP 5/MG history now syncs.** Some nights were stored by the strap in newer record layouts (internally \"v20/v21\") that Sfz Health didn't recognise yet, so they were skipped and showed up as empty. Those now decode - so more of your 5/MG history comes through. We also pull richer detail from the existing records (higher-precision heart rate, step cadence, an extra skin-temperature channel) and corrected the skin-temperature scale so worn readings land where they should. *(Thanks to community contributor j0b-dev for the captured-frame analysis behind this.)*",
                 "**Sleep: no more daytime false sleep.** Time with the strap off your wrist - on the charger, or sat at a desk - could occasionally be logged as sleep. Sfz Health now spots those gaps (a long stretch with no real heart-rate signal, or an explicit off-wrist marker) and won't count them as sleep, day or night.",
                 "**Sleep: fixed a 6 PM wake-time clamp.** On some past nights your wake time could be reported as exactly 6 PM - an artefact of the read window ending there, not your real wake. Past nights now read through the full day so your true wake time shows.",
                 "**Workouts: Average HR always matches the trace.** A workout's Average HR is now always computed from the exact heart-rate samples behind the graph and zones, so the number and the chart can never drift apart.",
@@ -971,7 +971,7 @@ enum AppChangelog {
             title: "Light theme tuning",
             date: "June 2026",
             items: [
-                "**Light got dialled in.** Based on early feedback it was leaning too gold, so the chrome - links, the selected range pill, header accents - now uses the deep brand **blue** on Light, with **gold kept for what it means** (the Charge/recovery rings and the action button). Cards now sit on a slightly **deeper warm canvas with a stronger shadow**, so they stand out more. And on **Mac**, a sidebar glitch where the NOOP lockup overlapped the navigation list is fixed. Dark is untouched.",
+                "**Light got dialled in.** Based on early feedback it was leaning too gold, so the chrome - links, the selected range pill, header accents - now uses the deep brand **blue** on Light, with **gold kept for what it means** (the Charge/recovery rings and the action button). Cards now sit on a slightly **deeper warm canvas with a stronger shadow**, so they stand out more. And on **Mac**, a sidebar glitch where the Sfz Health lockup overlapped the navigation list is fixed. Dark is untouched.",
             ]),
         Release(
             version: "4.3.1",
@@ -985,7 +985,7 @@ enum AppChangelog {
             title: "Light theme - Sfz Health in warm paper & gold",
             date: "June 2026",
             items: [
-                "**NOOP now has a full Light theme, and you can switch any time.** Settings → Appearance lets you pick **System** (follow your phone/Mac), **Light**, or **Dark**. The new Light look is \"warm paper & gold\" - a soft warm-white canvas with crisp navy-ink text and the signature gold deepened so it stays legible on white. Every surface was re-done for it, not just inverted: the ring gauges, frosted cards (now lifted with a soft shadow instead of a glow), charts, the scenic hero, the home-screen widget and even the status bar all adapt. Dark stays exactly as it was. Same data, same layout - your choice of finish.",
+                "**Sfz Health now has a full Light theme, and you can switch any time.** Settings → Appearance lets you pick **System** (follow your phone/Mac), **Light**, or **Dark**. The new Light look is \"warm paper & gold\" - a soft warm-white canvas with crisp navy-ink text and the signature gold deepened so it stays legible on white. Every surface was re-done for it, not just inverted: the ring gauges, frosted cards (now lifted with a soft shadow instead of a glow), charts, the scenic hero, the home-screen widget and even the status bar all adapt. Dark stays exactly as it was. Same data, same layout - your choice of finish.",
             ]),
         Release(
             version: "4.2.13",
@@ -1088,10 +1088,10 @@ enum AppChangelog {
             title: "Estimated steps for your WHOOP 4.0",
             date: "June 2026",
             items: [
-                "**Steps on a WHOOP 4.0 - estimated, and calibrated to *you*.** A WHOOP 4.0 doesn't send a step count over Bluetooth, so NOOP now *estimates* your daily steps from the strap's own motion and calibrates that estimate against your phone's step count (Apple Health / Health Connect) - learning a coefficient personal to your gait and how the band rides. It's honest about what it is: an **estimate**, never a pretend pedometer - shown with an \"est.\" marker, and \"—\" when there isn't enough movement to say.",
+                "**Steps on a WHOOP 4.0 - estimated, and calibrated to *you*.** A WHOOP 4.0 doesn't send a step count over Bluetooth, so Sfz Health now *estimates* your daily steps from the strap's own motion and calibrates that estimate against your phone's step count (Apple Health / Health Connect) - learning a coefficient personal to your gait and how the band rides. It's honest about what it is: an **estimate**, never a pretend pedometer - shown with an \"est.\" marker, and \"—\" when there isn't enough movement to say.",
                 "**A Steps calibration screen** (Settings → Profile → Steps estimate): see your estimate next to your phone's real count side-by-side, how confident the fit is, and a **manual dial** to tune it to you, with a live preview. No phone steps to calibrate against? Set the dial by hand.",
                 "Where you do have a real phone step count, that always wins - the estimate only fills the days your phone didn't cover.",
-                "**Generic heart-rate straps now actually connect.** A Polar / Wahoo / Coospo strap you made active was being *discovered* but never *connected to* - so it sat there with no live data. Fixed: NOOP now connects straight to your selected strap. Thanks @pilleuspulcher-blip (#421).",
+                "**Generic heart-rate straps now actually connect.** A Polar / Wahoo / Coospo strap you made active was being *discovered* but never *connected to* - so it sat there with no live data. Fixed: Sfz Health now connects straight to your selected strap. Thanks @pilleuspulcher-blip (#421).",
                 "**The strap log is now safe to share.** It no longer exposes your WHOOP's serial or Bluetooth MAC addresses - they're masked automatically, so you can paste a diagnostic log on GitHub without leaking identifiers. Thanks @maddognik (#445).",
             ]),
         Release(
@@ -1135,7 +1135,7 @@ enum AppChangelog {
             title: "Your Fitness Age, Vitality & Body Age",
             date: "June 2026",
             items: [
-                "**Fitness Age - a weekly number for how fit your heart is.** NOOP now estimates your **Fitness Age** from your resting heart rate and recent activity, and shows it against your real age - “35, four years younger than your calendar age.” Built on the published Nes/HUNT VO₂max model. Tap **“How accurate is this?”** to see exactly which of your inputs went in, grouped by what each one unlocks - we’re honest that it’s a fitness comparison, not a biological age.",
+                "**Fitness Age - a weekly number for how fit your heart is.** Sfz Health now estimates your **Fitness Age** from your resting heart rate and recent activity, and shows it against your real age - “35, four years younger than your calendar age.” Built on the published Nes/HUNT VO₂max model. Tap **“How accurate is this?”** to see exactly which of your inputs went in, grouped by what each one unlocks - we’re honest that it’s a fitness comparison, not a biological age.",
                 "**Vitality + Body Age - your longevity number.** A weekly **0-100 Vitality** score and a **Body Age in years**, built the way WHOOP’s Healthspan is: your resting HR, sleep duration + regularity, HRV, and activity, each weighed against published all-cause-mortality research, then turned into “how old your habits make your body.” It even tells you the **one thing helping most** and the **one holding you back**. A wellness trend - **never** a clinical or medical age.",
                 "**Optional: see your estimated VO₂max.** Add your waist measurement in Settings and Sfz Health will also show an estimated VO₂max alongside your Fitness Age. (Your Fitness Age itself never needs it.)",
                 "**Honest by design.** Every new number carries a ± band and a plain “this is a wellness estimate, not a clinical age” line. These build over a week or two of wear and sharpen as Sfz Health learns your baseline.",
@@ -1160,7 +1160,7 @@ enum AppChangelog {
                 "**Manage several WHOOP straps.** Got more than one WHOOP - a couple of 4.0s, a 5.0, or a mix? Sfz Health now tells them apart and lets you **pair, switch, rename and remove** each one from the **Devices** screen. Only one strap is ever active at a time, and your history is never mixed between devices.",
                 "**A guided way to add a device.** “Add a device” now **asks what you're adding** - WHOOP 5.0/MG, WHOOP 4.0, or a heart-rate strap - and walks you through the right pairing steps for that band (a 5/MG pairs differently from a 4.0).",
                 "**The Live screen points to your devices.** The live console now shows **which band is active** and has a **Manage devices** shortcut, so it's obvious where to go to pair or switch straps.",
-                "**Every device card now says what it actually does.** Each band shows **what it captures and what NOOP uses it for** - so it's clear at a glance that, say, a 5/MG reports steps while a 4.0 doesn't. We also made the labels honest: no “Blood oxygen” where NOOP can't read an SpO₂ percentage off the strap (it never can - a real % only comes from a WHOOP CSV import), and skin temp / respiration are marked as the on-device estimates they are.",
+                "**Every device card now says what it actually does.** Each band shows **what it captures and what Sfz Health uses it for** - so it's clear at a glance that, say, a 5/MG reports steps while a 4.0 doesn't. We also made the labels honest: no “Blood oxygen” where Sfz Health can't read an SpO₂ percentage off the strap (it never can - a real % only comes from a WHOOP CSV import), and skin temp / respiration are marked as the on-device estimates they are.",
             ]),
         Release(
             version: "3.8.0",
@@ -1186,7 +1186,7 @@ enum AppChangelog {
             items: [
                 "**Step calibration goes further:** on a WHOOP 5/MG the strap's motion counter can over-report steps by 20× or more, and the calibration dial used to stop at 4×. It now goes all the way to **30×**, and the +/− control takes bigger jumps the higher you go - so you can dial in a large correction in a few taps instead of dozens. Thanks @exzanimo (#132).",
                 "**Insights “By Day” stays smooth with years of history:** tapping **All** with a big imported history used to build every day at once and could freeze the app. The list now renders only what's on screen, so it scrolls smoothly no matter how many days you've imported. Small histories look and feel identical. Thanks @maddognik (#345).",
-                "**Honest Apple Health guidance on free sideloads:** if you installed NOOP with a free Apple ID (AltStore / Sideloadly), the build can't be granted Apple Health access at all - so instead of pointing you to a Settings screen NOOP can never appear in, it now tells you straight and routes you to the file-import / Shortcuts path. Properly-signed installs are unchanged. Thanks @exzanimo (#348).",
+                "**Honest Apple Health guidance on free sideloads:** if you installed Sfz Health with a free Apple ID (AltStore / Sideloadly), the build can't be granted Apple Health access at all - so instead of pointing you to a Settings screen Sfz Health can never appear in, it now tells you straight and routes you to the file-import / Shortcuts path. Properly-signed installs are unchanged. Thanks @exzanimo (#348).",
                 "**Better odds of unlocking newer straps:** the on-device archive that collects undecoded history frames (so new firmware layouts can be reverse-engineered) now keeps a guaranteed sample of **each distinct layout version**, so a rare new one - WHOOP 4.0 v19, 5/MG v20/v21 - can't be crowded out before we can study it. Thanks @airtonzanon and everyone sending logs (#344).",
             ]),
         Release(
@@ -1202,7 +1202,7 @@ enum AppChangelog {
             title: "Hand-correct your sleep times + smaller backups",
             date: "June 2026",
             items: [
-                "**Sleep (iPhone/Mac):** auto-detection sometimes reads the wrong bed or wake time - now you can fix it. Tap the **pencil** on the Sleep tab to correct a night's **Asleep / Woke** times, and NOOP re-stages the night from the raw sensor data over your corrected window. The correction **sticks** - a later strap sync won't quietly revert it. (For an imported WHOOP-export night, the displayed times update but its recovery/performance stay as WHOOP recorded them.) Thanks @claypilat (#395).",
+                "**Sleep (iPhone/Mac):** auto-detection sometimes reads the wrong bed or wake time - now you can fix it. Tap the **pencil** on the Sleep tab to correct a night's **Asleep / Woke** times, and Sfz Health re-stages the night from the raw sensor data over your corrected window. The correction **sticks** - a later strap sync won't quietly revert it. (For an imported WHOOP-export night, the displayed times update but its recovery/performance stay as WHOOP recorded them.) Thanks @claypilat (#395).",
                 "**Smaller, shareable backups:** exporting your data now produces a compressed **`.noopbak`** file - typically **80-90% smaller** (a 100 MB+ backup becomes ~10-20 MB), small enough to AirDrop, message or email. iPhone, Mac and Android all read each other's, and your older uncompressed backups still import fine. Thanks @ujix (#396).",
             ]),
         Release(
@@ -1242,7 +1242,7 @@ enum AppChangelog {
             items: [
                 "Smart alarm: it now re-arms every day, so a strap that stays connected keeps waking you past the first morning (iPhone, Mac and Android). On WHOOP 5/MG the strap's firmware alarm correctly stays behind the Experimental toggle until it's confirmed. Thanks @vulnix0x4 (#376, #379).",
                 "More honest numbers: workout calories now count sparse heart-rate streams properly without ever over-counting your whole day; heart-rate zones are no longer inflated by a gap when the strap is off your wrist; daytime stress no longer false-alarms from your overnight sleep; and the recovery baseline reads your imported data cleanly. Thanks @vulnix0x4 (#360, #366, #357, #387).",
-                "Bluetooth & live HR: WHOOP 5/MG keeps decoding correctly after iOS relaunches NOOP in the background, and the Lock-Screen / Dynamic-Island live heart rate now ends when the strap disconnects instead of freezing on a stale number. Thanks @vulnix0x4 (#378, #386).",
+                "Bluetooth & live HR: WHOOP 5/MG keeps decoding correctly after iOS relaunches Sfz Health in the background, and the Lock-Screen / Dynamic-Island live heart rate now ends when the strap disconnects instead of freezing on a stale number. Thanks @vulnix0x4 (#378, #386).",
                 "Your data is safer: a failed import now keeps your existing data instead of risking an empty database, and the AI Coach never sends an API key you saved for one provider to a different one. Thanks @vulnix0x4 (#383, #385).",
                 "Accessibility & polish: the breathing orb honours Reduce Motion, the 24-hour heart-rate chart reads out in VoiceOver, text scales with Dynamic Type, the day navigator has bigger tap targets, and Sleep/Stress times follow your device's 12/24-hour and language settings. The Today screen also stays smooth while live heart rate streams. Thanks @vulnix0x4 (#359, #362, #381, #363, #361, #388, #358).",
                 "Android: workout rows are now tappable with a detail sheet, and the sleep-consistency tile no longer reads a false 0% - thanks @ujix (#370, #367). The Rest confidence dot now matches iPhone/Mac (#373). Plus an accurate Mac menu-bar live-feed toggle, and \"What's New\" no longer gets skipped after an update that also refreshes the Terms (#390, #389).",
@@ -1267,7 +1267,7 @@ enum AppChangelog {
             title: "Cleaner score rings + a few fixes",
             date: "June 2026",
             items: [
-                "Changed: removed the small gold dot in the centre of the Charge / Recovery rings, behind the number - at the v3 launch a few of you (rightly) said it crowded the read-out. The clean ring + number + micro-NOOP wordmark stay; the dot now lives only in the standalone logo.",
+                "Changed: removed the small gold dot in the centre of the Charge / Recovery rings, behind the number - at the v3 launch a few of you (rightly) said it crowded the read-out. The clean ring + number + micro-Sfz Health wordmark stay; the dot now lives only in the standalone logo.",
                 "Fixed: Steps on Today now prefer your strap's own on-device step count (WHOOP 5/MG) over Apple Health, matching Android - so strap-only users see their steps without importing anything. Thanks @netizentryingtofitin (#276).",
                 "Fixed: a real overnight sleep that runs late, or has a brief morning stir then drifts back to sleep, no longer truncates your wake time to late morning (\"woke at noon\"). Your true wake time is kept. Thanks @vulnix0x4 (#353).",
                 "Fixed (Android): the HR-zone coaching toggle now actually persists and buzzes your strap when you cross into your top zone - and again as you recover - closing the gap with Mac/iPhone. It was previously a preview-only stub. Thanks @cbarrado (#350).",
@@ -1322,7 +1322,7 @@ enum AppChangelog {
             title: "Export your raw sensor data (CSV)",
             date: "June 2026",
             items: [
-                "New (experimental): Settings now has an Export raw sensor data (CSV) button - it dumps the decoded per-sample streams NOOP already stores (heart rate, R-R, accelerometer, the motion/step counter, SpO2/PPG and events) for the last 24h as a plain CSV. It's for tinkerers: prototype your own sleep / activity / VBT algorithms on real data, no BLE coding needed. On-device only, nothing leaves your phone unless you share it. Thanks @maddognik / @alacore (#322/#276).",
+                "New (experimental): Settings now has an Export raw sensor data (CSV) button - it dumps the decoded per-sample streams Sfz Health already stores (heart rate, R-R, accelerometer, the motion/step counter, SpO2/PPG and events) for the last 24h as a plain CSV. It's for tinkerers: prototype your own sleep / activity / VBT algorithms on real data, no BLE coding needed. On-device only, nothing leaves your phone unless you share it. Thanks @maddognik / @alacore (#322/#276).",
             ]),
         Release(
             version: "2.17.1",
@@ -1420,7 +1420,7 @@ enum AppChangelog {
             title: "Continuous HRV capture - sharper overnight HRV, recovery and sleep",
             date: "June 2026",
             items: [
-                "New (opt-in): **Continuous HRV capture.** Your strap streams dense beat-to-beat heart-rate variability in the clear - but apps usually only listen while a live screen is open, so overnight, when HRV, recovery and sleep need it most, the data goes quiet. Turn this on (**Settings → Strap**) and NOOP keeps the stream open in the background, banking roughly an interval a second all night for much sharper overnight HRV, recovery and sleep - especially on WHOOP 5.0/MG. It uses more battery, so it's off by default and entirely your call. Big thanks to @Extazian, whose reverse-engineering proved this is reachable without touching anything encrypted.",
+                "New (opt-in): **Continuous HRV capture.** Your strap streams dense beat-to-beat heart-rate variability in the clear - but apps usually only listen while a live screen is open, so overnight, when HRV, recovery and sleep need it most, the data goes quiet. Turn this on (**Settings → Strap**) and Sfz Health keeps the stream open in the background, banking roughly an interval a second all night for much sharper overnight HRV, recovery and sleep - especially on WHOOP 5.0/MG. It uses more battery, so it's off by default and entirely your call. Big thanks to @Extazian, whose reverse-engineering proved this is reachable without touching anything encrypted.",
             ]),
         Release(
             version: "2.11.1",
@@ -1476,8 +1476,8 @@ enum AppChangelog {
             date: "June 2026",
             items: [
                 "Fixed (Android): the Insights tab crashed for anyone with journal entries - a text-matching pattern used a flag that works on a computer but not on Android’s engine, so it threw the moment you opened Insights. Fixed. Thanks @pilleuspulcher-blip and @maddognik (#224/#267).",
-                "New (Android): if NOOP ever crashes, the details are now saved into the strap log you share - so a crash that only happens on your device can actually be diagnosed (#33).",
-                "More accurate HRV: the heart-rate variability NOOP computes from a session now discards stray, irregular beats before averaging - the same cleaning the rest of its HRV maths already does - so a noisy WHOOP 5/MG optical reading no longer comes out inflated. Thanks @frazzle28 (#262/#235).",
+                "New (Android): if Sfz Health ever crashes, the details are now saved into the strap log you share - so a crash that only happens on your device can actually be diagnosed (#33).",
+                "More accurate HRV: the heart-rate variability Sfz Health computes from a session now discards stray, irregular beats before averaging - the same cleaning the rest of its HRV maths already does - so a noisy WHOOP 5/MG optical reading no longer comes out inflated. Thanks @frazzle28 (#262/#235).",
                 "Fixed (Mac): the sidebar and the Settings strap card could disagree about your connection - one saying ‘Connecting…’ while the other said ‘Connected’ for the same state. They now read from one source. Thanks @gingerbeardman (#266).",
                 "Fixed (Mac & iPhone): the experimental WHOOP 5/MG deep-data unlock now requires the full encrypted bond. A live-HR-only link (strap still owned by the official app) can’t carry the unlock, so the button waits for a real bond and tells you to free the strap from the official app first. Thanks @Joshsil03 (#269).",
                 "New (Android): the ‘Start a workout’ sport list now shows a scrollbar so you can tell it scrolls, and adds Tennis, Squash and Table tennis. Thanks @nhe (#265).",
@@ -1505,10 +1505,10 @@ enum AppChangelog {
             title: "iPhone diagnostics & expectations, clearer labels, a journal fix",
             date: "June 2026",
             items: [
-                "New (iPhone): a 'Using NOOP on iPhone' note in Settings sets honest expectations - sideloading, re-signing, unlocking your phone after a reboot so history can sync - and shows how many days until your sideloaded build expires. The strap log you share now also carries the iPhone details (iOS version, lock state, background-refresh, low-power) that make iPhone-only issues quick to diagnose, with a one-tap Diagnostics screen to copy them.",
+                "New (iPhone): a 'Using Sfz Health on iPhone' note in Settings sets honest expectations - sideloading, re-signing, unlocking your phone after a reboot so history can sync - and shows how many days until your sideloaded build expires. The strap log you share now also carries the iPhone details (iOS version, lock state, background-refresh, low-power) that make iPhone-only issues quick to diagnose, with a one-tap Diagnostics screen to copy them.",
                 "Fixed: copy that said 'this Mac' now reads correctly on iPhone. Thanks @robin-liquidium (#225).",
                 "Fixed: the journal could show the same prompt (e.g. magnesium) twice after importing - duplicates are now merged, on every platform. Thanks @maddognik (#224).",
-                "Improved (WHOOP 5/MG): the heart rate NOOP derives from the optical sensor on sleeping (sub-60 bpm) stretches no longer risks snapping to ~60 bpm from a recording artifact, while a genuine 60 bpm is preserved. Thanks @ryanbr (#194).",
+                "Improved (WHOOP 5/MG): the heart rate Sfz Health derives from the optical sensor on sleeping (sub-60 bpm) stretches no longer risks snapping to ~60 bpm from a recording artifact, while a genuine 60 bpm is preserved. Thanks @ryanbr (#194).",
             ]),
         Release(
             version: "2.8.5",
@@ -1540,7 +1540,7 @@ enum AppChangelog {
             date: "June 2026",
             items: [
                 "Fixed (Android): your Charge could read slightly low on Android because the skin-temperature term was weighted twice as hard as on macOS/iOS. All three apps now compute Charge identically. (#219)",
-                "Fixed (Android, WHOOP 5/MG): the heart rate NOOP derives from the optical (PPG) sensor on stretches with no measured HR now uses the same harmonic-rejecting estimator as macOS/iOS - it could previously lock onto half or double your true rate - and it now also recovers HR from short data runs the way the other apps do. (#219)",
+                "Fixed (Android, WHOOP 5/MG): the heart rate Sfz Health derives from the optical (PPG) sensor on stretches with no measured HR now uses the same harmonic-rejecting estimator as macOS/iOS - it could previously lock onto half or double your true rate - and it now also recovers HR from short data runs the way the other apps do. (#219)",
                 "Fixed (Android): the respiratory-rate early-illness signal in Readiness now uses the same sensitivity thresholds and plausible-range filter as macOS/iOS, so all three apps flag it the same way.",
                 "Fixed: assorted smaller cross-platform tidy-ups - skin-temperature data is now kept over the same range on every platform (Android was dropping valid just-put-on readings), CSV exports round-trip byte-for-byte, and a couple of score-rounding edge cases now agree across apps.",
             ]),
@@ -1572,7 +1572,7 @@ enum AppChangelog {
             date: "June 2026",
             items: [
                 "Fixed (WHOOP 4.0): some straps on firmware 41.17.x silently failed to set their clock, so they banked no history and showed no sleep or recovery. Sfz Health now sends both clock-command formats, so these straps clock and bank correctly. Thanks @rad182 (#120).",
-                "Fixed: the strap sometimes wouldn't reconnect after an app update - NOOP now rotates the scan between WHOOP 4 and 5/MG so it finds your strap either way. Thanks @khalilkm01.",
+                "Fixed: the strap sometimes wouldn't reconnect after an app update - Sfz Health now rotates the scan between WHOOP 4 and 5/MG so it finds your strap either way. Thanks @khalilkm01.",
                 "Fixed (AI Coach): the Custom provider can now reach a local LLM on your home network (e.g. Ollama at http://192.168.x.x:11434), not just localhost - on Android and iPhone, while cloud providers stay HTTPS-only. Thanks @andreasc1 (#187).",
                 "Fixed (iPhone): the Backup buttons (Export / Import / Export CSV) no longer truncate to Ex / Im / E. (#188)",
                 "Fixed: the Explore page was empty for WHOOP 5 users on live Bluetooth with no import - it now reads your computed daily scores. Thanks @sebastianwoo (#199).",
@@ -1602,7 +1602,7 @@ enum AppChangelog {
             title: "iPhone import: handle iCloud and large export files",
             date: "June 2026",
             items: [
-                "Fixed (iPhone): importing a WHOOP or Apple Health export could still fail right after you picked the file. NOOP now copies the file out of iCloud Drive / Files into local storage first - so a not-yet-downloaded iCloud file or a very large export actually opens - and then imports it. Thanks @adrnxq and @Chopin85 (#179).",
+                "Fixed (iPhone): importing a WHOOP or Apple Health export could still fail right after you picked the file. Sfz Health now copies the file out of iCloud Drive / Files into local storage first - so a not-yet-downloaded iCloud file or a very large export actually opens - and then imports it. Thanks @adrnxq and @Chopin85 (#179).",
             ]),
         Release(
             version: "2.6.7",
@@ -1661,14 +1661,14 @@ enum AppChangelog {
             title: "Recovery, Strain & Sleep - Sfz Health's own scores, out of 100",
             date: "June 2026",
             items: [
-                "New (Mac, iOS and Android): NOOP now has its own daily scores, all out of 100 - Charge (how recovered and ready you are), Effort (the day cardiovascular + movement load), and Rest (last night sleep quality). They are computed on-device across WHOOP 4.0 and 5.0/MG from published sports-science methods (no WHOOP cloud): Charge folds HRV, resting heart rate, respiration, your skin-temperature deviation and Rest into one readiness number; Effort is your cardiovascular load curve; Rest weighs how long you slept versus your need, efficiency, restorative (deep + REM) sleep and consistency. Renamed from Recovery/Strain/Sleep and rescaled so everything reads on the same 0-100 axis. Imported WHOOP history is rescaled to match. They are honest approximations, not WHOOP scores.",
+                "New (Mac, iOS and Android): Sfz Health now has its own daily scores, all out of 100 - Charge (how recovered and ready you are), Effort (the day cardiovascular + movement load), and Rest (last night sleep quality). They are computed on-device across WHOOP 4.0 and 5.0/MG from published sports-science methods (no WHOOP cloud): Charge folds HRV, resting heart rate, respiration, your skin-temperature deviation and Rest into one readiness number; Effort is your cardiovascular load curve; Rest weighs how long you slept versus your need, efficiency, restorative (deep + REM) sleep and consistency. Renamed from Recovery/Strain/Sleep and rescaled so everything reads on the same 0-100 axis. Imported WHOOP history is rescaled to match. They are honest approximations, not WHOOP scores.",
             ]),
         Release(
             version: "2.5.0",
             title: "Experimental: unlocking WHOOP 5.0/MG deep data",
             date: "June 2026",
             items: [
-                "New (Mac, iOS and Android, experimental): a WHOOP 5.0/MG \"deep data\" unlock under Settings → Experimental. 5/MG straps give a fresh third-party app only live heart rate; the official app switches on the deeper streams by writing a set of feature flags. NOOP can now send that exact, documented sequence to your strap (opt-in, one button, only when worn + bonded). It writes to the strap but is reversible - it just changes which data the strap emits - and it is the same thing the official app does. Experimental: it may do nothing on your firmware yet. If you have a 5/MG, turning it on and sharing your strap log is exactly what we need to finish 5.0/MG support. iPhone/Android only (a Mac cannot write to a 5/MG). Built on the public protocol work of judes.club, Asherlc/dofek and b-nnett/goose. (#174)",
+                "New (Mac, iOS and Android, experimental): a WHOOP 5.0/MG \"deep data\" unlock under Settings → Experimental. 5/MG straps give a fresh third-party app only live heart rate; the official app switches on the deeper streams by writing a set of feature flags. Sfz Health can now send that exact, documented sequence to your strap (opt-in, one button, only when worn + bonded). It writes to the strap but is reversible - it just changes which data the strap emits - and it is the same thing the official app does. Experimental: it may do nothing on your firmware yet. If you have a 5/MG, turning it on and sharing your strap log is exactly what we need to finish 5.0/MG support. iPhone/Android only (a Mac cannot write to a 5/MG). Built on the public protocol work of judes.club, Asherlc/dofek and b-nnett/goose. (#174)",
             ]),
         Release(
             version: "2.4.0",
@@ -1690,7 +1690,7 @@ enum AppChangelog {
             date: "June 2026",
             items: [
                 "Fixed (Mac and iOS): skin temperature from the strap was being read on the wrong scale, which made every real night look impossibly cold and silently discarded it - so the nightly skin-temp deviation never appeared. Real nights now read correctly (matching Android), and your deviation builds after a few nights of wear. (#166, PR #97 review - thanks @tigercraft4)",
-                "Fixed (Mac and iOS): the strap log no longer prints a stale \"layout v25/v26 … doesn't decode yet\" warning for layouts NOOP has decoded for a while. (#156, thanks @sudden-break)",
+                "Fixed (Mac and iOS): the strap log no longer prints a stale \"layout v25/v26 … doesn't decode yet\" warning for layouts Sfz Health has decoded for a while. (#156, thanks @sudden-break)",
                 "Fixed (all platforms): the CSV export wrote the sleep-disturbance count into the \"Awake duration (min)\" column - the cell is now left empty rather than carrying the wrong unit. Also: workouts present as both an import and an on-device detection are no longer exported twice, free-text fields are guarded against spreadsheet formula injection, and a failed export on macOS can no longer destroy your previous export file. (PR #97 review - thanks @tigercraft4)",
             ]),
         Release(
@@ -1698,7 +1698,7 @@ enum AppChangelog {
             title: "HR from the optical waveform, an early-morning day rollover, and clearer terms",
             date: "June 2026",
             items: [
-                "New (Mac, iOS and Android): on WHOOP 5.0/MG, NOOP now derives a per-second heart rate from the strap's optical (PPG) waveform to fill gaps where a stored HR isn't available. It's heart-rate continuity only - it does not reconstruct HRV - and a measured HR always takes priority over a derived one. (#156, thanks @j0b-dev)",
+                "New (Mac, iOS and Android): on WHOOP 5.0/MG, Sfz Health now derives a per-second heart rate from the strap's optical (PPG) waveform to fill gaps where a stored HR isn't available. It's heart-rate continuity only - it does not reconstruct HRV - and a measured HR always takes priority over a derived one. (#156, thanks @j0b-dev)",
                 "Fixed (Mac, iOS and Android): your day now rolls over in the early morning (~4am) instead of at midnight, so a late-night workout or a 1am glance still counts toward the right day rather than resetting underneath you. (#144)",
                 "Improved (Mac, iOS and Android): nights with more than one sleep block (naps, split sleep) are now grouped by day, so each block is shown and navigated correctly. (#160)",
                 "New (Android): an \"All other apps\" toggle under Notifications → Behaviour now buzzes your wrist for any app that isn't in the curated list (e.g. BeReal). Opt-in and off by default; quiet hours and only-when-worn still apply. (#168)",
@@ -1740,15 +1740,15 @@ enum AppChangelog {
             title: "Clearer answers when your strap isn't banking history",
             date: "June 2026",
             items: [
-                "Improved (Mac, iOS and Android): your strap log now records what a sync SAVED, not only what failed - a \"persisted N rows (M with motion) across K night(s)\" line on every successful offload. NOOP previously logged only failures, so a shared log couldn't show whether history was actually banking; now it can. (#150)",
-                "Improved (Mac, iOS and Android): when the strap reports it has no stored history to hand over (its \"no flash cursor\" state), NOOP now names the real cause plainly - the strap's clock has lost sync and it isn't saving to flash, a charge/clock state on the strap, NOT a NOOP decode bug. The Troubleshooting and FAQ guides now lead with this, the most common reason recovery and sleep don't appear, with the fix: fully charge to 100% and reconnect. (#150)",
+                "Improved (Mac, iOS and Android): your strap log now records what a sync SAVED, not only what failed - a \"persisted N rows (M with motion) across K night(s)\" line on every successful offload. Sfz Health previously logged only failures, so a shared log couldn't show whether history was actually banking; now it can. (#150)",
+                "Improved (Mac, iOS and Android): when the strap reports it has no stored history to hand over (its \"no flash cursor\" state), Sfz Health now names the real cause plainly - the strap's clock has lost sync and it isn't saving to flash, a charge/clock state on the strap, NOT a Sfz Health decode bug. The Troubleshooting and FAQ guides now lead with this, the most common reason recovery and sleep don't appear, with the fix: fully charge to 100% and reconnect. (#150)",
             ]),
         Release(
             version: "1.99",
             title: "Your imported steps now show on the Today screen (Android)",
             date: "June 2026",
             items: [
-                "New (Android): the Today screen's Steps tile now shows the steps from your Apple Health / Health Connect import when the strap didn't bank an on-device count - so a WHOOP 4.0, which NOOP can't yet read steps off over Bluetooth, shows your imported steps instead of \"No Data\" (Mac and iOS already did this). Worth saying plainly: the WHOOP 4.0 does count steps in the official WHOOP app - the only gap was that NOOP couldn't surface them yet. (#150)",
+                "New (Android): the Today screen's Steps tile now shows the steps from your Apple Health / Health Connect import when the strap didn't bank an on-device count - so a WHOOP 4.0, which Sfz Health can't yet read steps off over Bluetooth, shows your imported steps instead of \"No Data\" (Mac and iOS already did this). Worth saying plainly: the WHOOP 4.0 does count steps in the official WHOOP app - the only gap was that Sfz Health couldn't surface them yet. (#150)",
             ]),
         Release(
             version: "1.98",
@@ -1786,7 +1786,7 @@ enum AppChangelog {
             title: "Manual workouts on WHOOP 5.0/MG get their calories and strain back",
             date: "June 2026",
             items: [
-                "Fixed (Mac and Android): a workout you start yourself now fills in its calories, average heart rate and strain even on a WHOOP 5.0/MG. The live heart-rate stream on 5/MG is sparse, so a manual session was often saved showing ~1 kcal and no strain - now, once your strap offloads the heart rate it banked during the session, NOOP re-scores that workout from the fuller data. Well-scored workouts are left untouched. (#137)",
+                "Fixed (Mac and Android): a workout you start yourself now fills in its calories, average heart rate and strain even on a WHOOP 5.0/MG. The live heart-rate stream on 5/MG is sparse, so a manual session was often saved showing ~1 kcal and no strain - now, once your strap offloads the heart rate it banked during the session, Sfz Health re-scores that workout from the fuller data. Well-scored workouts are left untouched. (#137)",
             ]),
         Release(
             version: "1.93",
@@ -1800,7 +1800,7 @@ enum AppChangelog {
             title: "Better diagnostics for newer strap firmware - so we can decode it",
             date: "June 2026",
             items: [
-                "Improved (Mac and Android): when your strap's historical records use a firmware layout NOOP can't decode yet - newer WHOOP 5.0/MG units, and some WHOOP 4.0 straps, which is why sleep, recovery and steps can be missing (see #30, #136) - the strap log now includes the full record bytes (it previously cut them off after 64) plus a few more sample records. That's exactly what we need to map the new layout, so a single fresh strap log from an affected device now carries everything required for us to add support.",
+                "Improved (Mac and Android): when your strap's historical records use a firmware layout Sfz Health can't decode yet - newer WHOOP 5.0/MG units, and some WHOOP 4.0 straps, which is why sleep, recovery and steps can be missing (see #30, #136) - the strap log now includes the full record bytes (it previously cut them off after 64) plus a few more sample records. That's exactly what we need to map the new layout, so a single fresh strap log from an affected device now carries everything required for us to add support.",
             ]),
         Release(
             version: "1.91",
@@ -1945,7 +1945,7 @@ enum AppChangelog {
             title: "Android reconnect guide + a startup-crash fix",
             date: "June 2026",
             items: [
-                "Android now matches the Mac: if your WHOOP 5.0 / MG can't connect after a firmware update (a Bluetooth pairing reset), NOOP detects it and shows the forget-and-re-pair steps right in the app, instead of silently retrying. (Mac got this in 1.73.)",
+                "Android now matches the Mac: if your WHOOP 5.0 / MG can't connect after a firmware update (a Bluetooth pairing reset), Sfz Health detects it and shows the forget-and-re-pair steps right in the app, instead of silently retrying. (Mac got this in 1.73.)",
                 "Fixed (Android): a rare startup crash on some fast devices (e.g. Galaxy S24+) - the app could crash once on launch when a strap was already connected, then open fine on the second try. (Mac was never affected.)",
             ]),
         Release(
@@ -1953,7 +1953,7 @@ enum AppChangelog {
             title: "Reconnect help for WHOOP 5.0 / MG after a firmware update",
             date: "June 2026",
             items: [
-                "If your WHOOP 5.0 / MG stopped connecting after a WHOOP firmware update, that's a Bluetooth pairing reset - not a lockout, and NOOP works fine on the new firmware. To reconnect: quit the official WHOOP app, forget the strap in your Bluetooth settings, put it in pairing mode (tap the band until the LEDs flash blue), then reconnect. On Mac, NOOP now detects this automatically and shows you these exact steps in-app instead of silently retrying. WHOOP 4.0 is unaffected.",
+                "If your WHOOP 5.0 / MG stopped connecting after a WHOOP firmware update, that's a Bluetooth pairing reset - not a lockout, and Sfz Health works fine on the new firmware. To reconnect: quit the official WHOOP app, forget the strap in your Bluetooth settings, put it in pairing mode (tap the band until the LEDs flash blue), then reconnect. On Mac, Sfz Health now detects this automatically and shows you these exact steps in-app instead of silently retrying. WHOOP 4.0 is unaffected.",
             ]),
         Release(
             version: "1.72",
@@ -1983,7 +1983,7 @@ enum AppChangelog {
             date: "June 2026",
             items: [
                 "Fixed (Mac and Android): the \"Last Event\" line on the Live screen no longer shows an internal name when live heart rate starts (it used to read \"BLE_REALTIME_HR…\"). It now only shows meaningful strap events - wrist on/off, double-tap, battery, and so on.",
-                "Diagnostics (Mac and Android): when the strap sends history that NOOP can't decode, the strap log now prints a short hex sample of the dropped records - not just the count. If your WHOOP 4 is on a firmware whose record layout we haven't mapped yet (history syncs but no data appears), turning on Debug logging and sharing the strap log now gives us the exact bytes we need to add support. Chasing one of these now (#91).",
+                "Diagnostics (Mac and Android): when the strap sends history that Sfz Health can't decode, the strap log now prints a short hex sample of the dropped records - not just the count. If your WHOOP 4 is on a firmware whose record layout we haven't mapped yet (history syncs but no data appears), turning on Debug logging and sharing the strap log now gives us the exact bytes we need to add support. Chasing one of these now (#91).",
             ]),
         Release(
             version: "1.68",
@@ -2005,7 +2005,7 @@ enum AppChangelog {
             title: "Track a workout manually",
             date: "June 2026",
             items: [
-                "New (Mac and Android): start and stop a workout yourself, instead of waiting for NOOP to detect one. Tap Start workout on the Live screen and you get a live card - elapsed time, heart rate, and strain building in real time; tap End and it's scored and saved to your Workouts, contributing to the day. Perfect for a session NOOP might not auto-detect, or when you just want a clean start/stop. Needs a connected strap streaming live heart rate. A community request - thanks for the nudge.",
+                "New (Mac and Android): start and stop a workout yourself, instead of waiting for Sfz Health to detect one. Tap Start workout on the Live screen and you get a live card - elapsed time, heart rate, and strain building in real time; tap End and it's scored and saved to your Workouts, contributing to the day. Perfect for a session Sfz Health might not auto-detect, or when you just want a clean start/stop. Needs a connected strap streaming live heart rate. A community request - thanks for the nudge.",
             ]),
         Release(
             version: "1.66",
@@ -2019,14 +2019,14 @@ enum AppChangelog {
             title: "Sync diagnostics: surfacing silently-dropped history",
             date: "June 2026",
             items: [
-                "Diagnostics (Mac and Android): if a chunk of history arrives from the strap but none of it can be decoded - frames failing their checksum, an unrecognised firmware layout, or out-of-range timestamps - NOOP now says so plainly in the strap log instead of quietly moving on. Until now a sync like that looked completely healthy (\"history synced\") while the data went nowhere, which made a rare \"I wore it but got no data\" report almost impossible to diagnose. This release changes no behaviour - it just makes that case visible - so if your history isn't showing up, turning on Debug logging and sharing your strap log will now point straight at the cause. Investigating a report along these lines (#77).",
+                "Diagnostics (Mac and Android): if a chunk of history arrives from the strap but none of it can be decoded - frames failing their checksum, an unrecognised firmware layout, or out-of-range timestamps - Sfz Health now says so plainly in the strap log instead of quietly moving on. Until now a sync like that looked completely healthy (\"history synced\") while the data went nowhere, which made a rare \"I wore it but got no data\" report almost impossible to diagnose. This release changes no behaviour - it just makes that case visible - so if your history isn't showing up, turning on Debug logging and sharing your strap log will now point straight at the cause. Investigating a report along these lines (#77).",
             ]),
         Release(
             version: "1.64",
             title: "Android: faster sync, skin temp, sync status, alarm groundwork",
             date: "June 2026",
             items: [
-                "New (Android): a batch of WHOOP 5/MG improvements, with thanks to a community contributor. Sync is faster and more reliable - NOOP now negotiates a larger Bluetooth packet size on connect, so a full history record rides one packet instead of being chopped into fragments. The Live screen now tells you the honest truth about syncing: \"History synced N ago,\" or a clear note if a sync stalled - no more silent guessing for a cloud-free app. Skin-temperature deviation now builds offline from the strap's own nights (wear-gated, in-bed only, baseline-seeded like recovery - APPROXIMATE), which also re-arms the illness early-warning signal. And the recovery ring now shows \"Calibrating - N of 4 nights\" while it learns your baseline, instead of a blank \"No Data.\" Also groundwork for a 5/MG firmware wake alarm - it's behind the Experimental toggle and UNCONFIRMED (help us verify it actually wakes you before relying on it). Mac: version bump only.",
+                "New (Android): a batch of WHOOP 5/MG improvements, with thanks to a community contributor. Sync is faster and more reliable - Sfz Health now negotiates a larger Bluetooth packet size on connect, so a full history record rides one packet instead of being chopped into fragments. The Live screen now tells you the honest truth about syncing: \"History synced N ago,\" or a clear note if a sync stalled - no more silent guessing for a cloud-free app. Skin-temperature deviation now builds offline from the strap's own nights (wear-gated, in-bed only, baseline-seeded like recovery - APPROXIMATE), which also re-arms the illness early-warning signal. And the recovery ring now shows \"Calibrating - N of 4 nights\" while it learns your baseline, instead of a blank \"No Data.\" Also groundwork for a 5/MG firmware wake alarm - it's behind the Experimental toggle and UNCONFIRMED (help us verify it actually wakes you before relying on it). Mac: version bump only.",
             ]),
         Release(
             version: "1.63",
@@ -2040,7 +2040,7 @@ enum AppChangelog {
             title: "WHOOP 5/MG history: the missing clock",
             date: "June 2026",
             items: [
-                "New (Mac and Android, experimental): NOOP now sets the clock on a WHOOP 5.0/MG before asking for its history - and that matters more than it sounds: an un-clocked WHOOP 5 doesn't save sensor data at all, so history syncs were \"succeeding\" with nothing in them. A fellow developer's work on real 5/MG hardware found this (history went from 0 to hundreds of frames once clocked) along with several smaller protocol fixes NOOP now carries: the history request waits for the strap to acknowledge a range query first (with a retry if it stays silent), an Android 5/MG connects directly to the strap your phone already paired instead of re-scanning, fresh history is scored within seconds instead of at the next 15-minute tick, and the strap's own diagnostic messages now appear in the strap log. Also new (Android, opt-in, default OFF): \"Record 5/MG raw capture\" in Settings → Experimental writes each history sync's raw frames to a shareable file - if you have a 5/MG, sharing one capture is the single most useful thing you can do to help NOOP learn to decode 5/MG sleep, recovery and strain. With thanks to tajchert, whose hardware-validated fork drove this release.",
+                "New (Mac and Android, experimental): Sfz Health now sets the clock on a WHOOP 5.0/MG before asking for its history - and that matters more than it sounds: an un-clocked WHOOP 5 doesn't save sensor data at all, so history syncs were \"succeeding\" with nothing in them. A fellow developer's work on real 5/MG hardware found this (history went from 0 to hundreds of frames once clocked) along with several smaller protocol fixes Sfz Health now carries: the history request waits for the strap to acknowledge a range query first (with a retry if it stays silent), an Android 5/MG connects directly to the strap your phone already paired instead of re-scanning, fresh history is scored within seconds instead of at the next 15-minute tick, and the strap's own diagnostic messages now appear in the strap log. Also new (Android, opt-in, default OFF): \"Record 5/MG raw capture\" in Settings → Experimental writes each history sync's raw frames to a shareable file - if you have a 5/MG, sharing one capture is the single most useful thing you can do to help Sfz Health learn to decode 5/MG sleep, recovery and strain. With thanks to tajchert, whose hardware-validated fork drove this release.",
             ]),
         Release(
             version: "1.61",
@@ -2082,7 +2082,7 @@ enum AppChangelog {
             title: "Shortcuts on Mac, recovery in the Android notification",
             date: "June 2026",
             items: [
-                "New (Mac): NOOP now offers two Shortcuts actions - \"Buzz Strap\" and \"Mark a Moment\" - so you can vibrate your connected strap or drop a timestamped marker from Shortcuts, Spotlight, or a menu-bar/keyboard trigger without opening the app's window. They act on the strap NOOP is already bonded to; if NOOP isn't running, or the strap isn't connected, you get a clear \"open NOOP\" / \"connect your strap\" message instead of a silent no-op. No new permissions - just the strap you already paired.",
+                "New (Mac): Sfz Health now offers two Shortcuts actions - \"Buzz Strap\" and \"Mark a Moment\" - so you can vibrate your connected strap or drop a timestamped marker from Shortcuts, Spotlight, or a menu-bar/keyboard trigger without opening the app's window. They act on the strap Sfz Health is already bonded to; if Sfz Health isn't running, or the strap isn't connected, you get a clear \"open Sfz Health\" / \"connect your strap\" message instead of a silent no-op. No new permissions - just the strap you already paired.",
                 "New (Android): the ongoing background notification now shows today's recovery % alongside live heart rate and strap battery, so a glance at your shade tells you how recovered you are without opening the app. It updates itself when the on-device analysis recomputes (about every 15 minutes), and stays absent until Sfz Health has learned enough nights to score you honestly.",
             ]),
         Release(
@@ -2090,14 +2090,14 @@ enum AppChangelog {
             title: "Mac: recovery builds from your strap alone",
             date: "June 2026",
             items: [
-                "New (Mac): recovery now builds from the strap's own offloaded nights, no WHOOP export needed - the same fix Android got in v1.53. The recovery baseline previously only learned from imported history, so a Bluetooth-only Mac user never crossed the \"learn your baseline\" threshold and recovery stayed blank. NOOP now seeds the baseline from the nights it computes on-device too, so after about four nights recovery lights up on its own. Honest-blank until then; a real import still wins per day. Also: the WHOOP 5.0/MG step counter now persists on Mac (parity with Android - surfaced later, still APPROXIMATE). Android: version bump only (it already had both).",
+                "New (Mac): recovery now builds from the strap's own offloaded nights, no WHOOP export needed - the same fix Android got in v1.53. The recovery baseline previously only learned from imported history, so a Bluetooth-only Mac user never crossed the \"learn your baseline\" threshold and recovery stayed blank. Sfz Health now seeds the baseline from the nights it computes on-device too, so after about four nights recovery lights up on its own. Honest-blank until then; a real import still wins per day. Also: the WHOOP 5.0/MG step counter now persists on Mac (parity with Android - surfaced later, still APPROXIMATE). Android: version bump only (it already had both).",
             ]),
         Release(
             version: "1.54",
             title: "French WHOOP exports now import",
             date: "June 2026",
             items: [
-                "Fixed: French WHOOP CSV exports now import. Like German and Spanish before it, a French export translates both the column headers (Score de récupération, Variabilité de la fréquence cardiaque, …) and the sleep/workout filenames (sommeil.csv, entrainements.csv), so it used to match nothing and reported \"0 items.\" NOOP now maps every French column - including the full workout set with HR zones - and recognises the French filenames, so recovery, strain, sleep, HRV and workouts all import. Mac and Android. Thanks to a reporter who supplied a real export's headers (#79).",
+                "Fixed: French WHOOP CSV exports now import. Like German and Spanish before it, a French export translates both the column headers (Score de récupération, Variabilité de la fréquence cardiaque, …) and the sleep/workout filenames (sommeil.csv, entrainements.csv), so it used to match nothing and reported \"0 items.\" Sfz Health now maps every French column - including the full workout set with HR zones - and recognises the French filenames, so recovery, strain, sleep, HRV and workouts all import. Mac and Android. Thanks to a reporter who supplied a real export's headers (#79).",
             ]),
         Release(
             version: "1.53",
@@ -2111,7 +2111,7 @@ enum AppChangelog {
             title: "WHOOP 5.0/MG history offload (Android)",
             date: "June 2026",
             items: [
-                "New (Android, experimental): a WHOOP 5.0/MG can now offload its stored history, not just stream live HR - the same thing the Mac already did. The 5/MG Bluetooth envelope shifts every field by 4 bytes and its end-of-history marker is a different type than the 4.0's, so the app was silently dropping every \"history finished\" frame and the strap never released its records. NOOP now reads those frames at the right place (matching the Mac), so history can download and feed recovery, strain and sleep. If you have a 5.0/MG, please report whether your history populates - it's experimental until confirmed on more straps. Thanks to a community contribution (#78). (macOS: version bump only - it already had this.)",
+                "New (Android, experimental): a WHOOP 5.0/MG can now offload its stored history, not just stream live HR - the same thing the Mac already did. The 5/MG Bluetooth envelope shifts every field by 4 bytes and its end-of-history marker is a different type than the 4.0's, so the app was silently dropping every \"history finished\" frame and the strap never released its records. Sfz Health now reads those frames at the right place (matching the Mac), so history can download and feed recovery, strain and sleep. If you have a 5.0/MG, please report whether your history populates - it's experimental until confirmed on more straps. Thanks to a community contribution (#78). (macOS: version bump only - it already had this.)",
             ]),
         Release(
             version: "1.51",
@@ -2141,14 +2141,14 @@ enum AppChangelog {
             title: "More reliable Bluetooth on newer Android phones",
             date: "June 2026",
             items: [
-                "Fixed (Android): on some phones - especially newer ones on Android 13+, and worst on Android 16 - NOOP could silently drop a Bluetooth command when the phone's Bluetooth stack was momentarily busy, instead of retrying it. The dropped command was often the one that starts live heart rate, sets the strap clock, or acknowledges a chunk of history - so live HR sometimes never started and overnight data didn't come through, even though the strap and pairing were fine. NOOP now retries a rejected command and paces the writes so the stack keeps up. Thanks to a detailed strap log from a Pixel 7 on Android 16 (#77). (macOS: version bump only - it uses CoreBluetooth's own write queue and was never affected.)",
+                "Fixed (Android): on some phones - especially newer ones on Android 13+, and worst on Android 16 - Sfz Health could silently drop a Bluetooth command when the phone's Bluetooth stack was momentarily busy, instead of retrying it. The dropped command was often the one that starts live heart rate, sets the strap clock, or acknowledges a chunk of history - so live HR sometimes never started and overnight data didn't come through, even though the strap and pairing were fine. Sfz Health now retries a rejected command and paces the writes so the stack keeps up. Thanks to a detailed strap log from a Pixel 7 on Android 16 (#77). (macOS: version bump only - it uses CoreBluetooth's own write queue and was never affected.)",
             ]),
         Release(
             version: "1.47",
             title: "Auto-sync Health Connect (Android)",
             date: "June 2026",
             items: [
-                "New (Android): an opt-in auto-sync for Health Connect. Turn it on under Data Sources → Health Connect and NOOP re-pulls new data (e.g. from a Samsung Galaxy Watch via Samsung Health) each time you open it, if it's been longer than your chosen 6 / 12 / 24h interval. Read-only, never overwrites your strap data, default OFF. Thanks to a community contribution. (macOS: version bump only.)",
+                "New (Android): an opt-in auto-sync for Health Connect. Turn it on under Data Sources → Health Connect and Sfz Health re-pulls new data (e.g. from a Samsung Galaxy Watch via Samsung Health) each time you open it, if it's been longer than your chosen 6 / 12 / 24h interval. Read-only, never overwrites your strap data, default OFF. Thanks to a community contribution. (macOS: version bump only.)",
             ]),
         Release(
             version: "1.46",
@@ -2164,7 +2164,7 @@ enum AppChangelog {
             title: "Clearer pairing guidance for WHOOP 5.0/MG",
             date: "June 2026",
             items: [
-                "Improved (Mac): live heart rate on a WHOOP 5.0/MG streams even before the strap is fully paired - but buzz, alarms, double-tap and full history sync all need that real pairing. NOOP now keeps the \"free the strap from the WHOOP app\" guidance visible (in clearer wording) whenever the strap isn't fully paired, so it's obvious what to do to unlock the rest. Thanks to a 5.0/MG report (#69).",
+                "Improved (Mac): live heart rate on a WHOOP 5.0/MG streams even before the strap is fully paired - but buzz, alarms, double-tap and full history sync all need that real pairing. Sfz Health now keeps the \"free the strap from the WHOOP app\" guidance visible (in clearer wording) whenever the strap isn't fully paired, so it's obvious what to do to unlock the rest. Thanks to a 5.0/MG report (#69).",
             ]),
         Release(
             version: "1.44",
@@ -2213,14 +2213,14 @@ enum AppChangelog {
             title: "Smoother during long history syncs (Mac)",
             date: "June 2026",
             items: [
-                "Improved (Mac): NOOP stays responsive while your strap syncs a long stretch of history and while the dashboard recomputes. Sync data is now handled as bulk traffic - drained in small batches and kept out of the live UI parser - the strap log no longer floods with a line for every sync acknowledgement, and the heavy recovery/strain/sleep analysis runs off the main thread. So the app no longer hitches during a big offload. Thanks to a community contributor (#64, #65).",
+                "Improved (Mac): Sfz Health stays responsive while your strap syncs a long stretch of history and while the dashboard recomputes. Sync data is now handled as bulk traffic - drained in small batches and kept out of the live UI parser - the strap log no longer floods with a line for every sync acknowledgement, and the heavy recovery/strain/sleep analysis runs off the main thread. So the app no longer hitches during a big offload. Thanks to a community contributor (#64, #65).",
             ]),
         Release(
             version: "1.37",
             title: "New first-run onboarding (Mac + Android)",
             date: "June 2026",
             items: [
-                "A proper guided setup the first time you open NOOP - the same flow on Mac and Android: what NOOP is and what to expect, then Bluetooth, putting your strap on, connecting, a little celebration when it bonds, your profile, optional history import, and wrist alerts. Permissions are now asked only on the step that explains them (nothing fires at launch), and the background-connection service is only promoted once you finish. Cleaner, calmer, and consistent across platforms. Thanks to a community contributor (#36/#63).",
+                "A proper guided setup the first time you open Sfz Health - the same flow on Mac and Android: what Sfz Health is and what to expect, then Bluetooth, putting your strap on, connecting, a little celebration when it bonds, your profile, optional history import, and wrist alerts. Permissions are now asked only on the step that explains them (nothing fires at launch), and the background-connection service is only promoted once you finish. Cleaner, calmer, and consistent across platforms. Thanks to a community contributor (#36/#63).",
                 "Live heart-rate zones and %-of-max now use the real max heart rate from your profile (your manual override, or the age-based estimate) instead of a fixed default.",
             ]),
         Release(
@@ -2235,7 +2235,7 @@ enum AppChangelog {
             title: "WHOOP 5.0/MG buzz - the real command (matched byte-for-byte)",
             date: "June 2026",
             items: [
-                "WHOOP 5.0/MG: the buzz now sends the exact haptics command a working 5.0 app uses - the right command number (0x13), the right 12-byte payload (the \"notify\" vibration pattern), and a framing fix (4-byte padding) that the longer payload needs. NOOP's command is now byte-for-byte identical to the working app's, verified by a test. So Test buzz, wrist alerts and the smart-alarm buzz should now actually vibrate a bonded 5.0/MG. (This supersedes the v1.34 attempt, which had the command number but not the payload.) WHOOP 4.0 buzz is unchanged. If you have a 5.0/MG, please confirm on issue #48.",
+                "WHOOP 5.0/MG: the buzz now sends the exact haptics command a working 5.0 app uses - the right command number (0x13), the right 12-byte payload (the \"notify\" vibration pattern), and a framing fix (4-byte padding) that the longer payload needs. Sfz Health's command is now byte-for-byte identical to the working app's, verified by a test. So Test buzz, wrist alerts and the smart-alarm buzz should now actually vibrate a bonded 5.0/MG. (This supersedes the v1.34 attempt, which had the command number but not the payload.) WHOOP 4.0 buzz is unchanged. If you have a 5.0/MG, please confirm on issue #48.",
             ]),
         Release(
             version: "1.34",
@@ -2291,21 +2291,21 @@ enum AppChangelog {
             title: "Wrist alerts work on Android",
             date: "June 2026",
             items: [
-                "Fixed (Android): you couldn't turn wrist alerts on - NOOP didn't show up in your phone's Notification Access list, so there was nothing to grant. NOOP now registers a notification listener (so it appears there); grant access and enable wrist alerts, and your strap buzzes when your chosen apps notify you - respecting your per-app patterns, quiet hours, and only-when-worn. Privacy: it reads only WHICH app notified, never the message content, and nothing leaves your phone. (The buzz works on WHOOP 4.0; 5.0/MG haptics are still being decoded.)",
+                "Fixed (Android): you couldn't turn wrist alerts on - Sfz Health didn't show up in your phone's Notification Access list, so there was nothing to grant. Sfz Health now registers a notification listener (so it appears there); grant access and enable wrist alerts, and your strap buzzes when your chosen apps notify you - respecting your per-app patterns, quiet hours, and only-when-worn. Privacy: it reads only WHICH app notified, never the message content, and nothing leaves your phone. (The buzz works on WHOOP 4.0; 5.0/MG haptics are still being decoded.)",
             ]),
         Release(
             version: "1.26",
             title: "Smart alarm actually works on Android",
             date: "June 2026",
             items: [
-                "Fixed (Android): the Smart alarm in Automations didn't work - the toggle reset the moment you left the screen, and the wake time was stuck at 07:00 with no way to change it. It's now a real, saved setting with a proper time picker, and on WHOOP 4.0 it arms the strap's own firmware alarm, so your wrist buzzes at your wake time even if your phone is asleep or NOOP is closed (matching the Mac). Connect the strap to arm it. (On 5.0/MG the alarm command isn't verified yet - same situation as the buzz.)",
+                "Fixed (Android): the Smart alarm in Automations didn't work - the toggle reset the moment you left the screen, and the wake time was stuck at 07:00 with no way to change it. It's now a real, saved setting with a proper time picker, and on WHOOP 4.0 it arms the strap's own firmware alarm, so your wrist buzzes at your wake time even if your phone is asleep or Sfz Health is closed (matching the Mac). Connect the strap to arm it. (On 5.0/MG the alarm command isn't verified yet - same situation as the buzz.)",
             ]),
         Release(
             version: "1.25",
             title: "WHOOP 5.0/MG history download (experimental) + pairing help (Mac)",
             date: "June 2026",
             items: [
-                "Experimental (Mac): once your WHOOP 5.0/MG is properly paired (see below), NOOP now attempts to download the strap's stored history - the missing piece for on-device 5.0 recovery, strain and sleep. It's brand-new and needs real-hardware testing; if it works you'll see the offload run in the strap log. WHOOP 4.0 is completely unaffected.",
+                "Experimental (Mac): once your WHOOP 5.0/MG is properly paired (see below), Sfz Health now attempts to download the strap's stored history - the missing piece for on-device 5.0 recovery, strain and sleep. It's brand-new and needs real-hardware testing; if it works you'll see the offload run in the strap log. WHOOP 4.0 is completely unaffected.",
                 "Clearer 5.0/MG pairing: you can't just scan for a 5.0/MG - it has to be in pairing mode and freed from the official WHOOP app first (otherwise pairing is refused with \"Encryption is insufficient\"). The \"free your strap\" tip now shows right on the Live screen (it was hidden in Settings), and the README has a step-by-step pairing guide.",
             ]),
         Release(
@@ -2334,7 +2334,7 @@ enum AppChangelog {
             title: "Reading more from your WHOOP 5.0 (Mac)",
             date: "June 2026",
             items: [
-                "Decoding progress (WHOOP 5.0): NOOP now reads skin temperature, motion/activity and wrist-contact from your 5.0's stored history - each verified against real data (e.g. ~30.6 °C on the wrist, dropping to room temperature off it) and only stored when it's physically sensible. These are building blocks toward on-device 5.0 sleep and recovery; nothing changes on screen yet.",
+                "Decoding progress (WHOOP 5.0): Sfz Health now reads skin temperature, motion/activity and wrist-contact from your 5.0's stored history - each verified against real data (e.g. ~30.6 °C on the wrist, dropping to room temperature off it) and only stored when it's physically sensible. These are building blocks toward on-device 5.0 sleep and recovery; nothing changes on screen yet.",
                 "Fixed (Mac): corrected which byte Sfz Health reads the 5.0's optical-pulse channel from - a community reverse-engineering report, cross-checked against our own captured frames, showed it was a counter byte, not the channel. The pulse waveform itself was always decoded correctly; this only affects the channel label.",
             ]),
         Release(
@@ -2365,7 +2365,7 @@ enum AppChangelog {
             title: "Sleep from WHOOP 4 on more firmware (Mac)",
             date: "June 2026",
             items: [
-                "Fixed (Mac): no sleep recorded from a WHOOP 4 on certain firmware. NOOP stages your sleep from the strap's overnight motion data - but historical records from firmware versions it hadn't mapped were being silently dropped, so the offload finished yet produced no motion → no sleep. NOOP now falls back to the standard record layout for unmapped firmware, accepting it only when it decodes to physically-real data (so it can never store garbage), and surfaces a genuinely-unknown firmware version in the strap log. If your WHOOP 4 wasn't recording sleep, update and wear it overnight while connected.",
+                "Fixed (Mac): no sleep recorded from a WHOOP 4 on certain firmware. Sfz Health stages your sleep from the strap's overnight motion data - but historical records from firmware versions it hadn't mapped were being silently dropped, so the offload finished yet produced no motion → no sleep. Sfz Health now falls back to the standard record layout for unmapped firmware, accepting it only when it decodes to physically-real data (so it can never store garbage), and surfaces a genuinely-unknown firmware version in the strap log. If your WHOOP 4 wasn't recording sleep, update and wear it overnight while connected.",
             ]),
         Release(
             version: "1.16",
@@ -2379,7 +2379,7 @@ enum AppChangelog {
             title: "WHOOP 5/MG: the buzz works",
             date: "June 2026",
             items: [
-                "The wrist buzz now works on WHOOP 5.0/MG (experimental). Now that live heart rate confirmed a 5/MG strap acts on NOOP's commands, the haptic buzz - Test buzz, the smart alarm - is wired through the same path. Try Test buzz in Notifications; if it doesn't fire on your 5/MG strap, let us know. (Battery already worked on 5/MG via the standard profile.) WHOOP 4.0 is unchanged.",
+                "The wrist buzz now works on WHOOP 5.0/MG (experimental). Now that live heart rate confirmed a 5/MG strap acts on Sfz Health's commands, the haptic buzz - Test buzz, the smart alarm - is wired through the same path. Try Test buzz in Notifications; if it doesn't fire on your 5/MG strap, let us know. (Battery already worked on 5/MG via the standard profile.) WHOOP 4.0 is unchanged.",
             ]),
         Release(
             version: "1.14",
@@ -2393,14 +2393,14 @@ enum AppChangelog {
             title: "WHOOP 5/MG heart rate on Android",
             date: "June 2026",
             items: [
-                "WHOOP 5.0/MG live heart rate now works on Android. Once the strap bonds, NOOP subscribes to its realtime data channels and decodes the heart-rate stream the same way the Mac does - before, Android only listened on the standard profile, which a 5/MG strap doesn't stream, so it bonded but showed no HR. Still experimental: 5/MG owners, update and share a strap log if it doesn't come through. WHOOP 4.0 is unaffected.",
+                "WHOOP 5.0/MG live heart rate now works on Android. Once the strap bonds, Sfz Health subscribes to its realtime data channels and decodes the heart-rate stream the same way the Mac does - before, Android only listened on the standard profile, which a 5/MG strap doesn't stream, so it bonded but showed no HR. Still experimental: 5/MG owners, update and share a strap log if it doesn't come through. WHOOP 4.0 is unaffected.",
             ]),
         Release(
             version: "1.12",
             title: "WHOOP 5/MG heart rate on Mac + a Readiness fix",
             date: "June 2026",
             items: [
-                "WHOOP 5.0/MG on Mac: the secure pairing now completes and live heart rate comes through. NOOP waits for the strap to bond before subscribing to its data channels - subscribing too early was the silent failure - then asks it to start streaming with the right framing. If the strap won't bond on first connect, NOOP now tells you to close the official WHOOP app and put the strap in pairing mode (blue LEDs flashing), which is what lets it pair. Still experimental on 5/MG; built from a 5/MG owner's verified flow. (Android 5/MG bonding landed in v1.10; WHOOP 4.0 is untouched.)",
+                "WHOOP 5.0/MG on Mac: the secure pairing now completes and live heart rate comes through. Sfz Health waits for the strap to bond before subscribing to its data channels - subscribing too early was the silent failure - then asks it to start streaming with the right framing. If the strap won't bond on first connect, Sfz Health now tells you to close the official WHOOP app and put the strap in pairing mode (blue LEDs flashing), which is what lets it pair. Still experimental on 5/MG; built from a 5/MG owner's verified flow. (Android 5/MG bonding landed in v1.10; WHOOP 4.0 is untouched.)",
                 "Readiness now reflects today, not a stale import. After importing months-old WHOOP history, the \"Should you push today?\" card was still reading off the newest imported day. It now anchors to your real calendar day on both Mac and Android - completing the v1.11 dashboard fix - so an old import no longer drives today's readiness.",
             ]),
         Release(
@@ -2453,7 +2453,7 @@ enum AppChangelog {
             title: "WHOOP 5/MG: secure-pairing fix",
             date: "June 2026",
             items: [
-                "WHOOP 5.0/MG: fixed connecting getting stuck at “Finishing the secure pairing handshake.” NOOP now establishes the encrypted pairing first, then subscribes - so live heart rate can come through instead of hanging. Still experimental on 5/MG: if you have one, please try it and share your strap log on GitHub so we can keep improving it.",
+                "WHOOP 5.0/MG: fixed connecting getting stuck at “Finishing the secure pairing handshake.” Sfz Health now establishes the encrypted pairing first, then subscribes - so live heart rate can come through instead of hanging. Still experimental on 5/MG: if you have one, please try it and share your strap log on GitHub so we can keep improving it.",
             ]),
         Release(
             version: "1.4",
@@ -2520,7 +2520,7 @@ enum AppChangelog {
         Expectation(
             icon: "checkmark.seal",
             title: String(localized: "WHOOP 4.0 is the supported path"),
-            body: String(localized: "WHOOP 4.0 is tested and works end to end. WHOOP 5.0/MG is newer: live heart rate works today, but deeper metrics (recovery, strain, sleep) for 5/MG are still being figured out. NOOP always tells you what's live versus still building.")),
+            body: String(localized: "WHOOP 4.0 is tested and works end to end. WHOOP 5.0/MG is newer: live heart rate works today, but deeper metrics (recovery, strain, sleep) for 5/MG are still being figured out. Sfz Health always tells you what's live versus still building.")),
         Expectation(
             icon: "hourglass",
             title: String(localized: "Your scores build over a few nights"),

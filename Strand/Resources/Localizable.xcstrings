@@ -5396,6 +5396,7 @@
       }
     },
     "Charge / Effort / Rest" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -10281,7 +10282,7 @@
     "Hypnogram" : {
 
     },
-    "I am not a WHOOP employee, contractor, or affiliate, and I am not using NOOP on WHOOP's behalf." : {
+    "I am not a WHOOP employee, contractor, or affiliate, and I am not using NOOP on WHOOP's behalf." : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "I am not a WHOOP employee, contractor, or affiliate, and I am not using Sfz Health on WHOOP's behalf."}}}
 
     },
     "I have read and accept these terms, and I'm using NOOP with my own device and my own data, at my own risk." : {
@@ -10306,13 +10307,13 @@
         }
       }
     },
-    "I own the WHOOP device I will use with NOOP and will only use it to access my own data. Doing so is my decision and my risk, including any effect on my WHOOP account, subscription, device, or warranty, and it may breach WHOOP's Terms of Service." : {
+    "I own the WHOOP device I will use with NOOP and will only use it to access my own data. Doing so is my decision and my risk, including any effect on my WHOOP account, subscription, device, or warranty, and it may breach WHOOP's Terms of Service." : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "I own the WHOOP device I will use with Sfz Health and will only use it to access my own data. Doing so is my decision and my risk, including any effect on my WHOOP account, subscription, device, or warranty, and it may breach WHOOP's Terms of Service."}}}
 
     },
     "I understand" : {
 
     },
-    "I understand NOOP is unofficial and experimental, is provided free and \"as is\" with no warranty, and is not a medical device or medical advice." : {
+    "I understand NOOP is unofficial and experimental, is provided free and \"as is\" with no warranty, and is not a medical device or medical advice." : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "I understand Sfz Health is unofficial and experimental, is provided free and \"as is\" with no warranty, and is not a medical device or medical advice."}}}
 
     },
     "I understand this disconnects the ring from Oura and that NOOP cannot undo it for me." : {
@@ -16712,6 +16713,9 @@
         }
       }
     },
+    "Recovery / Strain / Sleep" : {
+
+    },
     "Recovery & strain" : {
 
     },
@@ -21548,7 +21552,7 @@
     "To get your Apple Health data in anyway: import a Health export .zip in Data Sources, or turn on Shortcuts Export to feed your strap data into Health without the entitlement. (A build installed from the App Store or signed with a paid Apple Developer account connects directly.)" : {
 
     },
-    "To the fullest extent the law allows, I will not hold the NOOP project or its contributors liable for any loss or damage arising from my use of it." : {
+    "To the fullest extent the law allows, I will not hold the NOOP project or its contributors liable for any loss or damage arising from my use of it." : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "To the fullest extent the law allows, I will not hold the Sfz Health project or its contributors liable for any loss or damage arising from my use of it."}}}
 
     },
     "today" : {

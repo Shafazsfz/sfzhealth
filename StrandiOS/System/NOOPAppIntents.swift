@@ -102,7 +102,7 @@ struct SyncStrapIntent: LiveActivityIntent {
         case .alreadyRunning:        return .result(dialog: "Your strap is already syncing.")
         case .willSyncWhenConnected: return .result(dialog: "Sfz Health is connecting to your strap and will sync as soon as it's ready.")
         case .strapNotReady:         return .result(dialog: "Your strap isn't connected to Sfz Health yet, so the sync didn't start.")
-        case .notStarted:            return .result(dialog: "NOOP couldn't start the sync. Open NOOP to see the strap log.")
+        case .notStarted:            return .result(dialog: "Sfz Health couldn't start the sync. Open Sfz Health to see the strap log.")
         }
     }
 }

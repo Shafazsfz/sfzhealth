@@ -1858,7 +1858,7 @@ public final class OuraLiveSource: NSObject, ObservableObject {
         let cmd = OuraCommands.setFeatureMode(feature, mode: mode)
         let frameHex = cmd.bytes.map { String(format: "%02x", $0) }.joined()
         log("Oura: feature-mode WRITE feature=0x\(String(feature, radix: 16)) mode=\(mode) frame=\(frameHex)"
-            + " - EXPERIMENT, unvalidated on NOOP hardware (OURA_PROTOCOL.md s7.5)")
+            + " - EXPERIMENT, unvalidated on Sfz Health hardware (OURA_PROTOCOL.md s7.5)")
         loggedFeatureStatuses.remove(Int(feature))
         if mode == 0x00 {
             manuallyDisabledFeatures.insert(Int(feature))
@@ -1963,7 +1963,7 @@ public final class OuraLiveSource: NSObject, ObservableObject {
         }
         pendingInstallKey = key
         adoptPhase = .installingKey
-        log("Oura: installing NOOP's key on the reset ring")
+        log("Oura: installing Sfz Health's key on the reset ring")
         write([cmd])
     }
 

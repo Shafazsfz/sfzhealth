@@ -459,7 +459,7 @@ enum DataBackup {
         let origin = backupOrigin(of: backupTables)
         let holdsData = backupTables.contains("device") || backupTables.contains("hrSample")
         if origin == .android || (origin == .unknown && holdsData) {
-            return .failure(String(localized: "This isn't a NOOP backup from this app. It's missing the migration bookkeeping a NOOP backup carries (it looks like an Android backup or another app's database), and restoring it would strand your store. To move your history across platforms, export the WHOOP-format CSV on the other device (Settings → Export data) and import that here, or import your original WHOOP / Apple Health export."))
+            return .failure(String(localized: "This isn't a Sfz Health backup from this app. It's missing the migration bookkeeping a Sfz Health backup carries (it looks like an Android backup or another app's database), and restoring it would strand your store. To move your history across platforms, export the WHOOP-format CSV on the other device (Settings → Export data) and import that here, or import your original WHOOP / Apple Health export."))
         }
 
         // #1014 defence-in-depth: both gates above read only the FIRST pages of the file — the
@@ -598,7 +598,7 @@ enum DataBackup {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd"
-        return "NOOP-backup-\(f.string(from: Date())).noopbak"
+        return "SfzHealth-backup-\(f.string(from: Date())).noopbak"
     }
 
     private static func timestamp() -> String {

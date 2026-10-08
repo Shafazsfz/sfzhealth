@@ -336,7 +336,7 @@ struct HowNoopWorksView: View {
 }
 
 #if DEBUG
-#Preview("How NOOP works") {
+#Preview("How Sfz Health works") {
     HowNoopWorksView(onClose: {})
         .preferredColorScheme(.dark)
 }

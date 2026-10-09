@@ -17,11 +17,11 @@ import Foundation
 /// collapsed), distinct from "never set" (which yields the Insights+Body seed via `@AppStorage`'s default).
 enum MoreSectionPrefs {
     /// The `@AppStorage` / UserDefaults key. The Android twin namespaces this as `noop.more.expandedSections`.
-    static let storageKey = "more.expandedSections"
+    static let storageKey = "sfz.more.expandedSections"   // sfz: new key so every group starts open
 
     /// Groups open by default at first run; Data + App collapse to just their header so the list reads
     /// shorter at rest without dropping a single row. Mirrors the Android `defaultExpanded` flags.
-    static let defaultExpanded: Set<String> = ["Insights", "Body"]
+    static let defaultExpanded: Set<String> = ["Insights", "Body", "Data", "App"]   // sfz: all open
 
     /// The default expressed as the stored CSV (sorted, so the seed string is deterministic and testable).
     static var defaultCSV: String { encode(defaultExpanded) }

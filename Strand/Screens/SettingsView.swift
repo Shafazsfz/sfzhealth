@@ -218,6 +218,7 @@ struct SettingsView: View {
 
     /// "What's New" changelog sheet, reachable any time from About.
     @State private var showWhatsNew = false
+    @State private var settingsCopied = false
 
     /// "How your scores work" explainer sheet, reachable any time from About.
     @State private var showScoringGuide = false
@@ -2395,6 +2396,19 @@ struct SettingsView: View {
                         showWhatsNew = true
                     }
                 }
+                #if os(iOS)
+                // sfz: copy every app setting as text, so a set-up phone's choices can become the defaults.
+                Button {
+                    UIPasteboard.general.string = SfzSettingsExport.json()
+                    settingsCopied = true
+                } label: {
+                    Label(settingsCopied ? "Settings copied" : "Copy my settings",
+                          systemImage: settingsCopied ? "checkmark.circle.fill" : "doc.on.doc")
+                        .font(StrandFont.subhead)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(StrandPalette.accent)
+                #endif
 
                 // How NOOP works — the plain-English primer: how sleep is sorted, how scores +
                 // calibration work, what recording means, and where the provenance badges come
@@ -3516,5 +3530,29 @@ private extension Color {
         #endif
         return String(format: "#%02X%02X%02X",
                       Int((r * 255).rounded()), Int((g * 255).rounded()), Int((b * 255).rounded()))
+    }
+}
+
+
+/// sfz: every app setting (simple values only) as sorted JSON. No keys, tokens or logged data:
+/// API keys live in the Keychain, and arrays / data blobs are skipped.
+enum SfzSettingsExport {
+    static func json() -> String {
+        let skipPrefixes = ["Apple", "NS", "com.apple", "AK", "IN", "PK", "WebKit", "MSV", "CK"]
+        var out: [String: Any] = [:]
+        for (k, v) in UserDefaults.standard.dictionaryRepresentation() {
+            if skipPrefixes.contains(where: { k.hasPrefix($0) }) { continue }
+            let lower = k.lowercased()
+            if lower.contains("key") && lower.contains("api") { continue }
+            switch v {
+            case let b as Bool: out[k] = b
+            case let n as NSNumber: out[k] = n
+            case let str as String where str.count <= 200: out[k] = str
+            default: continue
+            }
+        }
+        guard let data = try? JSONSerialization.data(withJSONObject: out, options: [.sortedKeys, .prettyPrinted]),
+              let text = String(data: data, encoding: .utf8) else { return "{}" }
+        return text
     }
 }

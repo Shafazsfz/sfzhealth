@@ -620,7 +620,7 @@ struct WorkoutsView: View {
     /// so this screen doesn't have to — see the comment on `profile`/`intelligence` above.
     private var workoutActionRow: some View {
         HStack(spacing: NoopMetrics.rowSpacing) {
-            WorkoutStartControl()
+            WorkoutStartControl(showsCoach: false)
                 .frame(maxWidth: .infinity)
             addWorkoutButton
                 .frame(maxWidth: .infinity)

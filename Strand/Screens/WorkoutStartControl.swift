@@ -16,6 +16,8 @@ import StrandDesign
 /// live on the parent either.
 struct WorkoutStartControl: View {
     var showsActiveIndicator = false
+    /// sfz: the Coach shortcut beside the button. Off where the row is already shared (Workouts).
+    var showsCoach = true
     @EnvironmentObject var model: AppModel
     @State private var showLiveWorkout = false
     @State private var showStartSport = false
@@ -30,8 +32,10 @@ struct WorkoutStartControl: View {
             } else {
                 // sfz: Start workout takes three quarters of the row, a Coach shortcut the first quarter on the left.
                 HStack(spacing: 10) {
-                SfzCoachShortcutButton()
-                    .frame(width: 88)
+                if showsCoach {
+                    SfzCoachShortcutButton()
+                        .frame(width: 88)
+                }
                 NoopButton(model.activeWorkout == nil ? "Start workout" : "View active workout",
                            systemImage: model.activeWorkout == nil ? "figure.run" : "timer",
                            kind: .primary,

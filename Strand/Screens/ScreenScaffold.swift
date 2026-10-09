@@ -58,6 +58,10 @@ struct ScreenScaffold<Content: View, Trailing: View>: View {
             .frame(maxWidth: hSizeClass == .regular ? 700 : .infinity,
                    alignment: hSizeClass == .regular ? .center : .leading)
             .frame(maxWidth: .infinity, alignment: .center)
+            // sfz: pin the content to exactly the screen width, so a row that is a little too wide
+            // can't make the page drift or wobble sideways while scrolling.
+            .containerRelativeFrame(.horizontal)
+            .clipped()
             #else
             .padding(28)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -68,6 +72,7 @@ struct ScreenScaffold<Content: View, Trailing: View>: View {
         // permits horizontal bounce when content genuinely overflows the width (it does not here, the column
         // is width-capped), so the spurious horizontal rubber-band that caused the sideways drift is gone.
         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+        .scrollIndicators(.hidden, axes: .horizontal)
         #endif
         // The flat canvas, plus an optional full-bleed TOP backdrop (Today's day-cycle scene) drawn behind
         // the scroll content — edge-to-edge under the status bar. The scene is CONFINED to the header+hero

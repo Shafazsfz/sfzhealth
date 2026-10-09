@@ -310,6 +310,7 @@ final class AppModel: ObservableObject {
         #if os(iOS)
         // sfz: wear reminders follow wear, connection and charging.
         live.$worn.combineLatest(live.$connected, live.$charging)
+            .removeDuplicates(by: { $0 == $1 })
             .sink { worn, connected, charging in
                 Task { @MainActor in SfzWearReminder.shared.update(worn: worn, connected: connected, charging: charging ?? false) }
             }

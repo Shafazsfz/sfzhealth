@@ -78,19 +78,26 @@ final class SfzWearReminder: ObservableObject {
             // Back on: stop everything and forget any "until it's back" pause.
             missingSince = nil
             pausedUntilBack = false
+            nextReminder = nil
             cancel()
             return
         }
         if connected && charging {
             // On the charger: no reminders, and the clock restarts once it comes off.
             missingSince = nil
+            nextReminder = nil
             cancel()
             return
         }
-        if missingSince == nil {
-            missingSince = Date()
-            offWrist = connected
+        // Already counting: leave the queued reminders alone. The live state republishes every few
+        // seconds, and rescheduling on each one kept pushing the first reminder a minute into the future,
+        // so it never arrived.
+        guard missingSince == nil else {
+            if offWrist != connected { offWrist = connected }
+            return
         }
+        missingSince = Date()
+        offWrist = connected
         reschedule()
     }
 
@@ -120,6 +127,7 @@ final class SfzWearReminder: ObservableObject {
 
     func pauseUntilBack() {
         pausedUntilBack = true
+        nextReminder = nil
         cancel()
     }
 
@@ -156,21 +164,38 @@ final class SfzWearReminder: ObservableObject {
         return end
     }
 
+    /// The fixed set of reminder ids. Removing them by name (rather than listing what is pending first)
+    /// keeps the removal in order with the adds that follow it. The old list-then-remove version ran its
+    /// removal AFTER the new reminders had been added, and silently wiped them.
+    private static let ids: [String] = (0..<20).map { "\(prefix)\($0)" }
+
     func cancel() {
         let center = UNUserNotificationCenter.current()
-        center.getPendingNotificationRequests { pending in
-            let ids = pending.map(\.identifier).filter { $0.hasPrefix(Self.prefix) }
-            center.removePendingNotificationRequests(withIdentifiers: ids)
-        }
-        center.getDeliveredNotifications { delivered in
-            let ids = delivered.map(\.request.identifier).filter { $0.hasPrefix(Self.prefix) }
-            center.removeDeliveredNotifications(withIdentifiers: ids)
-        }
+        center.removePendingNotificationRequests(withIdentifiers: Self.ids)
+        center.removeDeliveredNotifications(withIdentifiers: Self.ids)
+    }
+
+    /// When the next reminder will fire, for the settings card.
+    @Published private(set) var nextReminder: Date?
+
+    /// A one-off reminder in 5 seconds, to check notifications reach you.
+    func sendTest() {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        let content = UNMutableNotificationContent()
+        content.title = "Put your WHOOP on"
+        content.body = "This is a test. Wear reminders are working."
+        content.sound = .default
+        content.categoryIdentifier = Self.category
+        center.add(UNNotificationRequest(identifier: "sfz-weartest",
+                                         content: content,
+                                         trigger: UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)))
     }
 
     func reschedule() {
         cancel()
-        guard enabled, !pausedUntilBack, let since = missingSince else { return }
+        guard enabled, !pausedUntilBack, let since = missingSince else { nextReminder = nil; return }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         let step = Double(max(interval, 1)) * 60
         let now = Date()
         var t = max(since.addingTimeInterval(step), now.addingTimeInterval(60))
@@ -181,6 +206,7 @@ final class SfzWearReminder: ObservableObject {
             times.append(t)
             t = t.addingTimeInterval(step)
         }
+        nextReminder = times.first
         let center = UNUserNotificationCenter.current()
         let off = offWrist
         for (i, fire) in times.enumerated() {
@@ -292,6 +318,29 @@ struct SfzWearReminderSettingsCard: View {
                             Button("Resume") { wear.resume() }.font(StrandFont.caption)
                         }
                     }
+                    // sfz: what the reminder is doing right now, so it's clear whether one is coming.
+                    Group {
+                        if let since = wear.missingSince {
+                            if let next = wear.nextReminder {
+                                Text("Band not on since \(since.formatted(date: .omitted, time: .shortened)). Next reminder \(next.formatted(date: .omitted, time: .shortened)).")
+                            } else {
+                                Text("Band not on since \(since.formatted(date: .omitted, time: .shortened)). Reminders are paused.")
+                            }
+                        } else {
+                            Text("Your band is on, or on the charger. Nothing to remind.")
+                        }
+                    }
+                    .font(StrandFont.caption)
+                    .foregroundStyle(StrandPalette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        wear.sendTest()
+                    } label: {
+                        Label("Send a test reminder", systemImage: "bell.badge")
+                            .font(StrandFont.subhead)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(StrandPalette.accent)
                     Text("Each reminder has Remind me again, Snooze 1 hour and Not today. Tap one for more choices.")
                         .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)

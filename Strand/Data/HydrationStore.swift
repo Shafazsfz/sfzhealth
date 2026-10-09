@@ -211,6 +211,9 @@ extension Repository {
         // #798 - also record the per-entry row so the detail can show, edit and delete this exact drink.
         let entries = HydrationEntries.adding(Self.hydrationEntries(day: dayKey), amountMl: amountMl)
         Self.writeHydrationEntries(entries, day: dayKey)
+        #if os(iOS)
+        SfzHealthWriter.syncWater(day: dayKey, entries: entries)   // sfz: also into Apple Health
+        #endif
         // #989: hydration writes never bump refreshSeq, so tell the Today card directly.
         noteHydrationChanged()
         // `next` is the manual row; callers of this return value display it, so hand back the combined
@@ -253,6 +256,9 @@ extension Repository {
     @discardableResult
     private func rebankHydrationTotal(entries: [HydrationEntry], day dayKey: String) async -> Double {
         let total = HydrationEntries.total(entries)
+        #if os(iOS)
+        SfzHealthWriter.syncWater(day: dayKey, entries: entries)   // sfz: edits and deletes reach Health too
+        #endif
         if let store = await storeHandle() {
             _ = try? await store.upsertMetricSeries(
                 [MetricPoint(day: dayKey, key: HydrationStore.key, value: total)],

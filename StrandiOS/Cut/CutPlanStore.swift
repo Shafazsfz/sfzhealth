@@ -166,7 +166,9 @@ final class CutPlanStore: ObservableObject {
 
     func logWeight(_ kg: Double) {
         guard kg > 0 else { return }
-        weighIns.append(WeighIn(kg: kg, at: Date()))
+        let w = WeighIn(kg: kg, at: Date())
+        weighIns.append(w)
+        SfzHealthWriter.saveWeight(kg: kg, at: w.at, id: w.id)   // sfz: also into Apple Health
     }
 
     // MARK: Math (Mifflin–St Jeor)
@@ -324,6 +326,56 @@ enum SfzHealthWriter {
             for t in [energy, protein, carbs, fat] where store.authorizationStatus(for: t) == .sharingAuthorized {
                 _ = try? await store.deleteObjects(of: t, predicate: predicate)
             }
+        }
+    }
+
+    // MARK: sfz: water and weight
+
+    private static let water = HKQuantityType(.dietaryWater)
+    private static let bodyMass = HKQuantityType(.bodyMass)
+
+    /// A weigh-in from the Goal page as body weight.
+    static func saveWeight(kg: Double, at: Date, id: UUID) {
+        Task {
+            guard await authorized([bodyMass], key: bodyMass) else { return }
+            let sample = HKQuantitySample(type: bodyMass,
+                                          quantity: HKQuantity(unit: .gramUnit(with: .kilo), doubleValue: kg),
+                                          start: at, end: at,
+                                          metadata: [HKMetadataKeyExternalUUID: "sfz:weight:\(id.uuidString)"])
+            try? await store.save(sample)
+        }
+    }
+
+    /// Mirrors one day's logged drinks into Health: this app's water samples for the day are replaced
+    /// with one sample per drink, so an edit or delete in sfz is reflected too. Water from other apps is
+    /// never touched (the delete is scoped to this app's own samples).
+    static func syncWater(day: String, entries: [HydrationEntry]) {
+        Task {
+            guard await authorized([water], key: water) else { return }
+            let tag = "sfz:water:\(day)"
+            // This app's own water samples within ±2 days of the day, then keep only this day's tag.
+            let f = DateFormatter(); f.calendar = Calendar(identifier: .gregorian); f.dateFormat = "yyyy-MM-dd"
+            let dayDate = f.date(from: day) ?? Date()
+            let from = dayDate.addingTimeInterval(-2 * 86400), to = dayDate.addingTimeInterval(3 * 86400)
+            let mine = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                HKQuery.predicateForObjects(from: HKSource.default()),
+                HKQuery.predicateForSamples(withStart: from, end: to, options: [])
+            ])
+            let old: [HKSample] = await withCheckedContinuation { cont in
+                let q = HKSampleQuery(sampleType: water, predicate: mine, limit: HKObjectQueryNoLimit,
+                                      sortDescriptors: nil) { _, samples, _ in cont.resume(returning: samples ?? []) }
+                store.execute(q)
+            }
+            let tagged = old.filter { (($0.metadata?[HKMetadataKeyExternalUUID] as? String) ?? "").hasPrefix(tag) }
+            if !tagged.isEmpty { try? await store.delete(tagged) }
+            let samples = entries.filter { $0.amountMl > 0 }.map { e in
+                HKQuantitySample(type: water,
+                                 quantity: HKQuantity(unit: .literUnit(with: .milli), doubleValue: Double(e.amountMl)),
+                                 start: e.loggedAt, end: e.loggedAt,
+                                 metadata: [HKMetadataKeyExternalUUID: "\(tag):\(e.id.uuidString)"])
+            }
+            guard !samples.isEmpty else { return }
+            try? await store.save(samples)
         }
     }
 

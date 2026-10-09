@@ -5624,7 +5624,6 @@
 
     },
     "Calibrating, %lld of %lld" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7272,6 +7271,9 @@
       }
     },
     "Copy environment dump" : {
+
+    },
+    "Copy my settings" : {
 
     },
     "Copy report.txt" : {
@@ -20418,6 +20420,9 @@
           }
         }
       }
+    },
+    "Settings copied" : {
+
     },
     "Settling" : {
 

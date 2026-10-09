@@ -164,8 +164,9 @@ enum FolderBackup {
     // MARK: - Persisted state
 
     /// Auto-backup defaults OFF (manual-first; must-fix #4 + #6). The user turns it on in the screen.
+    /// sfz: ON by default, daily, into the app's own Files folder until another folder is chosen.
     static var autoEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: autoKey) }
+        get { UserDefaults.standard.object(forKey: autoKey) as? Bool ?? true }
         set { UserDefaults.standard.set(newValue, forKey: autoKey) }
     }
 
@@ -181,7 +182,9 @@ enum FolderBackup {
     /// can drag that folder into iCloud Drive to read backups on the Mac; a first-class iCloud container
     /// is a separate, larger change. An explicit external pick (`saveFolder`) turns this back off.
     static var useInternalFolder: Bool {
-        get { UserDefaults.standard.bool(forKey: internalKey) }
+        // sfz: with nothing chosen yet, back up into the app's own folder so backups just work.
+        get { UserDefaults.standard.object(forKey: internalKey) as? Bool
+                ?? (UserDefaults.standard.data(forKey: bookmarkKey) == nil) }
         set { UserDefaults.standard.set(newValue, forKey: internalKey) }
     }
 

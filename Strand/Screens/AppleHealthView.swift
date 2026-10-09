@@ -406,7 +406,23 @@ struct AppleHealthView: View {
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("To get your Apple Health data in anyway: import a Health export .zip in Data Sources, or turn on Shortcuts Export to feed your WHOOP data into Health without the entitlement. (A build installed from the App Store or signed with a paid Apple Developer account connects directly.)")
+                    // sfz: the Shortcuts route, set up once.
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Send your data to Health with Shortcuts")
+                            .font(StrandFont.subhead.weight(.semibold))
+                            .foregroundStyle(StrandPalette.textPrimary)
+                        Text("""
+                        1. Open Shortcuts → Automation → + → Time of Day, 10:00, Daily, Run Immediately.
+                        2. Add "Get sfz Health Value" (Resting heart rate), then "Log Health Sample": Type Resting Heart Rate, Value = the result.
+                        3. Repeat for HRV, Blood oxygen, Respiratory rate, Steps, Active calories, Water and Food calories, each followed by Log Health Sample of the same type.
+                        4. For sleep: "Get sfz Sleep Time" (Fell asleep) and (Woke up), then Log Health Sample: Sleep Analysis, Asleep, with those as start and end.
+                        Run it once a day, so nothing is logged twice.
+                        """)
+                            .font(StrandFont.caption)
+                            .foregroundStyle(StrandPalette.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Text("A build signed with a paid Apple Developer account connects to Health directly.")
                         .font(StrandFont.caption)
                         .foregroundStyle(StrandPalette.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)

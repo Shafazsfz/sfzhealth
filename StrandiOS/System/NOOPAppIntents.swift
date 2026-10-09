@@ -1,6 +1,7 @@
 #if os(iOS)
 import Foundation
 import AppIntents
+import WhoopStore
 
 /// Queue of actions requested by an App Intent while the app may be suspended. Intents can't reach
 /// into the running `AppModel` directly (BLE only lives in the foreground app), so they enqueue here
@@ -153,6 +154,160 @@ struct NOOPShortcuts: AppShortcutsProvider {
                     ],
                     shortTitle: "Ask Coach",
                     systemImageName: "sparkles")
+    }
+}
+
+// MARK: - sfz: values for a "Log Health Sample" Shortcut
+
+/// A sideloaded (SideStore) install has no HealthKit entitlement, so sfz can't write to Apple Health
+/// itself. These intents hand sfz's numbers to the Shortcuts app instead, whose own "Log Health
+/// Sample" action writes them into Health. One daily automation does the whole job.
+enum SfzHealthMetric: String, AppEnum {
+    case restingHeartRate, heartRateVariability, bloodOxygen, respiratoryRate, sleepHours,
+         steps, activeCalories, water, weight, dietaryCalories, protein
+
+    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Health value"
+    static var caseDisplayRepresentations: [SfzHealthMetric: DisplayRepresentation] = [
+        .restingHeartRate: "Resting heart rate (bpm)",
+        .heartRateVariability: "Heart rate variability (ms)",
+        .bloodOxygen: "Blood oxygen (%)",
+        .respiratoryRate: "Respiratory rate (breaths/min)",
+        .sleepHours: "Sleep (hours)",
+        .steps: "Steps",
+        .activeCalories: "Active calories (kcal)",
+        .water: "Water (ml)",
+        .weight: "Weight (kg)",
+        .dietaryCalories: "Food calories (kcal)",
+        .protein: "Protein (g)"
+    ]
+
+    /// Night readings come from the latest scored night; day totals from the last complete day.
+    var isNightly: Bool {
+        switch self {
+        case .restingHeartRate, .heartRateVariability, .bloodOxygen, .respiratoryRate, .sleepHours, .weight: return true
+        default: return false
+        }
+    }
+}
+
+enum SfzHealthDay: String, AppEnum {
+    case automatic, today, yesterday
+    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Day"
+    static var caseDisplayRepresentations: [SfzHealthDay: DisplayRepresentation] = [
+        .automatic: "Automatic (last night / yesterday)",
+        .today: "Today",
+        .yesterday: "Yesterday"
+    ]
+}
+
+struct SfzIntentError: Error, CustomLocalizedStringResourceConvertible {
+    let message: String
+    var localizedStringResource: LocalizedStringResource { LocalizedStringResource(stringLiteral: message) }
+}
+
+struct GetSfzHealthValueIntent: AppIntent {
+    static var title: LocalizedStringResource = "Get sfz Health Value"
+    static var description = IntentDescription("Get a number from sfz, such as resting heart rate or steps, to log into Apple Health with Log Health Sample.")
+    static var openAppWhenRun = false
+
+    @Parameter(title: "Value", default: .restingHeartRate)
+    var metric: SfzHealthMetric
+
+    @Parameter(title: "Day", default: .automatic)
+    var day: SfzHealthDay
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Get sfz \(\.$metric) for \(\.$day)")
+    }
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ReturnsValue<Double> & ProvidesDialog {
+        guard let model = AppModel.shared else { throw SfzIntentError(message: "Open sfz once, then run this again.") }
+        let repo = model.repo
+        if repo.days.isEmpty { await repo.refresh() }
+        let cal = Calendar.current
+        let todayKey = Repository.localDayKey(Date())
+        let yesterdayKey = Repository.localDayKey(cal.date(byAdding: .day, value: -1, to: Date()) ?? Date())
+        let dayKey: String
+        switch day {
+        case .today: dayKey = todayKey
+        case .yesterday: dayKey = yesterdayKey
+        case .automatic: dayKey = metric.isNightly ? todayKey : yesterdayKey
+        }
+        // Night readings: the requested night, or (automatic) the latest of the last two.
+        func night<T>(_ pick: (DailyMetric) -> T?) -> T? {
+            if day == .automatic {
+                for k in [todayKey, yesterdayKey] {
+                    if let d = repo.days.last(where: { $0.day == k }), let v = pick(d) { return v }
+                }
+                return nil
+            }
+            return repo.days.last(where: { $0.day == dayKey }).flatMap(pick)
+        }
+        let row = repo.days.last(where: { $0.day == dayKey })
+        let plan = CutPlanStore.shared
+        var value: Double?
+        switch metric {
+        case .restingHeartRate: value = night { $0.restingHr.map(Double.init) }
+        case .heartRateVariability: value = night { $0.avgHrv }
+        case .bloodOxygen: value = night { $0.spo2Pct }
+        case .respiratoryRate: value = night { $0.respRateBpm }
+        case .sleepHours: value = night { $0.totalSleepMin.map { $0 / 60 } }
+        case .steps: value = row?.steps.map(Double.init)
+        case .activeCalories: value = row?.activeKcalEst
+        case .water:
+            let ml = await repo.hydrationTotal(day: dayKey)
+            value = ml > 0 ? ml : nil
+        case .weight: value = plan.weighIns.max(by: { $0.at < $1.at })?.kg
+        case .dietaryCalories:
+            let kcal = plan.logged(day: dayKey)
+            value = kcal > 0 ? Double(kcal) : nil
+        case .protein:
+            let g = plan.entries(day: dayKey).compactMap(\.protein).reduce(0, +)
+            value = g > 0 ? g : nil
+        }
+        guard let v = value else {
+            let name = SfzHealthMetric.caseDisplayRepresentations[metric]?.title ?? "That value"
+            throw SfzIntentError(message: "sfz has no \(name) for that day yet.")
+        }
+        let rounded = (v * 10).rounded() / 10
+        return .result(value: rounded, dialog: "\(rounded)")
+    }
+}
+
+enum SfzSleepEdge: String, AppEnum {
+    case start, end
+    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Sleep time"
+    static var caseDisplayRepresentations: [SfzSleepEdge: DisplayRepresentation] = [
+        .start: "Fell asleep", .end: "Woke up"
+    ]
+}
+
+struct GetSfzSleepTimeIntent: AppIntent {
+    static var title: LocalizedStringResource = "Get sfz Sleep Time"
+    static var description = IntentDescription("When you fell asleep or woke up last night, for logging Sleep in Apple Health.")
+    static var openAppWhenRun = false
+
+    @Parameter(title: "Time", default: .start)
+    var edge: SfzSleepEdge
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Get sfz \(\.$edge) time")
+    }
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ReturnsValue<Date> {
+        guard let model = AppModel.shared else { throw SfzIntentError(message: "Open sfz once, then run this again.") }
+        let repo = model.repo
+        if repo.sleeps.isEmpty { await repo.refresh() }
+        let since = Int(Date().addingTimeInterval(-30 * 3600).timeIntervalSince1970)
+        // The main sleep: the longest session that ended in the last ~30 hours.
+        guard let s = repo.sleeps.filter({ $0.endTs >= since })
+                .max(by: { ($0.endTs - $0.startTs) < ($1.endTs - $1.startTs) }) else {
+            throw SfzIntentError(message: "sfz has no sleep from last night yet.")
+        }
+        let ts = edge == .start ? s.startTs : s.endTs
+        return .result(value: Date(timeIntervalSince1970: TimeInterval(ts)))
     }
 }
 #endif

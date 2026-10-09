@@ -28,8 +28,10 @@ struct WorkoutStartControl: View {
                     showLiveWorkout = true
                 }
             } else {
-                // sfz: Start workout takes three quarters of the row, a Coach shortcut the last quarter.
+                // sfz: Start workout takes three quarters of the row, a Coach shortcut the first quarter on the left.
                 HStack(spacing: 10) {
+                SfzCoachShortcutButton()
+                    .frame(width: 88)
                 NoopButton(model.activeWorkout == nil ? "Start workout" : "View active workout",
                            systemImage: model.activeWorkout == nil ? "figure.run" : "timer",
                            kind: .primary,
@@ -41,8 +43,6 @@ struct WorkoutStartControl: View {
                 }
                 .accessibilityLabel(model.activeWorkout == nil ? "Start a workout" : "View the active workout")
                 .layoutPriority(1)
-                SfzCoachShortcutButton()
-                    .frame(width: 88)
                 }
                 .fixedSize(horizontal: false, vertical: true)
             }

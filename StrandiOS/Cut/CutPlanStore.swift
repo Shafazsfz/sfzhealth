@@ -3,6 +3,7 @@ import Combine
 #if os(iOS)
 import HealthKit
 import UserNotifications
+import WidgetKit
 #endif
 
 /// Personal weight-loss plan: goal, daily deficit, a per-day food log and weigh-ins.
@@ -566,11 +567,11 @@ final class SfzHabitStore: ObservableObject {
     @Published private(set) var auto: [String: [String: Double]] { didSet { save(auto, K.auto) } }
     /// Timers that are running: habit id → when they started.
     @Published private(set) var running: [String: Date] { didSet { save(running, K.running) } }
-    @Published var challenge: SfzChallenge? { didSet { save(challenge, K.challenge) } }
+    @Published var challenge: SfzChallenge? { didSet { save(challenge, K.challenge); SfzGoalWidget.schedulePublish() } }
     @Published private(set) var finished: [SfzChallenge] { didSet { save(finished, K.finished) } }
     /// The first day the consistency grid and perfect-day streak count. Set when targets change from
     /// today and you choose to start fresh; nil counts all history.
-    @Published var gridStart: String? { didSet { d.set(gridStart, forKey: "sfz.gridStart") } }
+    @Published var gridStart: String? { didSet { d.set(gridStart, forKey: "sfz.gridStart"); SfzGoalWidget.schedulePublish() } }
     @Published var roundUpEnabled: Bool { didSet { d.set(roundUpEnabled, forKey: K.roundUp); changed() } }
     @Published var roundUpMinutes: Int { didSet { d.set(roundUpMinutes, forKey: K.roundUpAt); changed() } }
 
@@ -1224,7 +1225,7 @@ final class SfzHabitStore: ObservableObject {
 
     // MARK: Persistence and reminders
 
-    private func changed() { SfzHabitReminders.schedule(self) }
+    private func changed() { SfzHabitReminders.schedule(self); SfzGoalWidget.schedulePublish() }
 
     private func save<T: Encodable>(_ value: T, _ key: String) {
         if let data = try? JSONEncoder().encode(value) { d.set(data, forKey: key) }
@@ -1318,5 +1319,107 @@ enum SfzHabitReminders {
             }
         }
         #endif
+    }
+}
+
+
+// MARK: - Goal grid widget feed
+
+/// What the Goal grid widget draws. The widget extension decodes the same JSON shape
+/// (`SfzGoalGridFeed` in StrandiOSWidgets) from the shared App Group.
+struct SfzGoalGridSnapshot: Codable {
+    /// Week columns, oldest first, Monday→Sunday. Each cell: -4 future, -3 before the grid
+    /// start, -2 missed, -1 rest, 0 nothing due, 0<x≤1 green strength.
+    var weeks: [[Double]]
+    var streak: Int
+    var todayMet: Int
+    var todayDue: Int
+    var challengeName: String?
+    var challengeDay: Int?
+    var challengeLength: Int?
+    var strict: Bool
+    var percent30: Int?
+    var updated: Date
+}
+
+@MainActor
+enum SfzGoalWidget {
+    static let storageKey = "sfz.goalGrid.snapshot"
+    static let kind = "SfzGoalGridWidget"
+    private static var pending: DispatchWorkItem?
+
+    /// Coalesce bursts of habit changes into one publish.
+    static func schedulePublish() {
+        pending?.cancel()
+        let work = DispatchWorkItem { Task { @MainActor in publish() } }
+        pending = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: work)
+    }
+
+    static func level(_ date: Date, store: SfzHabitStore) -> Double {
+        let cal = Calendar.current
+        if cal.startOfDay(for: date) > cal.startOfDay(for: Date()) { return -4 }
+        let key = Repository.localDayKey(date)
+        if let start = store.gridStart, key < start { return -3 }
+        let isToday = cal.isDateInToday(date)
+        if let c = store.challenge, c.strict, c.endedDay == nil {
+            if key >= c.effectiveStart {
+                switch store.challengeStatus(c, on: date) {
+                case .met: return 1
+                case .missed: return -2
+                case .partial: return isToday ? 0 : -2
+                case .rest: return -1
+                default: return 0
+                }
+            }
+            if key >= c.startDay {
+                let s = store.dayScore(date, ids: c.habitIds)
+                if s.due == 0 { return 0 }
+                return s.met == s.due ? 1 : -2
+            }
+        }
+        let s = store.dayScore(date)
+        if s.due == 0 { return 0 }
+        if isToday && s.met < s.due {
+            return s.met == 0 ? 0 : 0.25 + 0.5 * Double(s.met) / Double(s.due)
+        }
+        if s.met == 0 { return -2 }
+        return 0.25 + 0.75 * Double(s.met) / Double(s.due)
+    }
+
+    static func publish() {
+        let store = SfzHabitStore.shared
+        var cal = Calendar.current
+        cal.firstWeekday = 2
+        let today = cal.startOfDay(for: Date())
+        let monday = cal.dateInterval(of: .weekOfYear, for: today)?.start ?? today
+        let weeksCount = 20
+        guard let first = cal.date(byAdding: .day, value: -7 * (weeksCount - 1), to: monday) else { return }
+        let weeks: [[Double]] = (0..<weeksCount).map { w in
+            (0..<7).map { d in
+                guard let day = cal.date(byAdding: .day, value: w * 7 + d, to: first) else { return -4 }
+                return level(day, store: store)
+            }
+        }
+        let t = store.dayScore(Date())
+        let recent = (0..<30).compactMap { cal.date(byAdding: .day, value: -$0, to: Date()) }
+            .filter { d in store.gridStart.map { Repository.localDayKey(d) >= $0 } ?? true }
+            .map { store.dayScore($0) }
+        let met = recent.reduce(0) { $0 + $1.met }, due = recent.reduce(0) { $0 + $1.due }
+        let c = store.challenge.flatMap { $0.endedDay == nil ? $0 : nil }
+        let snap = SfzGoalGridSnapshot(
+            weeks: weeks,
+            streak: store.perfectStreak().current,
+            todayMet: t.met, todayDue: t.due,
+            challengeName: c?.name,
+            challengeDay: c.map { min(store.dayNumber($0), $0.length) },
+            challengeLength: c?.length,
+            strict: c?.strict ?? false,
+            percent30: due > 0 ? Int((Double(met) / Double(due) * 100).rounded()) : nil,
+            updated: Date())
+        guard let defaults = UserDefaults(suiteName: WidgetSnapshot.suiteName),
+              let data = try? JSONEncoder().encode(snap) else { return }
+        defaults.set(data, forKey: storageKey)
+        WidgetCenter.shared.reloadTimelines(ofKind: kind)
     }
 }

@@ -765,6 +765,49 @@ final class AICoachEngine: ObservableObject {
     /// Send a question: append it, build the metrics context, call the chosen provider with the
     /// system prompt + context + running history, parse the reply, append it. Never throws/crashes;
     /// failures land in `errorText`.
+    /// sfz: re-ask the last question after a failed reply, without leaving a duplicate bubble.
+    func retryLastQuestion() async {
+        guard !sending else { return }
+        // Drop a trailing empty / failed assistant turn, then the question it answered.
+        if let last = messages.last, last.role == .assistant,
+           last.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || last.text == "(no reply)" {
+            messages.removeLast()
+        }
+        guard let last = messages.last, last.role == .user else { return }
+        let text = last.text
+        messages.removeLast()
+        errorText = nil
+        await send(text)
+    }
+
+    /// sfz: a readable name for a model id, e.g. "claude-sonnet-5-5" → "Claude Sonnet 5.5".
+    nonisolated static func friendlyModelName(_ id: String) -> String {
+        let lower = id.lowercased()
+        let parts = lower.split(separator: "-").map(String.init)
+        guard let head = parts.first else { return id }
+        func cap(_ s: String) -> String { s.prefix(1).uppercased() + s.dropFirst() }
+        if head == "claude" {
+            var words: [String] = []
+            var nums: [String] = []
+            for p in parts.dropFirst() {
+                if p.count == 8, Int(p) != nil { continue }          // date snapshot
+                if Int(p) != nil { nums.append(p) } else {
+                    if !nums.isEmpty { words.append(nums.joined(separator: ".")); nums = [] }
+                    words.append(p == "latest" ? "(latest)" : cap(p))
+                }
+            }
+            if !nums.isEmpty { words.append(nums.joined(separator: ".")) }
+            return (["Claude"] + words).joined(separator: " ")
+        }
+        if head == "gpt", parts.count >= 2 {
+            return (["GPT-" + parts[1]] + parts.dropFirst(2).map(cap)).joined(separator: " ")
+        }
+        if head == "gemini" {
+            return parts.map(cap).joined(separator: " ")
+        }
+        return id
+    }
+
     func send(_ userText: String) async {
         let trimmed = userText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { errorText = AICoachError.emptyQuestion.errorDescription; return }

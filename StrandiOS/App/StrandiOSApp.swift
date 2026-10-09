@@ -321,6 +321,9 @@ struct StrandiOSApp: App {
                 .onOpenURL { url in
                     if url.host == "import-health" {
                         model.handleHealthImportURL(url)
+                    } else if url.host == "goal" {
+                        // sfz: the Goal grid widget opens the Goal tab.
+                        NotificationCenter.default.post(name: Notification.Name("sfz.openGoal"), object: nil)
                     }
                 }
                 .alert("Import Apple Health data?", isPresented: healthImportAlertPresented) {
@@ -348,6 +351,7 @@ struct StrandiOSApp: App {
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
                 SfzWearReminder.shared.appOpened()
+                SfzGoalWidget.schedulePublish()
                 CoachBriefScheduler.activateIfEnabled { await model.coach.generateBrief() }
                 model.drainPendingIntents(router: router)
                 // iOS starts a Lift Log banner only for an app on screen, so a banner lost while NOOP was in

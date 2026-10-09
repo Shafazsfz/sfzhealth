@@ -181,3 +181,174 @@ struct CoachBriefWidget: Widget {
         ])
     }
 }
+
+
+// MARK: - sfz: Goal consistency grid widget
+
+/// Mirrors `SfzGoalGridSnapshot` in the app (StrandiOS/Cut/CutPlanStore.swift). Same JSON keys.
+struct SfzGoalGridFeed: Codable {
+    var weeks: [[Double]]
+    var streak: Int
+    var todayMet: Int
+    var todayDue: Int
+    var challengeName: String?
+    var challengeDay: Int?
+    var challengeLength: Int?
+    var strict: Bool
+    var percent30: Int?
+    var updated: Date
+
+    static let storageKey = "sfz.goalGrid.snapshot"
+
+    static func load() -> SfzGoalGridFeed? {
+        guard let data = UserDefaults(suiteName: WidgetSnapshot.suiteName)?.data(forKey: storageKey) else { return nil }
+        return try? JSONDecoder().decode(SfzGoalGridFeed.self, from: data)
+    }
+
+    static var sample: SfzGoalGridFeed {
+        let weeks: [[Double]] = (0..<20).map { w in
+            (0..<7).map { d in
+                if w == 19 && d > 3 { return -4 }
+                let v = Double((w * 7 + d) * 37 % 10) / 10
+                return v < 0.15 ? -2 : max(0.3, v)
+            }
+        }
+        return SfzGoalGridFeed(weeks: weeks, streak: 6, todayMet: 4, todayDue: 6,
+                               challengeName: "75 Soft", challengeDay: 18, challengeLength: 75,
+                               strict: false, percent30: 82, updated: Date())
+    }
+}
+
+struct SfzGoalGridEntry: TimelineEntry {
+    let date: Date
+    let feed: SfzGoalGridFeed?
+}
+
+struct SfzGoalGridProvider: TimelineProvider {
+    func placeholder(in context: Context) -> SfzGoalGridEntry { SfzGoalGridEntry(date: Date(), feed: .sample) }
+
+    func getSnapshot(in context: Context, completion: @escaping (SfzGoalGridEntry) -> Void) {
+        completion(SfzGoalGridEntry(date: Date(), feed: SfzGoalGridFeed.load() ?? (context.isPreview ? .sample : nil)))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<SfzGoalGridEntry>) -> Void) {
+        let entry = SfzGoalGridEntry(date: Date(), feed: SfzGoalGridFeed.load())
+        // The app reloads this whenever a habit changes; refresh after midnight as a safety net.
+        let cal = Calendar.current
+        let midnight = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: Date())) ?? Date().addingTimeInterval(3600)
+        let next = min(midnight.addingTimeInterval(60), Date().addingTimeInterval(2 * 3600))
+        completion(Timeline(entries: [entry], policy: .after(next)))
+    }
+}
+
+struct SfzGoalGridWidgetView: View {
+    @Environment(\.widgetFamily) private var family
+    let entry: SfzGoalGridEntry
+
+    private func color(_ v: Double) -> Color {
+        switch v {
+        case ..<(-3.5): return .clear
+        case ..<(-2.5): return StrandPalette.hairline.opacity(0.4)
+        case ..<(-1.5): return StrandPalette.statusCritical.opacity(0.75)
+        case ..<(-0.5): return StrandPalette.restColor.opacity(0.6)
+        case ..<0.01: return StrandPalette.hairline
+        default: return StrandPalette.chargeColor.opacity(min(1, v))
+        }
+    }
+
+    private var weeksShown: Int { family == .systemSmall ? 8 : 18 }
+
+    var body: some View {
+        Group {
+            if let feed = entry.feed {
+                content(feed)
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    header(nil)
+                    Spacer(minLength: 0)
+                    Text("Open sfz and log a habit to fill your grid.")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(StrandPalette.textSecondary)
+                }
+            }
+        }
+        .widgetURL(URL(string: "noop://goal"))
+    }
+
+    private func header(_ feed: SfzGoalGridFeed?) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: "target")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(StrandPalette.accent)
+            Text(feed?.challengeName ?? "Consistency")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(StrandPalette.textSecondary)
+                .lineLimit(1)
+            Spacer(minLength: 0)
+            if let feed, let d = feed.challengeDay, let l = feed.challengeLength {
+                Text("Day \(d)/\(l)")
+                    .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                    .foregroundStyle(StrandPalette.textPrimary)
+            }
+        }
+    }
+
+    private func grid(_ feed: SfzGoalGridFeed) -> some View {
+        let cols = Array(feed.weeks.suffix(weeksShown))
+        return GeometryReader { g in
+            let gap: CGFloat = family == .systemSmall ? 3 : 2.5
+            let byW = (g.size.width - gap * CGFloat(cols.count - 1)) / CGFloat(max(cols.count, 1))
+            let byH = (g.size.height - gap * 6) / 7
+            let side = max(4, min(byW, byH))
+            HStack(alignment: .top, spacing: gap) {
+                ForEach(cols.indices, id: \.self) { w in
+                    VStack(spacing: gap) {
+                        ForEach(0..<7, id: \.self) { d in
+                            let v = d < cols[w].count ? cols[w][d] : -4
+                            RoundedRectangle(cornerRadius: side * 0.22, style: .continuous)
+                                .fill(color(v))
+                                .frame(width: side, height: side)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        }
+    }
+
+    private func content(_ feed: SfzGoalGridFeed) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            header(feed)
+            grid(feed)
+            HStack(spacing: 10) {
+                if feed.todayDue > 0 {
+                    Label("\(feed.todayMet)/\(feed.todayDue) today", systemImage: feed.todayMet >= feed.todayDue ? "checkmark.circle.fill" : "circle.dashed")
+                        .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(feed.todayMet >= feed.todayDue ? StrandPalette.chargeColor : StrandPalette.textPrimary)
+                }
+                Spacer(minLength: 0)
+                Label("\(feed.streak)", systemImage: "flame.fill")
+                    .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                    .foregroundStyle(StrandPalette.accent)
+                if family != .systemSmall, let p = feed.percent30 {
+                    Text("\(p)% · 30d")
+                        .font(.system(size: 11, weight: .medium).monospacedDigit())
+                        .foregroundStyle(StrandPalette.textSecondary)
+                }
+            }
+            .labelStyle(.titleAndIcon)
+        }
+    }
+}
+
+struct SfzGoalGridWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "SfzGoalGridWidget", provider: SfzGoalGridProvider()) { entry in
+            SfzGoalGridWidgetView(entry: entry)
+                .containerBackground(for: .widget) { StrandPalette.surfaceBase }
+        }
+        .configurationDisplayName("Goal grid")
+        .description("Your habit consistency grid, today's progress and streak.")
+        .supportedFamilies([.systemSmall, .systemMedium])
+    }
+}

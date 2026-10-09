@@ -180,6 +180,9 @@
     "/ %@" : {
 
     },
+    "/ %@ kcal" : {
+
+    },
     "/ %lld" : {
       "localizations" : {
         "en" : {
@@ -3060,6 +3063,9 @@
     "A reminder to recharge before bed when the WHOOP drops to 15%, and a heads-up when it reaches 100%, each at most once per charge cycle." : {
 
     },
+    "A reminder when your WHOOP is off your wrist or not seen, until it's back on." : {
+
+    },
     "A ring talks to one owner at a time." : {
 
     },
@@ -3729,6 +3735,9 @@
 
     },
     "All caught up" : {
+
+    },
+    "All done" : {
 
     },
     "all history" : {
@@ -5376,6 +5385,12 @@
     "Burn **%@ kcal** in workouts" : {
 
     },
+    "Burn target reached" : {
+
+    },
+    "Burned so far, from your WHOOP" : {
+
+    },
     "Buteyko" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5642,6 +5657,9 @@
           }
         }
       }
+    },
+    "Calorie plan" : {
+
     },
     "Calories" : {
       "localizations" : {
@@ -8367,6 +8385,9 @@
     "Each metric, where your Apple Watch sits on it, and why." : {
 
     },
+    "Each reminder has Remind me again, Snooze 1 hour and Not today. Tap one for more choices." : {
+
+    },
     "Each score follows a published method, computed on your device. We name the method family so you can read up on it, and we never claim to reproduce another company's number exactly." : {
 
     },
@@ -8463,6 +8484,9 @@
 
     },
     "Edit nap times (edited)" : {
+
+    },
+    "Edit page" : {
 
     },
     "Edit program" : {
@@ -8934,6 +8958,9 @@
 
     },
     "Event" : {
+
+    },
+    "Every" : {
 
     },
     "Every beat, every night, every day, woven into one quiet picture of you. Welcome to NOOP." : {
@@ -10517,6 +10544,9 @@
     "Hidden" : {
 
     },
+    "Hidden cards keep their data. The \"Calories under target\" habit uses the same allowance as the Calories left card." : {
+
+    },
     "Hidden items remain available here and can be restored at any time." : {
 
     },
@@ -11834,6 +11864,12 @@
     "It shows the shape of your heartbeat timing and a plain-language description of how steady it looked. It does not tell you whether anything is right or wrong." : {
 
     },
+    "It stays on your Goal page; the challenge stops counting it." : {
+
+    },
+    "It stays on your Goal page. In a strict challenge this marks it Modified." : {
+
+    },
     "It stops being offered here. Sessions you already logged with it are kept exactly as they are." : {
       "localizations" : {
         "en" : {
@@ -11910,6 +11946,9 @@
         }
       }
     },
+    "kcal" : {
+
+    },
     "KCAL" : {
 
     },
@@ -11938,6 +11977,9 @@
           }
         }
       }
+    },
+    "Keep history" : {
+
     },
     "Keep it within about a metre of %@." : {
 
@@ -12993,6 +13035,9 @@
     "Log custom %lld millilitres" : {
 
     },
+    "Log food below" : {
+
+    },
     "Log going to sleep" : {
 
     },
@@ -13665,6 +13710,9 @@
 
     },
     "Minutes seated before the first nudge." : {
+
+    },
+    "Missed" : {
 
     },
     "Missed a day: restart from Day 1" : {
@@ -15807,6 +15855,9 @@
         }
       }
     },
+    "Not today" : {
+
+    },
     "not within 7d" : {
 
     },
@@ -16736,6 +16787,9 @@
     "Over the limit: missed" : {
 
     },
+    "Over today's target" : {
+
+    },
     "Over your readings, %@ and %@ move largely independently. No clear relationship." : {
       "localizations" : {
         "en" : {
@@ -16921,6 +16975,9 @@
     "Pause today (sick or travelling)" : {
 
     },
+    "Pause until the band is back on" : {
+
+    },
     "Paused" : {
       "localizations" : {
         "en" : {
@@ -16930,6 +16987,9 @@
           }
         }
       }
+    },
+    "Paused until the band is back" : {
+
     },
     "Peak" : {
       "localizations" : {
@@ -17201,7 +17261,7 @@
     "Plan a trip or shift" : {
 
     },
-    "Plan settings" : {
+    "Plan and page settings" : {
 
     },
     "Please confirm each of these:" : {
@@ -18658,10 +18718,22 @@
     "Remaining" : {
 
     },
+    "Remind me again in %lld min" : {
+
+    },
+    "Remind me at" : {
+
+    },
+    "Remind me to wear it" : {
+
+    },
     "Remind me to wind down" : {
 
     },
     "Reminders" : {
+
+    },
+    "Reminders stop by themselves as soon as the band is back on your wrist." : {
 
     },
     "Remove" : {
@@ -20656,6 +20728,12 @@
     "Show all metrics, %lld more" : {
 
     },
+    "Show as a grid" : {
+
+    },
+    "Show as a list" : {
+
+    },
     "Show custom background" : {
 
     },
@@ -20815,6 +20893,9 @@
           }
         }
       }
+    },
+    "Since %@ · show all" : {
+
     },
     "Single" : {
 
@@ -21230,6 +21311,15 @@
     "Smart alarm" : {
 
     },
+    "Snooze 1 hour" : {
+
+    },
+    "Snooze 2 hours" : {
+
+    },
+    "Snoozed until %@" : {
+
+    },
     "So your zones, calories and baselines are accurate." : {
 
     },
@@ -21497,6 +21587,9 @@
     "Start first set" : {
 
     },
+    "Start fresh from today" : {
+
+    },
     "Start next set" : {
 
     },
@@ -21512,6 +21605,12 @@
           }
         }
       }
+    },
+    "Start the consistency grid fresh from today" : {
+
+    },
+    "Start the grid fresh?" : {
+
     },
     "Start this program" : {
       "localizations" : {
@@ -22711,6 +22810,9 @@
     "Take it over locally. Beta." : {
 
     },
+    "Take out of %@" : {
+
+    },
     "Take over" : {
 
     },
@@ -23173,6 +23275,9 @@
 
     },
     "The method behind the score, not today's values." : {
+
+    },
+    "The new target applies from today. You can start the consistency grid and perfect-day streak again from today; nothing is deleted." : {
 
     },
     "the NOOP database failed its integrity check (SQLite reports: %@). A backup of it would not restore. Export the WHOOP-format CSV (Settings → Export data) to save what's still readable." : {
@@ -24551,6 +24656,9 @@
     "Turn on the wind-down reminder below to land at your usual wake time rested." : {
 
     },
+    "Turn wear reminders off" : {
+
+    },
     "Turning this switch off only stops NOOP sending the unlock. The flags it already wrote stay on the strap until something clears them. NOOP can write the off value to all 16 now and read each one back so you can see what the strap actually stores. Needs the strap connected and bonded." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -24716,6 +24824,12 @@
       }
     },
     "unscored" : {
+
+    },
+    "Until" : {
+
+    },
+    "Until a time" : {
 
     },
     "untouched days" : {
@@ -25413,6 +25527,9 @@
     "Wear it snug on your wrist or bicep, sensor against skin." : {
 
     },
+    "Wear reminder" : {
+
+    },
     "Wear state" : {
 
     },
@@ -25776,6 +25893,9 @@
           }
         }
       }
+    },
+    "When I open sfz" : {
+
     },
     "When NOOP reconstructs heart rate from the WHOOP 5/MG v26 optical waveform (the seconds the strap stored no HR), refine the autocorrelation peak with a parabolic sub-lag fit so the estimate is not quantized to roughly 16 bpm steps near a high HR. It only fills seconds the strap never reported; it never overrides a stored HR. 5/MG only, off by default." : {
       "extractionState" : "stale",
@@ -26364,6 +26484,9 @@
         }
       }
     },
+    "Within target so far" : {
+
+    },
     "Without" : {
       "localizations" : {
         "en" : {
@@ -26586,6 +26709,9 @@
           }
         }
       }
+    },
+    "You can change the timing and quiet hours in Settings → Wear reminder." : {
+
     },
     "You can change what you share any time in Settings › Health › Data Access & Devices." : {
 
@@ -27050,6 +27176,9 @@
     "Your nervous system is well-recovered, so you're primed to push" : {
 
     },
+    "Your new targets apply from today. Earlier days were measured against the old ones, so you can start the consistency grid and perfect-day streak again from today. Nothing is deleted, and you can show all history again any time." : {
+
+    },
     "your number, date and any note" : {
 
     },
@@ -27410,6 +27539,9 @@
 
     },
     "Your WHOOP isn't accepting the alarm" : {
+
+    },
+    "Your WHOOP isn't on" : {
 
     },
     "Your WHOOP only talks to one phone at a time." : {

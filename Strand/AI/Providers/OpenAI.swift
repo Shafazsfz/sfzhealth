@@ -41,20 +41,43 @@ struct OpenAIClient: AIProviderClient {
         var wire: [[String: Any]] = [["role": "system", "content": systemPrompt]]
         for m in messages { wire.append(["role": m.role.rawValue, "content": m.content]) }
 
-        var body: [String: Any] = ["model": model, "messages": wire, "stream": true]
-        body["temperature"] = 0.6
-        body["max_tokens"] = 4096
-
-        var req = URLRequest(url: AIProvider.openAI.endpoint)
-        req.httpMethod = "POST"
-        req.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        try await performStreamingRequest(req, session: session) { payload in
-            if let delta = SseDeltas.openAiDelta(payload) {
-                onDelta(delta)
+        // sfz: GPT-5 / GPT-6 and the o-series reject `temperature` and `max_tokens`, so they go
+        // straight to the modern shape. Anything else that 400s about them is retried once with it.
+        func streamOnce(modern: Bool) async throws {
+            var body: [String: Any] = ["model": model, "messages": wire, "stream": true]
+            if modern {
+                body["max_completion_tokens"] = 16000
+            } else {
+                body["temperature"] = 0.6
+                body["max_tokens"] = 4096
             }
+            var req = URLRequest(url: AIProvider.openAI.endpoint)
+            req.httpMethod = "POST"
+            req.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.httpBody = try JSONSerialization.data(withJSONObject: body)
+            try await performStreamingRequest(req, session: session) { payload in
+                if let delta = SseDeltas.openAiDelta(payload) {
+                    onDelta(delta)
+                }
+            }
+        }
+        let m = model.lowercased()
+        let modernModel = m.hasPrefix("gpt-5") || m.hasPrefix("gpt-6") || m.hasPrefix("gpt-7")
+            || m.range(of: #"^o\d"#, options: .regularExpression) != nil
+        if modernModel {
+            try await streamOnce(modern: true)
+            return
+        }
+        do {
+            try await streamOnce(modern: false)
+        } catch let AICoachError.server(code, detail) where code == 400 {
+            let d = detail.lowercased()
+            guard d.contains("max_completion_tokens") || d.contains("max_tokens")
+                    || d.contains("temperature") || d.contains("unsupported") else {
+                throw AICoachError.server(code, detail)
+            }
+            try await streamOnce(modern: true)
         }
     }
 

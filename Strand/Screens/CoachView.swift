@@ -181,8 +181,10 @@ struct CoachView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
+                    #if os(macOS)
                     chatHeader
                         .padding(.bottom, 4)
+                    #endif
                     if coach.messages.isEmpty && !coach.sending {
                         emptyState
                     }
@@ -212,6 +214,30 @@ struct CoachView: View {
             .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
             #endif
             .safeAreaInset(edge: .bottom, spacing: 0) { bottomBar }
+            #if os(iOS)
+            // sfz: the title, model chip and controls live in the navigation bar, beside Done / Back,
+            // instead of taking a row of the chat.
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    VStack(spacing: 2) {
+                        Text("Coach")
+                            .font(StrandFont.headline)
+                            .foregroundStyle(StrandPalette.textPrimary)
+                        modelMenu(compact: true)
+                    }
+                }
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "slider.horizontal.3")
+                    }
+                    .accessibilityLabel(String(localized: "Coach settings"))
+                    connectionMenu
+                }
+            }
+            #endif
             .background(alignment: .top) {
                 ZStack(alignment: .top) {
                     StrandPalette.surfaceBase
@@ -247,7 +273,7 @@ struct CoachView: View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Coach").font(StrandFont.rounded(28)).foregroundStyle(StrandPalette.textPrimary)
-                modelMenu
+                modelMenu(compact: false)
             }
             Spacer(minLength: 8)
             Button {
@@ -270,7 +296,7 @@ struct CoachView: View {
     }
 
     /// The model chip. A menu, so switching model is one tap from the conversation.
-    private var modelMenu: some View {
+    private func modelMenu(compact: Bool) -> some View {
         Menu {
             Picker("Model", selection: Binding(get: { coach.model }, set: { coach.model = $0 })) {
                 ForEach(coach.availableModels, id: \.self) { m in
@@ -294,17 +320,17 @@ struct CoachView: View {
             HStack(spacing: 6) {
                 Circle().fill(StrandPalette.accent).frame(width: 7, height: 7)
                 Text(AICoachEngine.friendlyModelName(coach.model))
-                    .font(StrandFont.footnote.weight(.semibold))
-                    .foregroundStyle(StrandPalette.textPrimary)
+                    .font(compact ? StrandFont.caption.weight(.semibold) : StrandFont.footnote.weight(.semibold))
+                    .foregroundStyle(compact ? StrandPalette.textSecondary : StrandPalette.textPrimary)
                     .lineLimit(1)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: compact ? 8 : 10, weight: .bold))
                     .foregroundStyle(StrandPalette.textSecondary)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(StrandPalette.surfaceInset, in: Capsule(style: .continuous))
-            .overlay(Capsule(style: .continuous).strokeBorder(StrandPalette.hairline, lineWidth: 1))
+            .padding(.horizontal, compact ? 0 : 10)
+            .padding(.vertical, compact ? 0 : 6)
+            .background(compact ? Color.clear : StrandPalette.surfaceInset, in: Capsule(style: .continuous))
+            .overlay(Capsule(style: .continuous).strokeBorder(compact ? Color.clear : StrandPalette.hairline, lineWidth: 1))
         }
         .accessibilityLabel("Model: \(AICoachEngine.friendlyModelName(coach.model)). Tap to change.")
     }

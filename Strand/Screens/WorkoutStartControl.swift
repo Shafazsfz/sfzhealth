@@ -98,10 +98,6 @@ struct SfzCoachShortcutButton: View {
         .sheet(isPresented: $showCoach) {
             NavigationStack {
                 CoachView()
-                    #if os(iOS)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbarBackground(.hidden, for: .navigationBar)
-                    #endif
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Done") { showCoach = false }

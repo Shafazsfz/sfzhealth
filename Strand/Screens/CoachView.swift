@@ -656,7 +656,8 @@ struct CoachView: View {
     }
 
     private func setupStep<Content: View>(_ n: Int, _ title: String, @ViewBuilder content: () -> Content) -> some View {
-        StrandCard(padding: 16) {
+        let inner = content()
+        return StrandCard(padding: 16) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 10) {
                     Text("\(n)")
@@ -668,7 +669,7 @@ struct CoachView: View {
                         .font(StrandFont.headline)
                         .foregroundStyle(StrandPalette.textPrimary)
                 }
-                content()
+                inner
             }
         }
     }

@@ -373,14 +373,7 @@ struct LiquidTodayView: View {
                         case .hero:
                             heroCard
                             if chargeLegacyRRGap { ChargeLegacyRRGapNote() }
-                        case .liveSession: if liveSessionsBeta {
-                            // sfz: Coach shortcut (1/4, left) + session start (3/4).
-                            HStack(spacing: 10) {
-                                SfzCoachShortcutButton(compact: true).frame(width: 88)
-                                liveSessionStartRow.layoutPriority(1)
-                            }
-                            .fixedSize(horizontal: false, vertical: true)
-                        }
+                        case .liveSession: if liveSessionsBeta { liveSessionStartRow }
                         case .synthesis: synthesisSection
                         case .keyMetrics: keyMetricsSection
                         case .workouts: lastWorkoutsSection

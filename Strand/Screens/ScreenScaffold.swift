@@ -37,6 +37,17 @@ struct ScreenScaffold<Content: View, Trailing: View>: View {
     /// at-root re-tap of the active tab (#198 follow-up). Default 0 never changes, so macOS and every
     /// non-tab screen keep their exact prior scroll behaviour.
     @Environment(\.scrollToTopSignal) private var scrollToTopSignal
+    @Environment(\.sfzCompactHeader) private var compactHint
+    /// Flipped off by the probe when there turns out to be no navigation bar to hold the title.
+    @State private var hasNavBar = true
+
+    private var compactHeader: Bool {
+        #if os(iOS)
+        return compactHint && hasNavBar && title != nil
+        #else
+        return false
+        #endif
+    }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -86,6 +97,15 @@ struct ScreenScaffold<Content: View, Trailing: View>: View {
             .ignoresSafeArea()
         }
         .modifier(RefreshableIfNeeded(onRefresh: onRefresh))
+        #if os(iOS)
+        .background(Group { if compactHint { SfzNavBarProbe { hasNavBar = $0 }.frame(width: 0, height: 0) } })
+        .navigationTitle(compactHeader ? (title ?? "") : "")
+        .toolbar {
+            if compactHeader && Trailing.self != EmptyView.self {
+                ToolbarItem(placement: .topBarTrailing) { trailing() }
+            }
+        }
+        #endif
         #if os(macOS)
         // The mac window toolbar's default vibrant material washed the top of the liquid day-of-sky WHITE
         // (the scroll-under-titlebar blend). Hide it so the sky reads edge-to-edge and dark, like iOS.
@@ -108,12 +128,12 @@ struct ScreenScaffold<Content: View, Trailing: View>: View {
     @ViewBuilder private var column: some View {
         if lazy {
             LazyVStack(alignment: .leading, spacing: 20) {
-                if title != nil || subtitle != nil { header }
+                if (title != nil || subtitle != nil) && !compactHeader { header }
                 content()
             }
         } else {
             VStack(alignment: .leading, spacing: 20) {
-                if title != nil || subtitle != nil { header }
+                if (title != nil || subtitle != nil) && !compactHeader { header }
                 content()
             }
         }
@@ -260,6 +280,42 @@ struct DataPendingNote: View {
 /// Zero-height scroll-to-top target id. File scope, not a `static` on `ScreenScaffold` — the latter is
 /// generic (`<Content, Trailing>`) and Swift forbids stored static properties on generic types.
 private let screenScaffoldTopAnchorID = "screenScaffold.top"
+
+/// sfz: set on screens pushed inside a NavigationStack whose bar is visible (More pages, Today/Trends
+/// pushes). The scaffold then puts its title in the navigation bar beside Back instead of a big header.
+private struct SfzCompactHeaderKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var sfzCompactHeader: Bool {
+        get { self[SfzCompactHeaderKey.self] }
+        set { self[SfzCompactHeaderKey.self] = newValue }
+    }
+}
+
+#if os(iOS)
+/// sfz: reports whether this view sits under a navigation bar that is actually showing. A sheet with no
+/// NavigationStack has none, so the scaffold keeps its own header there instead of losing the title.
+struct SfzNavBarProbe: UIViewControllerRepresentable {
+    let report: (Bool) -> Void
+    func makeUIViewController(context: Context) -> ProbeController { ProbeController(report: report) }
+    func updateUIViewController(_ vc: ProbeController, context: Context) { vc.report = report }
+
+    final class ProbeController: UIViewController {
+        var report: (Bool) -> Void
+        init(report: @escaping (Bool) -> Void) { self.report = report; super.init(nibName: nil, bundle: nil) }
+        required init?(coder: NSCoder) { fatalError() }
+        override func viewDidLoad() { super.viewDidLoad(); view.isUserInteractionEnabled = false; view.backgroundColor = .clear }
+        override func viewWillAppear(_ animated: Bool) { super.viewWillAppear(animated); check() }
+        override func didMove(toParent parent: UIViewController?) { super.didMove(toParent: parent); check() }
+        private func check() {
+            let has = navigationController != nil
+            DispatchQueue.main.async { [report] in report(has) }
+        }
+    }
+}
+#endif
 
 private struct ScrollToTopSignalKey: EnvironmentKey {
     static let defaultValue: Int = 0

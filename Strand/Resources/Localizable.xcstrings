@@ -4726,6 +4726,19 @@
     "Band" : {
 
     },
+    "Band not on since %@. Next reminder %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Band not on since %1$@. Next reminder %2$@."
+          }
+        }
+      }
+    },
+    "Band not on since %@. Reminders are paused." : {
+
+    },
     "Band Sleep State" : {
 
     },
@@ -20048,6 +20061,9 @@
         }
       }
     },
+    "Send a test reminder" : {
+
+    },
     "Send chart image to Gemini" : {
       "localizations" : {
         "en" : {
@@ -26949,6 +26965,9 @@
 
     },
     "Your average: %@ a day" : {
+
+    },
+    "Your band is on, or on the charger. Nothing to remind." : {
 
     },
     "YOUR BANDS" : {

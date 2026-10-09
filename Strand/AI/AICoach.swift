@@ -195,8 +195,8 @@ final class AICoachEngine: ObservableObject {
         didSet {
             guard provider != oldValue else { return }
             UserDefaults.standard.set(provider.rawValue, forKey: Self.providerKey)
-            // Reset the model list to the new provider's built-in options.
-            availableModels = provider.modelOptions
+            // Reset the model list to the new provider's options (built-in + last live list).
+            availableModels = Self.pickerModels(provider)
             // Keep the model valid for the newly-selected provider.
             if !provider.modelOptions.contains(model) {
                 model = provider.defaultModel
@@ -377,14 +377,18 @@ final class AICoachEngine: ObservableObject {
 
         let storedModel = UserDefaults.standard.string(forKey: Self.modelKey)
         // A persisted custom id is honoured even if it's not in the built-in list.
-        if let storedModel, !storedModel.isEmpty {
+        // sfz: models the provider has retired would only fail, so move them to the current default.
+        let retired: Set<String> = ["claude-3-7-sonnet-latest", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest",
+                                    "claude-3-opus-latest", "claude-opus-4-20250514", "claude-sonnet-4-20250514",
+                                    "claude-opus-4-1-20250805"]
+        if let storedModel, !storedModel.isEmpty, !retired.contains(storedModel) {
             self.model = storedModel
         } else {
             self.model = storedProvider.defaultModel
         }
 
         // Seed the picker with the provider's built-in options; include any persisted custom id.
-        var seeded = storedProvider.modelOptions
+        var seeded = Self.pickerModels(storedProvider)
         if let storedModel, !storedModel.isEmpty, !seeded.contains(storedModel) {
             seeded.insert(storedModel, at: 0)
         }
@@ -525,12 +529,20 @@ final class AICoachEngine: ObservableObject {
     /// When the live catalogue was last pulled for `provider`, keyed per provider so switching does
     /// not hide one provider's stale list behind another's refresh. Kotlin twin:
     /// `NoopPrefs.coachModelsRefreshedAt`.
+    /// sfz: the last live model list per provider, so new models stay in the picker after a relaunch.
+    static func cachedModelsKey(_ provider: AIProvider) -> String { "sfz.ai.cachedModels.\(provider.rawValue)" }
+    static func pickerModels(_ provider: AIProvider) -> [String] {
+        let builtin = provider.modelOptions
+        let cached = UserDefaults.standard.stringArray(forKey: cachedModelsKey(provider)) ?? []
+        return builtin + cached.filter { !builtin.contains($0) }
+    }
+
     static func modelsRefreshedKey(_ provider: AIProvider) -> String {
         "ai.modelsRefreshed.\(provider.rawValue)"
     }
 
     /// How long a pulled catalogue is trusted. Kotlin twin: `MODEL_REFRESH_INTERVAL_MS`.
-    static let modelRefreshInterval: TimeInterval = 7 * 24 * 60 * 60
+    static let modelRefreshInterval: TimeInterval = 24 * 60 * 60   // sfz: daily, so new models show up quickly
 
     /// Whether a catalogue last pulled at `last` is due another pull at `now`.
     ///
@@ -604,7 +616,10 @@ final class AICoachEngine: ObservableObject {
             // Merge: keep the captured provider's built-in options on top, append any newly-discovered
             // ids (sorted), and preserve a current custom selection if it isn't otherwise present.
             let builtin = capturedProvider.modelOptions
-            let discovered = Set(ids).subtracting(builtin).sorted()
+            // sfz: keep the provider's own order (Anthropic lists newest first), minus duplicates.
+            var seen = Set(builtin)
+            let discovered = ids.filter { seen.insert($0).inserted }
+            UserDefaults.standard.set(discovered, forKey: Self.cachedModelsKey(capturedProvider))
             var merged = builtin + discovered
             if !merged.contains(model) { merged.insert(model, at: 0) }
             availableModels = merged

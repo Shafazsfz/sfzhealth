@@ -77,7 +77,10 @@ struct AnthropicClient: AIProviderClient {
     }
 
     func fetchModels(key: String, session: URLSession) async throws -> [String] {
-        var req = URLRequest(url: AIProvider.anthropic.modelsEndpoint)
+        // sfz: ask for the whole catalogue; the default page is only 20 models.
+        var comps = URLComponents(url: AIProvider.anthropic.modelsEndpoint, resolvingAgainstBaseURL: false)!
+        comps.queryItems = [URLQueryItem(name: "limit", value: "1000")]
+        var req = URLRequest(url: comps.url ?? AIProvider.anthropic.modelsEndpoint)
         req.httpMethod = "GET"
         req.setValue(key, forHTTPHeaderField: "x-api-key")
         req.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")

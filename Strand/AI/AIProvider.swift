@@ -22,9 +22,9 @@ enum AIProvider: String, CaseIterable, Identifiable {
 
     var defaultModel: String {
         switch self {
-        case .openAI:    return "gpt-5-mini"
-        case .anthropic: return "claude-sonnet-4-6"
-        case .gemini:    return "gemini-flash-latest"   // stable alias → current Flash, no version churn (#400)
+        case .openAI:    return "gpt-6-luna"
+        case .anthropic: return "claude-sonnet-5-5"
+        case .gemini:    return "gemini-3.8-flash"   // sfz: pinned current stable Flash
         case .custom:    return ""   // the user picks the model their server serves
         }
     }
@@ -43,33 +43,38 @@ enum AIProvider: String, CaseIterable, Identifiable {
             // classic parameters, and on a 400 naming one of them retries with
             // `max_completion_tokens` and no temperature (see AiCoach's modernParams leg). The cost
             // is one extra round trip on the first message, not a per-model table to maintain.
+            // sfz: current lineup checked October 2026, newest first.
             return [
+                "gpt-6.1-sol",
+                "gpt-6-astra",
+                "gpt-6-luna",
                 "gpt-5",
                 "gpt-5-mini",
-                "gpt-5-nano",
-                "gpt-4.1",
                 "gpt-4.1-mini",
-                "gpt-4.1-nano",
-                "gpt-4o",
-                "gpt-4o-mini",
-                "o3",
-                "o4-mini"
+                "gpt-4o-mini"
             ]
         case .anthropic:
+            // sfz: active models checked October 2026, newest first. Retired 3.x ids removed.
             return [
+                "claude-sonnet-5-5",
+                "claude-opus-5-5",
+                "claude-haiku-5-5",
+                "claude-fable-5-1",
+                "claude-opus-5",
+                "claude-sonnet-5",
                 "claude-opus-4-8",
                 "claude-sonnet-4-6",
-                "claude-haiku-4-5-20251001",
-                "claude-3-7-sonnet-latest",
-                "claude-3-5-sonnet-latest",
-                "claude-3-5-haiku-latest",
-                "claude-3-opus-latest"
+                "claude-haiku-4-5-20251001"
             ]
         case .gemini:
             // Stable `-latest` ALIASES, not pinned versions (#400): they always resolve to the current
             // stable model in each tier, so Gemini's rapid releases never need a code bump. `refreshModels()`
             // still merges the live `/models` catalogue, so a user with a key can pin a concrete version.
             return [
+                "gemini-3.8-flash",
+                "gemini-3.1-pro-preview",
+                "gemini-3.5-flash-lite",
+                "gemini-3.7-flash",
                 "gemini-pro-latest",
                 "gemini-flash-latest",
                 "gemini-flash-lite-latest"

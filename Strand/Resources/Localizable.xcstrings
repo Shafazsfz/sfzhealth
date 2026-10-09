@@ -380,6 +380,9 @@
         }
       }
     },
+    "%@ API key" : {
+
+    },
     "%@ average steps per observed day" : {
 
     },
@@ -3960,7 +3963,7 @@
         }
       }
     },
-    "Any OpenAI-compatible server: Ollama, LM Studio, llama.cpp, or your own gateway. Stays on your network; nothing leaves %@." : {
+    "Any OpenAI-compatible server: Ollama, LM Studio, llama.cpp or your own gateway." : {
 
     },
     "Anything that needs Oura's cloud (web dashboard, Oura's coaching, shared circles)." : {
@@ -3982,7 +3985,7 @@
         }
       }
     },
-    "API key (optional)" : {
+    "API key (only if your server needs one)" : {
 
     },
     "App icon" : {
@@ -4195,6 +4198,9 @@
     "Ask about your charge, effort, rest and workouts, grounded in your own numbers." : {
 
     },
+    "Ask about your recovery, sleep and training, grounded in your own numbers." : {
+
+    },
     "Ask about your recovery, strain, sleep and workouts, grounded in your own numbers." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4210,6 +4216,7 @@
 
     },
     "Ask Coach about your data…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4218,6 +4225,9 @@
           }
         }
       }
+    },
+    "Ask me anything about your body" : {
+
     },
     "Ask out loud" : {
       "localizations" : {
@@ -5799,6 +5809,9 @@
     "Change marker" : {
 
     },
+    "Change model" : {
+
+    },
     "Change photo" : {
 
     },
@@ -7285,6 +7298,9 @@
     "Couldn't generate today's brief. Tap to try again in Coach." : {
 
     },
+    "Couldn't get a reply" : {
+
+    },
     "Couldn't locate the NOOP database. %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7602,6 +7618,9 @@
 
     },
     "Data kept" : {
+
+    },
+    "Data sharing is off, so I'll answer in general terms. Turn it on in Coach settings for answers based on your numbers." : {
 
     },
     "Data sources" : {
@@ -8130,6 +8149,9 @@
     "Disconnected" : {
 
     },
+    "Dismiss" : {
+
+    },
     "Dismiss (not a workout)" : {
 
     },
@@ -8161,6 +8183,9 @@
 
     },
     "DOB (raw)" : {
+
+    },
+    "Don't have a key? Get one from %@" : {
 
     },
     "Don't see it?" : {
@@ -11257,6 +11282,9 @@
     "I am not a WHOOP employee, contractor, or affiliate, and I am not using Sfz Health on WHOOP's behalf." : {
 
     },
+    "I can see your last two weeks of recovery, sleep, strain and workouts, and answer in plain language." : {
+
+    },
     "I have read and accept these terms, and I'm using NOOP with my own device and my own data, at my own risk." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13603,6 +13631,9 @@
     "Merge (%lld)" : {
 
     },
+    "Message Coach" : {
+
+    },
     "METHOD" : {
 
     },
@@ -13742,6 +13773,9 @@
           }
         }
       }
+    },
+    "Model: %@. Tap to change." : {
+
     },
     "moderate" : {
 
@@ -16377,9 +16411,6 @@
     "Only during active hours" : {
 
     },
-    "Only if your server requires one" : {
-
-    },
     "Only nights with a measured temperature are shown — the others only have a baseline difference." : {
 
     },
@@ -16399,6 +16430,9 @@
         }
       }
     },
+    "Only the question and a summary go to %@, using your key, when you send." : {
+
+    },
     "Open" : {
       "localizations" : {
         "en" : {
@@ -16410,6 +16444,9 @@
       }
     },
     "Open Backup and Sync to a folder" : {
+
+    },
+    "Open Coach settings" : {
 
     },
     "Open journal" : {
@@ -16942,6 +16979,9 @@
     },
     "Passive history/protocol trace" : {
       "shouldTranslate" : false
+    },
+    "Paste" : {
+
     },
     "Paste the corrected key. Your conversation is kept." : {
 
@@ -17660,6 +17700,7 @@
 
     },
     "Provider" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -18256,6 +18297,9 @@
     "Reclaimed %@." : {
 
     },
+    "Recommended" : {
+
+    },
     "Recompute" : {
       "localizations" : {
         "en" : {
@@ -18636,6 +18680,9 @@
 
     },
     "Refresh Fitness Age now" : {
+
+    },
+    "Refresh model list" : {
 
     },
     "Refresh models" : {
@@ -19295,6 +19342,9 @@
     "Resume" : {
 
     },
+    "Retry" : {
+
+    },
     "Return to workout" : {
 
     },
@@ -19632,6 +19682,7 @@
 
     },
     "Save key" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -19640,6 +19691,9 @@
           }
         }
       }
+    },
+    "Save key and start" : {
+
     },
     "Save name" : {
 
@@ -22416,6 +22470,9 @@
         }
       }
     },
+    "Suggested question: %@" : {
+
+    },
     "Summary" : {
 
     },
@@ -24911,6 +24968,7 @@
       }
     },
     "Use Bearer for most local servers; use x-api-key for gateways that require the key in that header." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -26717,6 +26775,9 @@
 
     },
     "You can still bring your data in by importing a Health export from Data Sources. A build from the App Store, or one signed with a paid Apple Developer account, connects directly." : {
+
+    },
+    "You can switch model any time from the chip at the top of the chat." : {
 
     },
     "You changed the number of sets. Keep the new counts in the program for next time?" : {

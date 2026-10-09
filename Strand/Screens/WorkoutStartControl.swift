@@ -28,6 +28,8 @@ struct WorkoutStartControl: View {
                     showLiveWorkout = true
                 }
             } else {
+                // sfz: Start workout takes three quarters of the row, a Coach shortcut the last quarter.
+                HStack(spacing: 10) {
                 NoopButton(model.activeWorkout == nil ? "Start workout" : "View active workout",
                            systemImage: model.activeWorkout == nil ? "figure.run" : "timer",
                            kind: .primary,
@@ -38,6 +40,11 @@ struct WorkoutStartControl: View {
                     else { showLiveWorkout = true }
                 }
                 .accessibilityLabel(model.activeWorkout == nil ? "Start a workout" : "View the active workout")
+                .layoutPriority(1)
+                SfzCoachShortcutButton()
+                    .frame(width: 88)
+                }
+                .fixedSize(horizontal: false, vertical: true)
             }
         }
         // #459: the in-exercise view, presented when Start Workout is tapped here (same screen LiveView
@@ -55,6 +62,54 @@ struct WorkoutStartControl: View {
                 model.startWorkout(sport: name)
                 showLiveWorkout = true
             }
+        }
+    }
+}
+
+
+/// sfz: a one-tap way into the Coach chat from anywhere, opened as a sheet.
+struct SfzCoachShortcutButton: View {
+    var compact = false
+    @EnvironmentObject var coach: AICoachEngine
+    @EnvironmentObject var repo: Repository
+    @State private var showCoach = false
+
+    var body: some View {
+        Button {
+            StrandHaptic.selection.play()
+            showCoach = true
+        } label: {
+            VStack(spacing: 3) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(StrandPalette.accent)
+                Text("Coach")
+                    .font(StrandFont.caption.weight(.semibold))
+                    .foregroundStyle(StrandPalette.textPrimary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.vertical, compact ? 6 : 8)
+            .background(NoopPanelSurface(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(StrandPalette.accent.opacity(0.35), lineWidth: 1))
+        }
+        .buttonStyle(LiquidPressStyle())
+        .accessibilityLabel("Open Coach")
+        .sheet(isPresented: $showCoach) {
+            NavigationStack {
+                CoachView()
+                    #if os(iOS)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbarBackground(.hidden, for: .navigationBar)
+                    #endif
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { showCoach = false }
+                        }
+                    }
+            }
+            .environmentObject(coach)
+            .environmentObject(repo)
         }
     }
 }
